@@ -1,0 +1,13 @@
+{
+  "name": "@meetnow/eslint-config",
+  "version": "1.0.0",
+  "description": "eslint config of meetnow.",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "eslint": "^6.0.0"
+  }
+}

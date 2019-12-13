@@ -1,0 +1,16 @@
+{
+  "name": "@meetnow/stylelint-config",
+  "version": "1.0.0",
+  "description": "stylelint config of meetnow.",
+  "main": "index.yml",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "stylelint": "^11.0.0"
+  },
+  "dependencies": {
+    "stylelint-order": "^3.1.1"
+  }
+}

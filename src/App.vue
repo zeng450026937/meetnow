@@ -1,29 +1,22 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { createUA } from '../packages/meetnow/src/user-agent';
 
 export default Vue.extend({
-  name: 'app',
-  components: {
-    HelloWorld,
+  name : 'app',
+
+  created() {
+    const ua = createUA();
+    ua.setup().connect({ number: '123456.11111' });
   },
 });
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
