@@ -2,6 +2,7 @@ import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
+import { ApiError } from '../api/api-error';
 
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;
@@ -9,11 +10,11 @@ export const MAX_INTERVAL = 30;
 
 export interface PollingConfigs {
   api: Api;
-  version?: number;
   onInfomation?: (...args: any[]) => void;
   onMessage?: (...args: any[]) => void;
   onRenegotiate?: (...args: any[]) => void;
   onQuit?: (...args: any[]) => void;
+  onError?: (...args: any[]) => void;
 }
 
 function computeTimeout(upperBound: number) {
@@ -38,11 +39,10 @@ function computeNextTimeout(attempts: number) {
 export function createPolling(config: PollingConfigs) {
   const { api } = config;
   let request: Request;
-  let canceled: boolean = false;
   let interval: number = DEFAULT_INTERVAL;
   let attempts: number = 0;
 
-  let version: number = config.version || 0;
+  let version: number = 0;
 
   function analyze(data: any) {
     if (!data) return;
@@ -83,24 +83,33 @@ export function createPolling(config: PollingConfigs) {
 
   async function poll() {
     let response: AxiosResponse<RequestResult>;
-    let error;
+    let error: ApiError;
+    let canceled: boolean = false;
+    let timeouted: boolean = false;
 
     try {
-      canceled = false;
       request = api.request('polling').data({ version });
       response = await request.send();
     } catch (e) {
       error = e;
       canceled = isCancel(e);
+
+      if (canceled) return;
+
+      // polling timeout
+      timeouted = [900408, 901323].includes(error.bizCode);
+
+      if (timeouted) return;
+
       // if request failed by network or server error,
       // increase next polling timeout
-      if (!canceled) {
-        attempts++;
-        interval = computeNextTimeout(attempts);
-      }
+      attempts++;
+      interval = computeNextTimeout(attempts);
+
+      config.onError && config.onError(error, attempts);
     }
 
-    if (error || canceled) return;
+    if (error) return;
 
     const { bizCode, data } = response.data;
 

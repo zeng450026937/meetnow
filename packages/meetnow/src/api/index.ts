@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConferenceApis, CONFIGS } from './api-configs';
+import { ApiError } from './api-error';
 import { createRequest, RequestResult } from './request';
 
 // long polling timeout within 30 seconds
@@ -14,8 +15,14 @@ export function createApi(config: AxiosRequestConfig = {}) {
 
   delegate.interceptors.response.use(
     (response: AxiosResponse<RequestResult>) => {
-      const { ret, data } = response.data;
-      if (ret !== 1) throw new Error('server error');
+      const {
+        ret,
+        bizCode,
+        error,
+        data,
+      } = response.data;
+
+      if (ret < 0) throw new ApiError(bizCode, error);
       // TBD
       // replace response data with actual data. eg. response.data = data;
 

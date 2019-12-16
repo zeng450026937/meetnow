@@ -39,7 +39,7 @@ export function createUA() {
   }
 
   function setup(): UA {
-    api = createApi({ baseURL: 'https://meetings.ylyun.com/webapp/' });
+    api = createApi({ baseURL: '/webapp/' });
     api.interceptors.request.use((config) => {
       if (token) {
         config.headers = config.headers || {};

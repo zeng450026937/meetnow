@@ -50,15 +50,16 @@ export function createKeepAlive(config: KeepAliveConfigs) {
     } catch (e) {
       error = e;
       canceled = isCancel(e);
+
+      if (canceled) return;
+
       // if request failed by network or server error,
       // increase next request timeout
-      if (!canceled) {
-        attempts++;
-        interval = computeNextTimeout(attempts);
-      }
+      attempts++;
+      interval = computeNextTimeout(attempts);
     }
 
-    if (error || canceled) return;
+    if (error) return;
 
     const {
       bizCode,

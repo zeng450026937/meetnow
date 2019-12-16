@@ -18,4 +18,14 @@ module.exports = {
     config.resolve.alias
       .set('package', path.resolve(__dirname, 'package.json'));
   },
+
+  devServer : {
+    proxy : {
+      '^/webapp' : {
+        target       : 'https://meetings.ylyun.com/',
+        ws           : true,
+        changeOrigin : true,
+      },
+    },
+  },
 };

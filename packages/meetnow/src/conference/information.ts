@@ -34,6 +34,8 @@ export interface Description extends Partialable {
   'organizer': Organizer;
   'conference-id': string;
   'conference-number': string;
+  'enable-svc': boolean;
+  'enterprise-id': string;
   'enterprise-number': string;
   'conference-long-no': string;
   'conference-type': 'vmr' | string;
@@ -47,7 +49,6 @@ export interface Description extends Partialable {
   'lobby-capable': boolean;
   'attendee-by-pass': boolean;
   'interactive-broadcast-enabled': boolean;
-  'enterprise-id': string;
   'video-enabled': boolean;
   'ipcall-enabled': boolean;
   'webrtc-enabled': boolean;
@@ -56,7 +57,7 @@ export interface Description extends Partialable {
 // Conference State
 
 export interface ApplicationSharer extends Partialable {
-  'user': any
+  'user': ConferenceUser;
 }
 
 export interface State extends Partialable {
@@ -128,7 +129,7 @@ export interface EntityView extends Partialable, ConfereceUri {
 }
 
 export interface View extends Partialable {
-  'entity-view': EntityView[]
+  'entity-view': EntityView[];
 }
 
 // Conference Users
@@ -165,26 +166,27 @@ export interface UserEndpoint extends Partialable {
 }
 
 export interface ConferenceUser extends Partialable {
-  'entity': string,
-  'answer-time-unix': number,
-  'display-text': string,
-  'display-number': string,
-  'display-text-pinyin-for-search': string,
-  'group-id'?: string,
-  'group-name'?: string,
-  'group-name-pinyin-for-search'?: string,
-  'subject-id': string,
-  'protocol': string | 'HTTP' | 'SIP',
-  'request-uri': string,
-  'user-agent': string,
-  'roles': UserRole,
+  'entity': string;
+  'answer-time-unix': number;
+  'display-text': string;
+  'display-number': string;
+  'display-text-pinyin-for-search': string;
+  'group-id'?: string;
+  'group-name'?: string;
+  'group-name-pinyin-for-search'?: string;
+  'subject-id': string;
+  'protocol': string | 'HTTP' | 'SIP';
+  'request-uri': string;
+  'user-agent': string;
+  'roles': UserRole;
   'endpoint': UserEndpoint[]
   'support-fecc': boolean;
   'ip'?: string;
 }
 
 export interface Users extends Partialable {
-  'user': ConferenceUser[]
+  'broadcast-user-count'?: number;
+  'user': ConferenceUser[];
 }
 
 // Conference Record Users
@@ -209,7 +211,7 @@ export interface RecordUsers extends Partialable {
 
 export interface ConferenceRTMPUser extends Partialable {
   'entity': string;
-  'default': boolean,
+  'default': boolean;
   'rtmp-status': 'stop' | 'recording' | 'start';
   'rtmp-last-stop-duration': number;
   'rtmp-last-start-time': number;
@@ -224,15 +226,15 @@ export interface RTMPUsers extends Partialable {
 // Conference Information
 
 export interface Information extends Partialable {
-  'conference-descriotion': Description;
-  'conference-state': State;
-  'conference-view': View;
+  'conference-descriotion'?: Description;
+  'conference-state'?: State;
+  'conference-view'?: View;
   'entity': string;
   'plan-id': string;
   'record-id': string;
-  'record-users': RecordUsers;
-  'rtmp-state': RTMPUsers;
-  'uses': Users;
+  'record-users'?: RecordUsers;
+  'rtmp-state'?: RTMPUsers;
+  'users'?: Users;
   'version': number;
 }
 
@@ -262,7 +264,7 @@ export function createInformationUpdater(data?: Information) {
       return;
     }
 
-    mergeItem(data, val);
+    data = mergeItem(data, val);
   }
 
   return {

@@ -10,9 +10,9 @@ import { createUA } from '../packages/meetnow/src/user-agent';
 export default Vue.extend({
   name : 'app',
 
-  created() {
+  async created() {
     const ua = createUA();
-    ua.setup().connect({ number: '123456.11111', password: '123456' });
+    await ua.setup().connect({ number: '123456.11111', password: '123456' });
   },
 });
 </script>

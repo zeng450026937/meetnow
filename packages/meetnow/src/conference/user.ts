@@ -1,3 +1,4 @@
+import { createEvents } from '../events';
 
 export interface User {
   isShareAvariable: () => boolean;
@@ -13,4 +14,17 @@ export interface User {
   setPresenterDemonstrator: () => Promise<void>;
 }
 
-export function createUser() {}
+export function createUser(data: object) {
+  const events = createEvents();
+  let user;
+
+  function update(val: object) {
+    data = val;
+    events.emit('updated', user);
+  }
+
+  return user = {
+    ...events,
+    update,
+  };
+}

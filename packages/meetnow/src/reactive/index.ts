@@ -1,4 +1,5 @@
 import { createEvents } from '../events';
+import { camelize } from '../utils';
 
 export function createReactive(data: object = {}) {
   const events = createEvents();
@@ -13,7 +14,7 @@ export function createReactive(data: object = {}) {
       target[prop] = value;
 
       if (oldValue !== value) {
-        events.emit(`${ prop }Changed`, value, oldValue);
+        events.emit(`${ camelize(prop) }Changed`, value, oldValue);
       }
 
       return true;
