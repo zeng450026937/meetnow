@@ -236,25 +236,44 @@ export interface Information extends Partialable {
   'version': number;
 }
 
-export function createInformation(data: Information) {
+export function createInformationUpdater(data?: Information) {
   function update(val: Information) {
+    if (!data) {
+      data = val;
+      return;
+    }
+
     const { version } = data;
     const { version: newVersion } = val;
 
     if (!newVersion) {
       console.warn('internal error');
       debugger;
-      return false;
+      return;
     }
-    if (newVersion <= version) return true;
-    if (newVersion - version > 1) return false;
+    if (newVersion <= version) {
+      console.warn('internal error');
+      debugger;
+      return;
+    }
+    if (newVersion - version > 1) {
+      console.warn('internal error');
+      debugger;
+      return;
+    }
 
     mergeItem(data, val);
-
-    return true;
   }
 
   return {
+    get data() {
+      return data;
+    },
+    get version() {
+      return data && data.version;
+    },
     update,
   };
 }
+
+export type InformationUpdater = ReturnType<typeof createInformationUpdater>;

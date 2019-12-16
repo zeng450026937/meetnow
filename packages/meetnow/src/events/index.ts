@@ -2,7 +2,7 @@ import { isArray } from '../utils';
 
 export function createEvents() {
   let instance;
-  const events = {};
+  const events = {} as Record<string, Function[]>;
 
   function on(event: string | string[], fn: Function) {
     if (isArray(event)) {
@@ -48,6 +48,20 @@ export function createEvents() {
     on(event, on);
   }
 
+  function emit(event: string, ...args: any[]) {
+    const callbacks = events[event];
+
+    if (!callbacks) return;
+
+    for (const callback of callbacks) {
+      try {
+        callback(...args);
+      } catch (error) {
+        error;
+      }
+    }
+  }
+
   return instance = {
     on(event: string | string[], fn: Function) {
       on(event, fn);
@@ -59,6 +73,10 @@ export function createEvents() {
     },
     once(event: string | string[], fn: Function) {
       once(event, fn);
+      return instance;
+    },
+    emit(event: string, ...args: any[]) {
+      emit(event, ...args);
       return instance;
     },
   };

@@ -1,6 +1,16 @@
-import axios, { AxiosInstance, AxiosRequestConfig, CancelTokenSource } from 'axios';
+import axios, {
+  AxiosInstance, AxiosPromise, AxiosRequestConfig, CancelTokenSource,
+} from 'axios';
 
 export const { isCancel } = axios;
+
+export interface RequestResult {
+  ret: number;
+  bizCode: number;
+  data: { [K: string]: any };
+  error?: { msg: string; errorCode: number };
+  statusCode?: number;
+}
 
 export function createRequest(config: AxiosRequestConfig, delegate: AxiosInstance = axios) {
   let source: CancelTokenSource | undefined;
@@ -18,7 +28,7 @@ export function createRequest(config: AxiosRequestConfig, delegate: AxiosInstanc
     config.data = data;
     return request;
   }
-  function send() {
+  function send(): AxiosPromise<RequestResult> {
     source = axios.CancelToken.source();
     config.cancelToken = source.token;
     return delegate(config);

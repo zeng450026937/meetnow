@@ -1,38 +1,43 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConferenceApis, CONFIGS } from './api-configs';
-import { createRequest, Request } from './request';
+import { createRequest, RequestResult } from './request';
 
 // long polling timeout within 30 seconds
 const DEFAULT_TIMEOUT = 30 * 1000;
 
-export interface ApiConfigs {
-  baseURL?: string;
-}
-
-export function createApi(config: ApiConfigs = {}) {
-  const { baseURL = '/' } = config;
-
+export function createApi(config: AxiosRequestConfig = {}) {
   const delegate = axios.create({
-    baseURL,
+    baseURL : '/',
     timeout : DEFAULT_TIMEOUT,
+    ...config,
   });
-  let token: string | undefined;
+
+  delegate.interceptors.response.use(
+    (response: AxiosResponse<RequestResult>) => {
+      const { ret, data } = response.data;
+      if (ret !== 1) throw new Error('server error');
+      // TBD
+      // replace response data with actual data. eg. response.data = data;
+
+      // TODO
+      // normalize error
+      return response;
+    },
+    (error) => {
+      console.warn(`
+        api error.
+        ${ error }
+      `);
+    },
+  );
 
   function request(apiName: ConferenceApis) {
-    const config = { ...CONFIGS[apiName] };
-    if (token) {
-      config.headers = Object(config.headers);
-      config.headers.token = token;
-    }
-    return createRequest(config, delegate);
+    return createRequest({ ...CONFIGS[apiName] }, delegate);
   }
 
   return {
-    get token() {
-      return token;
-    },
-    set token(val: string) {
-      token = val;
+    get interceptors() {
+      return delegate.interceptors;
     },
     request,
   };

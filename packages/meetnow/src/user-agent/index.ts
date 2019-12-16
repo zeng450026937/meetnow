@@ -1,4 +1,4 @@
-import { Api, ApiConfigs, createApi } from '../api';
+import { Api, createApi } from '../api';
 import { createWorker, Worker } from '../utils/worker';
 import { createConference } from '../conference';
 
@@ -8,13 +8,14 @@ export interface ConnectOptions {
   displayName?: string;
 }
 
-export interface UAConfigs extends ApiConfigs {}
+export interface UAConfigs {}
 
 export function createUA() {
   let api: Api;
   let worker: Worker;
   let ua;
 
+  let token: string | undefined;
   let partyId: string | undefined;
   let url: string | undefined;
 
@@ -29,23 +30,23 @@ export function createUA() {
       .params({ id: partyId })
       .send();
 
-    const { data } = response;
-
-    // TODO
-    // check bizCode
-
-    const { token } = data.data;
+    ({ token } = response.data.data);
 
     if (!token) {
       console.error('internal error');
       debugger;
     }
-
-    api.token = token;
   }
 
   function setup(): UA {
     api = createApi({ baseURL: 'https://meetings.ylyun.com/webapp/' });
+    api.interceptors.request.use((config) => {
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers.token = token;
+      }
+      return config;
+    });
 
     worker = createWorker({
       interval : 5 * 60 * 1000,

@@ -14,14 +14,13 @@ export function createWorker(config: WorkerConfig) {
   let timeout;
 
   const {
-    interval: nextInterval,
+    interval: nextInterval = interval,
     work,
     cancel,
   } = config;
 
   async function start(immediate: boolean = true) {
     stoped = false;
-    interval = isFunction(nextInterval) ? nextInterval() : nextInterval;
 
     if (work && immediate) {
       running = true;
@@ -30,6 +29,8 @@ export function createWorker(config: WorkerConfig) {
     }
 
     if (stoped) return;
+
+    interval = isFunction(nextInterval) ? nextInterval() : nextInterval;
 
     // schedule next
     timeout = setTimeout(start, interval);

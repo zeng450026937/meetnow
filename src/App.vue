@@ -12,7 +12,7 @@ export default Vue.extend({
 
   created() {
     const ua = createUA();
-    ua.setup().connect({ number: '123456.11111' });
+    ua.setup().connect({ number: '123456.11111', password: '123456' });
   },
 });
 </script>

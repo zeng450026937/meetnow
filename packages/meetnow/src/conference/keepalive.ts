@@ -1,4 +1,6 @@
-import { createRequest, isCancel } from '../api/request';
+import { AxiosResponse } from 'axios';
+import { Api } from '../api';
+import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
 
 export const DEFAULT_INTERVAL = 30 * 1000;
@@ -6,7 +8,7 @@ export const MIN_INTERVAL = 2;
 export const MAX_INTERVAL = 30;
 
 export interface KeepAliveConfigs {
-  api: any;
+  api: Api;
   interval?: number;
 }
 
@@ -30,18 +32,21 @@ function computeNextTimeout(attempts: number) {
 }
 
 export function createKeepAlive(config: KeepAliveConfigs) {
-  let request: ReturnType<typeof createRequest> | undefined;
+  const { api } = config;
+  let request: Request;
   let canceled: boolean = false;
-  let interval: number = DEFAULT_INTERVAL;
+  let interval: number = config.interval || DEFAULT_INTERVAL;
   let attempts: number = 0;
 
   async function keepalive() {
-    let response;
+    let response: AxiosResponse<RequestResult>;
     let error;
 
     try {
       canceled = false;
+      request = api.request('keepalive');
       response = await request.send();
+      attempts = 0;
     } catch (e) {
       error = e;
       canceled = isCancel(e);
@@ -60,16 +65,16 @@ export function createKeepAlive(config: KeepAliveConfigs) {
       data = {
         interval,
       },
-    } = response;
+    } = response.data;
+
+    const {
+      interval: expectedInterval, // in seconds
+    } = data;
 
     // TODO
     // check bizCode
 
-    const {
-      interval: expectedInterval,
-    } = data;
-
-    interval = Math.min(expectedInterval, interval);
+    interval = Math.min(expectedInterval * 1000, interval);
   }
 
   const worker = createWorker({

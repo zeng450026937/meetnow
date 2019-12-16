@@ -1,4 +1,6 @@
-import { createRequest, isCancel } from '../api/request';
+import { AxiosResponse } from 'axios';
+import { Api } from '../api';
+import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
 
 export const DEFAULT_INTERVAL = 100;
@@ -6,7 +8,8 @@ export const MIN_INTERVAL = 2;
 export const MAX_INTERVAL = 30;
 
 export interface PollingConfigs {
-  api: any;
+  api: Api;
+  version?: number;
   onInfomation?: (...args: any[]) => void;
   onMessage?: (...args: any[]) => void;
   onRenegotiate?: (...args: any[]) => void;
@@ -33,12 +36,13 @@ function computeNextTimeout(attempts: number) {
 }
 
 export function createPolling(config: PollingConfigs) {
-  let request: ReturnType<typeof createRequest> | undefined;
+  const { api } = config;
+  let request: Request;
   let canceled: boolean = false;
   let interval: number = DEFAULT_INTERVAL;
   let attempts: number = 0;
 
-  let version: any;
+  let version: number = config.version || 0;
 
   function analyze(data: any) {
     if (!data) return;
@@ -47,7 +51,7 @@ export function createPolling(config: PollingConfigs) {
 
     if (newVersion == null) return;
 
-    if (version && newVersion <= version) {
+    if (newVersion <= version) {
       console.warn(`illegal version: ${ newVersion }, current version: ${ version }`);
       return;
     }
@@ -78,11 +82,12 @@ export function createPolling(config: PollingConfigs) {
   }
 
   async function poll() {
-    let response;
+    let response: AxiosResponse<RequestResult>;
     let error;
 
     try {
       canceled = false;
+      request = api.request('polling').data({ version });
       response = await request.send();
     } catch (e) {
       error = e;
@@ -97,7 +102,7 @@ export function createPolling(config: PollingConfigs) {
 
     if (error || canceled) return;
 
-    const { bizCode, data } = response;
+    const { bizCode, data } = response.data;
 
     // TODO
     // check bizCode
@@ -108,6 +113,8 @@ export function createPolling(config: PollingConfigs) {
       console.error('internal error', error);
       debugger;
     }
+
+    attempts = 0;
   }
 
   const worker = createWorker({
