@@ -1,6 +1,6 @@
 import { createEvents } from '../events';
 
-export function createDescription() {
+export function createUsers() {
   const events = createEvents();
   return {
     ...events,

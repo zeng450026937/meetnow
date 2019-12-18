@@ -81,3 +81,5 @@ export function createEvents() {
     },
   };
 }
+
+export type Events = ReturnType<typeof createEvents>;

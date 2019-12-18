@@ -12,19 +12,42 @@ export interface RequestResult {
   statusCode?: number;
 }
 
-export function createRequest(config: AxiosRequestConfig, delegate: AxiosInstance = axios) {
+export class Request<
+  RequestData = any,
+  RequestParams = any,
+  RequestHeader = any,
+> {
+  config: AxiosRequestConfig;
+  header: (header: RequestHeader) => Request<RequestData, RequestParams, RequestHeader>;
+  params: (params: RequestParams) => Request<RequestData, RequestParams, RequestHeader>;
+  data: (data: RequestData) => Request<RequestData, RequestParams, RequestHeader>;
+  send: () => AxiosPromise<RequestResult>;
+  cancel: () => void;
+}
+
+export function createRequest<
+  RequestData = any,
+  RequestParams = any,
+  RequestHeader = any,
+>(config: AxiosRequestConfig, delegate?: AxiosInstance): Request<RequestData, RequestParams, RequestHeader>;
+
+export function createRequest<
+  RequestData = any,
+  RequestParams = any,
+  RequestHeader = any,
+>(config: AxiosRequestConfig, delegate: AxiosInstance = axios) {
   let source: CancelTokenSource | undefined;
   let request;
 
-  function header(header: any): Request {
+  function header(header: RequestHeader) {
     config.headers = header;
     return request;
   }
-  function params(params: any): Request {
+  function params(params: RequestParams) {
     config.params = params;
     return request;
   }
-  function data(data: any): Request {
+  function data(data: RequestData) {
     config.data = data;
     return request;
   }
@@ -47,4 +70,4 @@ export function createRequest(config: AxiosRequestConfig, delegate: AxiosInstanc
   };
 }
 
-export type Request = ReturnType<typeof createRequest>;
+// export type Request<T, B, D> = ReturnType<typeof createRequest<T, B, D>>;

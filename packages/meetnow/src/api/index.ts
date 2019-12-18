@@ -1,5 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ConferenceApis, CONFIGS } from './api-configs';
+import {
+  ApiDataMap, ApiHeaderMap, ApiNames, ApiParamsMap, CONFIGS,
+} from './api-configs';
 import { ApiError } from './api-error';
 import { createRequest, RequestResult } from './request';
 
@@ -38,8 +40,11 @@ export function createApi(config: AxiosRequestConfig = {}) {
     },
   );
 
-  function request(apiName: ConferenceApis) {
-    return createRequest({ ...CONFIGS[apiName] }, delegate);
+  function request<T extends ApiNames = ApiNames>(apiName: T) {
+    return createRequest<ApiDataMap[T], ApiParamsMap[T], ApiHeaderMap[T]>(
+      { ...CONFIGS[apiName] },
+      delegate,
+    );
   }
 
   return {

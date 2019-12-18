@@ -15,6 +15,99 @@ export interface ApiConfig extends AxiosRequestConfig {
   responseType?: ResponseType | any;
 }
 
+interface CtrlApiData {
+  'conference-uuid'?: string;
+  'conference-user-id'?: number;
+  [key: string]: any;
+}
+
+export interface ApiHeaderMap {
+  [apiName: string]: any;
+  'getVirtualJWT': { id: string }
+}
+
+export interface ApiParamsMap {
+  [apiName: string]: any;
+}
+
+export interface ApiDataMap {
+  [apiName: string]: any;
+  'polling': CtrlApiData & { 'version': number };
+  'keepalive': CtrlApiData;
+  'rejectLobbyUserAll': CtrlApiData;
+  'acceptLobbyUserAll': CtrlApiData;
+  'acceptLobbyUser': CtrlApiData & { 'user-entity': string };
+  'holdUser': CtrlApiData & { 'user-entity': string };
+  'holdUserAll': CtrlApiData;
+  'muteAll': CtrlApiData;
+  'unmuteAll': CtrlApiData;
+  'rejectHandupAll': CtrlApiData;
+  'deleteUser': CtrlApiData & { 'user-entity': string };
+  'getFullInfo': CtrlApiData;
+  'getBasicInfo': CtrlApiData;
+  'getURL': { 'long-number': string };
+  'pushMessage': CtrlApiData & {
+    'user-entity-list'?: string[];
+    'im-context': string;
+  };
+  'pullMessage': CtrlApiData & {
+    'count'?: number;
+  };
+  'joinFocus': {
+    'conference-url': string;
+    'user-agent'?: string;
+    'client-url'?: string;
+    'client-display-text'?: string;
+    'client-type': string;
+    'pure-ctrl-channel': boolean;
+    'is-webrtc'?: boolean;
+  };
+  'joinMedia': CtrlApiData & {
+    'sdp': string;
+  };
+  'renegMedia': CtrlApiData & {
+    'sdp': string;
+  };
+  'joinShare': CtrlApiData & {
+    'sdp': string;
+  };
+  'switchShare': CtrlApiData & {};
+  'leaveShare': CtrlApiData & {};
+  'renegShare': CtrlApiData & {
+    'sdp': string;
+    'media-version': number;
+  };
+  'invite': CtrlApiData & {
+    'uid'?: string[];
+    'sip-url'?: string;
+    'h323-url'?: string;
+  };
+  'modifyUserMedia': CtrlApiData & {
+    'user-entity': string;
+    'endpoint-entity': string;
+    'media-id': number;
+    'media-ingress-filter'?: 'block' | 'unblocking' | 'unblock';
+    'media-egress-filter'?: 'block' | 'unblocking' | 'unblock';
+  };
+  'modifyUserRole': CtrlApiData & {
+    'user-entity': string;
+    'role': 'attendee' | 'presenter';
+  };
+  'getStats': CtrlApiData & {
+    'user-entity-list': string[];
+  };
+  'lock': CtrlApiData & {
+    'admission-policy': 'openAuthenticated' | 'anonymous' | 'closedAuthenticated';
+    'attendee-lobby-bypass': boolean;
+   };
+  'leave': CtrlApiData & {
+    'reason-code': number;
+    'reason-text': string;
+    'bizCode': number;
+   };
+  'end': { 'conference-url': string };
+}
+
 export const configs = {
   // user manager
 
@@ -199,4 +292,4 @@ export const configs = {
 };
 
 export const CONFIGS: ApiConfigs = configs;
-export type ConferenceApis = keyof typeof configs;
+export type ApiNames = keyof typeof configs;

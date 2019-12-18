@@ -92,7 +92,6 @@ export interface EntityState extends Partialable {
   'focus-video-user-entity': string;
   'ext-video-as-focus': boolean;
   'video-layout': 'SpeechExcitation';
-  'MediaFiltersRules'?: any;
   'speech-excitation-video-big-view': number;
   'speech-excitation-video-max-view': number;
   'speech-excitation-video-round-enabled': boolean;
@@ -246,7 +245,7 @@ export function createInformationUpdater(data?: Information) {
     }
 
     const { version } = data;
-    const { version: newVersion } = val;
+    const { version: newVersion, state } = val;
 
     if (!newVersion) {
       console.warn('internal error');
@@ -259,6 +258,12 @@ export function createInformationUpdater(data?: Information) {
       return;
     }
     if (newVersion - version > 1) {
+      console.warn('internal error');
+      debugger;
+      return;
+    }
+    if (state === 'deleted') {
+      // can not delete root information
       console.warn('internal error');
       debugger;
       return;

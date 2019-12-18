@@ -25,6 +25,10 @@ export function createConference(config: ConferenceConfigs) {
   let updater: InformationUpdater;
   let interceptor: number;
   let conference;
+  let descriotion;
+  let state;
+  let view;
+  let users;
 
   let connected: boolean = false;
   let uuid: string | undefined;
@@ -43,9 +47,12 @@ export function createConference(config: ConferenceConfigs) {
       console.warn('already connected');
       return;
     }
+    events.emit('connecting');
 
     let response: AxiosResponse<RequestResult>;
     let data: RequestResult;
+
+    const hasMedia = false;
 
     // step 1
     // join focus
@@ -61,8 +68,9 @@ export function createConference(config: ConferenceConfigs) {
         'client-display-text' : options.displayName || 'Yealink Meeting',
         'client-type'         : 'http',
         'clinet-info'         : 'Apollo_WebRTC',
-        'pure-ctrl-channel'   : false,
-        'is-webrtc'           : true,
+        'pure-ctrl-channel'   : !hasMedia,
+        // if join with media
+        'is-webrtc'           : hasMedia,
       })
       .send();
 
@@ -148,6 +156,14 @@ export function createConference(config: ConferenceConfigs) {
         }
         if (data.users) {
           events.emit('usersChanged');
+
+          const updated = [];
+          const added = [];
+          const deleted = [];
+
+          data.users.user.forEach((user) => {
+            const { entity, state } = user;
+          });
         }
       },
 
@@ -199,6 +215,7 @@ export function createConference(config: ConferenceConfigs) {
       console.warn('already closed');
       return;
     }
+    events.emit('disconnecting');
 
     await api
       .request('leave')
