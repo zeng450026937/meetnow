@@ -163,7 +163,10 @@ export function createChannel(config: ChannelConfigs) {
         sdpSemantics : 'plan-b', // '' unified-plan plan-b
         iceServers   : [{ urls: 'stun:stun.l.google.com:19302' }],
       } as RTCConfiguration,
-      rtcOfferConstraints,
+      rtcOfferConstraints = {
+        offerToReceiveAudio : true,
+        offerToReceiveVideo : true,
+      },
     } = options);
 
     const {

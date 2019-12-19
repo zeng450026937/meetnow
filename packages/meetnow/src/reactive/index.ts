@@ -1,23 +1,22 @@
 import { createEvents, Events } from '../events';
-import { camelize } from '../utils';
+import { camelize, hasChanged, hasOwn } from '../utils';
 
 export function createReactive(data: object = {}, events?: Events) {
   events = events || createEvents();
   return new Proxy(data, {
-    set(target, prop: string, value) {
-      let oldValue;
+    set(target: object, prop: string, value: unknown, receiver: object) {
+      const oldValue = target[prop];
+      const hadKey = hasOwn(target, prop);
+      const result = Reflect.set(target, prop, value, receiver);
 
-      if (prop in target) {
-        oldValue = target[prop];
+      if (!hadKey) {
+        events.emit(`${ camelize(prop) }Added`, value);
       }
-
-      target[prop] = value;
-
-      if (oldValue !== value) {
+      if (hasChanged(value, oldValue)) {
         events.emit(`${ camelize(prop) }Changed`, value, oldValue);
       }
 
-      return true;
+      return result;
     },
   });
 }

@@ -2,7 +2,8 @@ import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
-import { createInformationUpdater, Information, InformationUpdater } from './information';
+import { createInformation, Information } from './information';
+import { ConferenceInformation } from './conference-info';
 import { RequestResult } from '../api/request';
 import { createEvents } from '../events';
 
@@ -22,13 +23,9 @@ export function createConference(config: ConferenceConfigs) {
   const events = createEvents();
   let keepalive: KeepAlive;
   let polling: Polling;
-  let updater: InformationUpdater;
   let interceptor: number;
+  let information: Information;
   let conference;
-  let descriotion;
-  let state;
-  let view;
-  let users;
 
   let connected: boolean = false;
   let uuid: string | undefined;
@@ -52,7 +49,7 @@ export function createConference(config: ConferenceConfigs) {
     let response: AxiosResponse<RequestResult>;
     let data: RequestResult;
 
-    const hasMedia = false;
+    const hasMedia = true;
 
     // step 1
     // join focus
@@ -67,7 +64,7 @@ export function createConference(config: ConferenceConfigs) {
         'client-url'          : options.url.replace(/\w+@/g, 'webrtc@'),
         'client-display-text' : options.displayName || 'Yealink Meeting',
         'client-type'         : 'http',
-        'clinet-info'         : 'Apollo_WebRTC',
+        'client-info'         : 'Apollo_WebRTC',
         'pure-ctrl-channel'   : !hasMedia,
         // if join with media
         'is-webrtc'           : hasMedia,
@@ -92,9 +89,11 @@ export function createConference(config: ConferenceConfigs) {
       .request
       .use((config) => {
         if (/conference-ctrl/.test(config.url) && config.method === 'post') {
-          config.data = config.data || {};
-          config.data['conference-user-id'] = userId;
-          config.data['conference-uuid'] = uuid;
+          config.data = {
+            'conference-user-id' : userId,
+            'conference-uuid'    : uuid,
+            ...config.data,
+          };
         }
         return config;
       });
@@ -109,9 +108,23 @@ export function createConference(config: ConferenceConfigs) {
     ({ data } = response);
 
 
-    // create information updater
-    updater = createInformationUpdater(data.data as Information);
+    const info = data.data as ConferenceInformation;
 
+    // create information
+    information = createInformation(info);
+
+    information.users.on('updated', () => {
+      console.log('users updated');
+    });
+    information.users.on('user:added', (user) => {
+      console.log('user:added', user);
+    });
+    information.users.on('user:updated', (user) => {
+      console.log('user:updated', user);
+    });
+    information.users.on('user:deleted', (user) => {
+      console.log('user:deleted', user);
+    });
 
     // step 3
     // get pull im messages
@@ -119,7 +132,8 @@ export function createConference(config: ConferenceConfigs) {
       .request('pullMessage')
       .send();
 
-    events.emit('connected', data);
+
+    events.emit('connected');
 
 
     // step 4
@@ -132,39 +146,12 @@ export function createConference(config: ConferenceConfigs) {
     polling = createPolling({
       api,
 
-      onInfomation : (data: Information) => {
+      onInfomation : (data: ConferenceInformation) => {
         console.log('onInfomation', data);
 
-        updater.update(data);
+        information.update(data);
 
-        events.emit('information', updater.data);
-
-        if (data['conference-descriotion']) {
-          events.emit('descriotionChanged');
-        }
-        if (data['conference-state']) {
-          events.emit('stateChanged');
-        }
-        if (data['conference-view']) {
-          events.emit('viewChanged');
-        }
-        if (data['record-users']) {
-          events.emit('recordUsersChanged');
-        }
-        if (data['rtmp-users']) {
-          events.emit('rtmpUsersChanged');
-        }
-        if (data.users) {
-          events.emit('usersChanged');
-
-          const updated = [];
-          const added = [];
-          const deleted = [];
-
-          data.users.user.forEach((user) => {
-            const { entity, state } = user;
-          });
-        }
+        events.emit('information');
       },
 
       onMessage : (data: any) => {
@@ -187,7 +174,7 @@ export function createConference(config: ConferenceConfigs) {
         keepalive.stop();
         polling.stop();
 
-        updater = null;
+        information = null;
 
         api.interceptors.request.eject(interceptor);
 
@@ -224,12 +211,31 @@ export function createConference(config: ConferenceConfigs) {
 
   return conference = {
     ...events,
+
     get uuid() {
       return uuid;
     },
     get useId() {
       return userId;
     },
+
+    get information() {
+      return information;
+    },
+
+    get descriotion() {
+      return information && information.descriotion;
+    },
+    get state() {
+      return information && information.state;
+    },
+    get view() {
+      return information && information.view;
+    },
+    get users() {
+      return information && information.users;
+    },
+
     join,
     leave,
   };

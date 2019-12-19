@@ -37,12 +37,72 @@ export interface ApiDataMap {
   'rejectLobbyUserAll': CtrlApiData;
   'acceptLobbyUserAll': CtrlApiData;
   'acceptLobbyUser': CtrlApiData & { 'user-entity': string };
+  'waitLobbyUserAll': CtrlApiData;
+  'waitLobbyUser': CtrlApiData & { 'user-entity': string };
   'holdUser': CtrlApiData & { 'user-entity': string };
   'holdUserAll': CtrlApiData;
   'muteAll': CtrlApiData;
   'unmuteAll': CtrlApiData;
   'rejectHandupAll': CtrlApiData;
   'deleteUser': CtrlApiData & { 'user-entity': string };
+  'setSpeakMode': CtrlApiData & { 'speak-mode': 'free' | 'hand-up' };
+  'setFreeLayout': CtrlApiData & {
+    'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
+    'speech-excitation-video-big-view'?: number;
+    'speech-excitation-video-max-view'?: number;
+    'equality-video-max-view'?: number;
+    'ext-video-as-focus': number;
+    'speech-excitation-video-round-enabled'?: boolean;
+    'speech-excitation-video-round-number'?: number;
+    'speech-excitation-video-round-interval'?: number;
+    'equality-video-round-enabled'?: boolean;
+    'equality-video-round-number'?: number;
+    'equality-video-round-interval'?: number;
+  };
+  'setCustomizeLayout': CtrlApiData & {
+    'enable'?: boolean;
+    'viewer': 'presenter' | 'attendee' | 'castviewer';
+    'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
+    'speech-excitation-video-big-view'?: number;
+    'speech-excitation-video-max-view'?: number;
+    'equality-video-max-view'?: number;
+    'ext-video-as-focus'?: number;
+    'speech-excitation-video-round-enabled': boolean;
+    'speech-excitation-video-round-number': number;
+    'speech-excitation-video-round-interval': number;
+    'equality-video-round-enabled'?: boolean;
+    'equality-video-round-number'?: number;
+    'equality-video-round-interval'?: number;
+    'applied-to-attendee': boolean;
+    'applied-to-cast-viewer': boolean;
+    'selected-user-entity'?: string[];
+    'pos'?: number;
+    'entity'?: string;
+  };
+  'setGlobalLayout': CtrlApiData & {
+    'hide-osd-site-name': boolean;
+    'hide-osd-site-icon': boolean;
+  };
+  'setFecc': CtrlApiData & {
+    'user-entity': string;
+    'action': string;
+  };
+  'setTitle': CtrlApiData & {
+    'position': string;
+    'type': string;
+    'display-time': number;
+    'repeat-count': number;
+    'repeat-interval': number;
+    'roll-direction': string;
+  };
+  'sendTitle': CtrlApiData & {
+    'display-text': string;
+    'all-presenter': boolean;
+    'all-attendee': boolean;
+    'all-castviewer': boolean;
+  };
+  'record': CtrlApiData & { 'operate': string };
+  'rtmp': CtrlApiData & { 'operate': string };
   'getFullInfo': CtrlApiData;
   'getBasicInfo': CtrlApiData;
   'getURL': { 'long-number': string };
@@ -55,10 +115,12 @@ export interface ApiDataMap {
   };
   'joinFocus': {
     'conference-url': string;
+    'conference-pwd': string;
     'user-agent'?: string;
     'client-url'?: string;
     'client-display-text'?: string;
     'client-type': string;
+    'client-info'?: string;
     'pure-ctrl-channel': boolean;
     'is-webrtc'?: boolean;
   };
@@ -77,19 +139,19 @@ export interface ApiDataMap {
     'sdp': string;
     'media-version': number;
   };
-  'invite': CtrlApiData & {
+  'inviteUser': CtrlApiData & {
     'uid'?: string[];
     'sip-url'?: string;
     'h323-url'?: string;
   };
-  'modifyUserMedia': CtrlApiData & {
+  'setUserMedia': CtrlApiData & {
     'user-entity': string;
     'endpoint-entity': string;
     'media-id': number;
     'media-ingress-filter'?: 'block' | 'unblocking' | 'unblock';
     'media-egress-filter'?: 'block' | 'unblocking' | 'unblock';
   };
-  'modifyUserRole': CtrlApiData & {
+  'setUserRole': CtrlApiData & {
     'user-entity': string;
     'role': 'attendee' | 'presenter';
   };
@@ -244,6 +306,16 @@ export const configs = {
     url    : `${ baseURL.ctrl }del-lobby-all`,
   },
 
+  waitLobbyUser : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }wait-lobby-user`,
+  },
+
+  waitLobbyUserAll : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }wait-lobby-all`,
+  },
+
   rejectHandupAll : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }reject-all-hand-up`,
@@ -254,12 +326,12 @@ export const configs = {
     url    : `${ baseURL.ctrl }delete-user`,
   },
 
-  modifyUserMedia : {
+  setUserMedia : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }modify-user-media`,
   },
 
-  modifyUserRole : {
+  setUserRole : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }modify-user-role`,
   },
@@ -272,6 +344,51 @@ export const configs = {
   inviteUser : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }invite-user`,
+  },
+
+  setSpeakMode : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-speak-mode`,
+  },
+
+  setFreeLayout : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-free-layout`,
+  },
+
+  setCustomizeLayout : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-customize-layout`,
+  },
+
+  setGlobalLayout : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-global-layout`,
+  },
+
+  setFecc : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-fecc`,
+  },
+
+  setTitle : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-title`,
+  },
+
+  sendTitle : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }send-title`,
+  },
+
+  record : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }record-operate`,
+  },
+
+  rtmp : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }rtmp-operate`,
   },
 
   lock : {

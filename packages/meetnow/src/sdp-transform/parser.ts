@@ -81,16 +81,16 @@ export interface SDP {
     };
     bandwidth?: {
       type: string;
-      limit: string;
-    };
+      limit: number;
+    }[];
     rtp?: {
-      payload: number;
+      payload: number | string;
       codec: string;
       rate?: number;
       encoding?: number;
     }[];
     fmtp?: {
-      payload: number;
+      payload: number | string;
       config: string;
     }[];
     rtcp?: {
@@ -104,7 +104,7 @@ export interface SDP {
       value: number;
     }[];
     rtcpFb?: {
-      payload: number;
+      payload: number | string;
       type: string;
       subtype?: string;
     }[];

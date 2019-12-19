@@ -65,6 +65,9 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
 }
 
 export function mergeItem<T extends Item>(rhys: T, item: T): T | null {
+  if (rhys === item) {
+    return rhys;
+  }
   if (!isPartialableItem(item)) {
     return item;
   }

@@ -1,13 +1,13 @@
 import { createEvents } from '../events';
-import { ConferenceDescription } from './conference-info';
+import { ConferenceView } from './conference-info';
 import { createReactive } from '../reactive';
 import { mergeItem } from './merge';
 
-export function createDescription(data: ConferenceDescription) {
+export function createView(data: ConferenceView) {
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
-  let description;
+  let view;
 
   function watch(target) {
     /* eslint-disable no-use-before-define */
@@ -15,28 +15,35 @@ export function createDescription(data: ConferenceDescription) {
     return target;
   }
 
-  function update(val?: ConferenceDescription) {
+  function update(val?: ConferenceView) {
     if (val) {
       data = mergeItem(data, val);
     }
     // fire status change events
     watch(reactive);
-    events.emit('updated', description as Description);
+    events.emit('updated', view as View);
   }
 
-  return description = {
+  function getLayout() {
+    const view = data['entity-view'].find((view) => view.entity === 'audio-video');
+    return view && view['entity-state'];
+  }
+
+  return view = {
     ...events,
 
     get data() {
       return data;
     },
 
-    get(key: keyof ConferenceDescription) {
+    get(key: keyof ConferenceView) {
       return data[key];
     },
 
     update,
+
+    getLayout,
   };
 }
 
-export type Description = ReturnType<typeof createDescription>;
+export type View = ReturnType<typeof createView>;
