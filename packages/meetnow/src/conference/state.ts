@@ -1,7 +1,6 @@
 import { createEvents } from '../events';
 import { ConferenceState } from './conference-info';
 import { createReactive } from '../reactive';
-import { mergeItem } from './merge';
 
 export function createState(data: ConferenceState) {
   const events = createEvents();
@@ -25,10 +24,7 @@ export function createState(data: ConferenceState) {
     return target;
   }
 
-  function update(val?: ConferenceState) {
-    if (val) {
-      data = mergeItem(data, val);
-    }
+  function update(diff?: ConferenceState) {
     // fire status change events
     watch(reactive);
     events.emit('updated', description as State);

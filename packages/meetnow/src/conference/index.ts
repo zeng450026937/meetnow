@@ -113,19 +113,6 @@ export function createConference(config: ConferenceConfigs) {
     // create information
     information = createInformation(info);
 
-    information.users.on('updated', () => {
-      console.log('users updated');
-    });
-    information.users.on('user:added', (user) => {
-      console.log('user:added', user);
-    });
-    information.users.on('user:updated', (user) => {
-      console.log('user:updated', user);
-    });
-    information.users.on('user:deleted', (user) => {
-      console.log('user:deleted', user);
-    });
-
     // step 3
     // get pull im messages
     response = await api
@@ -151,7 +138,7 @@ export function createConference(config: ConferenceConfigs) {
 
         information.update(data);
 
-        events.emit('information');
+        events.emit('information', information);
       },
 
       onMessage : (data: any) => {

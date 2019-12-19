@@ -1,7 +1,6 @@
 import { createEvents } from '../events';
 import { ConferenceView } from './conference-info';
 import { createReactive } from '../reactive';
-import { mergeItem } from './merge';
 
 export function createView(data: ConferenceView) {
   const events = createEvents();
@@ -15,10 +14,7 @@ export function createView(data: ConferenceView) {
     return target;
   }
 
-  function update(val?: ConferenceView) {
-    if (val) {
-      data = mergeItem(data, val);
-    }
+  function update(diff?: ConferenceView) {
     // fire status change events
     watch(reactive);
     events.emit('updated', view as View);

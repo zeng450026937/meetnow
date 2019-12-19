@@ -4,7 +4,6 @@ import {
   ConferenceUser, MediaFilter, UserEndpoint, UserMedia,
 } from './conference-info';
 import { createReactive } from '../reactive';
-import { mergeItem } from './merge';
 
 export function createUser(data: ConferenceUser, api?: Api) {
   const events = createEvents();
@@ -30,10 +29,7 @@ export function createUser(data: ConferenceUser, api?: Api) {
     return target;
   }
 
-  function update(val?: ConferenceUser) {
-    if (val) {
-      data = mergeItem(data, val);
-    }
+  function update(diff?: ConferenceUser) {
     // fire status change events
     watch(reactive);
     events.emit('updated', user as User);

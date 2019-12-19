@@ -62,8 +62,7 @@ export function createInformation(data: ConferenceInformation) {
       view.update();
     }
     if (hasOwn(val, 'users')) {
-      users.check(val.users);
-      users.update();
+      users.update(val.users);
     }
 
     events.emit('updated', information as Information);

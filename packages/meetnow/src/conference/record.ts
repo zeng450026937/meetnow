@@ -1,7 +1,6 @@
 import { createEvents } from '../events';
 import { ConferenceRecordUsers } from './conference-info';
 import { createReactive } from '../reactive';
-import { mergeItem } from './merge';
 
 export function createRecord(data: ConferenceRecordUsers) {
   const events = createEvents();
@@ -16,10 +15,7 @@ export function createRecord(data: ConferenceRecordUsers) {
     return target;
   }
 
-  function update(val?: ConferenceRecordUsers) {
-    if (val) {
-      data = mergeItem(data, val);
-    }
+  function update(diff?: ConferenceRecordUsers) {
     // fire status change events
     watch(reactive);
     events.emit('updated', record as Record);

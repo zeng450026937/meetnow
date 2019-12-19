@@ -1,7 +1,6 @@
 import { createEvents } from '../events';
 import { ConferenceRTMPUsers } from './conference-info';
 import { createReactive } from '../reactive';
-import { mergeItem } from './merge';
 
 export function createRTMP(data: ConferenceRTMPUsers) {
   const events = createEvents();
@@ -17,10 +16,7 @@ export function createRTMP(data: ConferenceRTMPUsers) {
     return target;
   }
 
-  function update(val?: ConferenceRTMPUsers) {
-    if (val) {
-      data = mergeItem(data, val);
-    }
+  function update(diff?: ConferenceRTMPUsers) {
     // fire status change events
     watch(reactive);
     events.emit('updated', rtmp as RTMP);
