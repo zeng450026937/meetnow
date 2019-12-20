@@ -12,7 +12,7 @@ export enum OperationTypes {
 export function createRecordCtrl(api: Api) {
   async function operation(type: OperationType) {
     await api
-      .request('record')
+      .request('setRecord')
       .data({ operate: type })
       .send();
   }

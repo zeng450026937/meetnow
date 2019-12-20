@@ -1,10 +1,10 @@
 import { AxiosResponse } from 'axios';
 import { Api } from '../api';
+import { RequestResult } from '../api/request';
 import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
-import { createInformation, Information } from './information';
 import { ConferenceInformation } from './conference-info';
-import { RequestResult } from '../api/request';
+import { createInformation, Information } from './information';
 import { createEvents } from '../events';
 
 export interface JoinOptions {
@@ -21,15 +21,15 @@ export interface ConferenceConfigs {
 export function createConference(config: ConferenceConfigs) {
   const { api } = config;
   const events = createEvents();
-  let keepalive: KeepAlive;
-  let polling: Polling;
-  let interceptor: number;
-  let information: Information;
+  let keepalive: KeepAlive | undefined;
+  let polling: Polling | undefined;
+  let interceptor: number | undefined;
+  let information: Information | undefined;
   let conference;
 
   let connected: boolean = false;
   let uuid: string | undefined;
-  let userId: string | undefined;
+  let userId: string | undefined; // as conference entity
 
   // Sequence of join conference
   //
@@ -120,6 +120,8 @@ export function createConference(config: ConferenceConfigs) {
       .send();
 
 
+    connected = true;
+
     events.emit('connected');
 
 
@@ -158,42 +160,53 @@ export function createConference(config: ConferenceConfigs) {
 
         connected = false;
 
-        keepalive.stop();
-        polling.stop();
+        /* eslint-disable-next-line no-use-before-define */
+        cleanup();
 
-        information = null;
-
-        api.interceptors.request.eject(interceptor);
-
-        events.emit('close', data);
+        events.emit('disconnect', data);
       },
 
       onError : (data: any) => {
         console.log('onError', data);
 
-        // TBD
-        // should we leave?
-
         events.emit('error', data);
+
+        // there are some problems with polling
+        // leave conference
+        //
+        /* eslint-disable-next-line no-use-before-define */
+        leave();
       },
     });
 
+    // start keepalive & polling
     keepalive.start();
     polling.start();
-
-    connected = true;
   }
 
   async function leave() {
     if (!connected) {
-      console.warn('already closed');
+      console.warn('already disconnected');
       return;
     }
+
     events.emit('disconnecting');
 
     await api
       .request('leave')
       .send();
+  }
+
+  function cleanup() {
+    if (keepalive) {
+      keepalive.stop();
+    }
+    if (polling) {
+      polling.stop();
+    }
+    if (interceptor) {
+      api.interceptors.request.eject(interceptor);
+    }
   }
 
   return conference = {

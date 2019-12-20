@@ -12,7 +12,7 @@ export enum OperationTypes {
 export function createRTMPCtrl(api: Api) {
   async function operation(type: OperationType) {
     await api
-      .request('rtmp')
+      .request('setRTMP')
       .data({ operate: type })
       .send();
   }

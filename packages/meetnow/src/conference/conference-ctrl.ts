@@ -1,4 +1,5 @@
 import { Api } from '../api';
+import { ConferenceDescription } from './conference-info';
 
 export interface InviteOptions {
   uid: string[];
@@ -7,6 +8,11 @@ export interface InviteOptions {
 }
 
 export type SpeakMode = 'free' | 'hand-up'
+
+export interface LockOptions {
+  policy: ConferenceDescription['admission-policy'];
+  attendeeByPass?: boolean;
+}
 
 export function createConferenceCtrl(api: Api) {
   async function invite(option: Partial<InviteOptions>) {
@@ -20,10 +26,34 @@ export function createConferenceCtrl(api: Api) {
   }
 
   // end-conference
-  function end() {}
+  async function end() {
+    await api
+      .request('end')
+      .data({ 'conference-url': '' })
+      .send();
+  }
 
-  // lock-conference
-  function lock() {}
+  async function setLock(options: LockOptions) {
+    await api
+      .request('setLock')
+      .data({
+        'admission-policy'      : options.policy,
+        'attendee-lobby-bypass' : options.attendeeByPass,
+      })
+      .send();
+  }
+
+  async function lock(attendeeByPass?: boolean) {
+    await setLock({
+      policy : 'closedAuthenticated',
+      attendeeByPass,
+    });
+  }
+  async function unlock() {
+    await setLock({
+      policy : 'anonymous',
+    });
+  }
 
   // mute-all
   function mute() {}
@@ -35,10 +65,22 @@ export function createConferenceCtrl(api: Api) {
   function rejectHandup() {}
 
   // delete-user
-  function kickUser() {}
+  function kick() {}
 
   // set-speak-mode
   function setSpeakMode(mode: SpeakMode) {}
 
-  return {};
+  return {
+    invite,
+    kick,
+
+    end,
+
+    setLock,
+    lock,
+    unlock,
+
+    mute,
+    unmute,
+  };
 }

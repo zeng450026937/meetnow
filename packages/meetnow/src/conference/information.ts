@@ -6,8 +6,15 @@ import { createView } from './view';
 import { createUsers } from './users';
 import { ConferenceInformation } from './conference-info';
 import { hasOwn } from '../utils';
+import { Api } from '../api';
 
-export function createInformation(data: ConferenceInformation) {
+export interface InformationConfigs {
+  api: Api;
+  uuid: string; // coference uuid
+  userId: string; // conference userId
+}
+
+export function createInformation(data: ConferenceInformation, config?: InformationConfigs) {
   const events = createEvents();
   const {
     'conference-descriotion': descriptiondata,

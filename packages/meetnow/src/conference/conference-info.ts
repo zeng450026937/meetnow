@@ -47,7 +47,7 @@ export interface ConferenceDescription extends Partialable {
   'presenter-pin': string;
   'attendee-pin': string;
   'maximum-user-count': string;
-  'admission-policy': 'anonymouse' | 'closedAuthenticated' | 'openAuthenticated';
+  'admission-policy': 'anonymous' | 'closedAuthenticated' | 'openAuthenticated';
   'lobby-capable': boolean;
   'attendee-by-pass': boolean;
   'interactive-broadcast-enabled': boolean;

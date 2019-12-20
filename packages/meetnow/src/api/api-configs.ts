@@ -45,6 +45,7 @@ export interface ApiDataMap {
   'unmuteAll': CtrlApiData;
   'rejectHandupAll': CtrlApiData;
   'deleteUser': CtrlApiData & { 'user-entity': string };
+  'setFocusVideo': CtrlApiData & { 'user-entity': string };
   'setSpeakMode': CtrlApiData & { 'speak-mode': 'free' | 'hand-up' };
   'setFreeLayout': CtrlApiData & {
     'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
@@ -101,8 +102,8 @@ export interface ApiDataMap {
     'all-attendee': boolean;
     'all-castviewer': boolean;
   };
-  'record': CtrlApiData & { 'operate': string };
-  'rtmp': CtrlApiData & { 'operate': string };
+  'setRecord': CtrlApiData & { 'operate': string };
+  'setRTMP': CtrlApiData & { 'operate': string };
   'getFullInfo': CtrlApiData;
   'getBasicInfo': CtrlApiData;
   'getURL': { 'long-number': string };
@@ -155,10 +156,14 @@ export interface ApiDataMap {
     'user-entity': string;
     'role': 'attendee' | 'presenter';
   };
+  'setUserDisplayText': CtrlApiData & {
+    'user-entity': string;
+    'display-text': string;
+  };
   'getStats': CtrlApiData & {
     'user-entity-list': string[];
   };
-  'lock': CtrlApiData & {
+  'setLock': CtrlApiData & {
     'admission-policy': 'openAuthenticated' | 'anonymous' | 'closedAuthenticated';
     'attendee-lobby-bypass': boolean;
    };
@@ -336,6 +341,11 @@ export const configs = {
     url    : `${ baseURL.ctrl }modify-user-role`,
   },
 
+  setUserDisplayText : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }edit-user-display-text`,
+  },
+
   holdUser : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }wait-lobby-user`,
@@ -344,6 +354,11 @@ export const configs = {
   inviteUser : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }invite-user`,
+  },
+
+  setFocusVideo : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }set-focus-video`,
   },
 
   setSpeakMode : {
@@ -381,17 +396,17 @@ export const configs = {
     url    : `${ baseURL.ctrl }send-title`,
   },
 
-  record : {
+  setRecord : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }record-operate`,
   },
 
-  rtmp : {
+  setRTMP : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }rtmp-operate`,
   },
 
-  lock : {
+  setLock : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }lock-conference`,
   },

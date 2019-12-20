@@ -1,15 +1,18 @@
 import { createEvents } from '../events';
-import { ConferenceView } from './conference-info';
+import { ConferenceView, EntityState } from './conference-info';
 import { createReactive } from '../reactive';
 
 export function createView(data: ConferenceView) {
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
+  let layout: EntityState;
   let view;
 
   function watch(target) {
     /* eslint-disable no-use-before-define */
+    layout = getLayout();
+    target.focusUserEntity = layout && layout['focus-video-user-entity'];
     /* eslint-enable no-use-before-define */
     return target;
   }

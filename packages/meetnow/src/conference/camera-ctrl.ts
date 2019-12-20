@@ -1,14 +1,14 @@
 import { Api } from '../api';
 
 export type ActionType =
-| 'PanLeft'
-| 'PanRight'
-| 'TiltDown'
-| 'TiltUp'
-| 'ZoomOut'
-| 'ZoomIn'
-| 'FocusOut'
-| 'FocusIn';
+  | 'PanLeft'
+  | 'PanRight'
+  | 'TiltDown'
+  | 'TiltUp'
+  | 'ZoomOut'
+  | 'ZoomIn'
+  | 'FocusOut'
+  | 'FocusIn';
 
 export enum ActionTypes {
   LEFT = 'PanLeft',
