@@ -55,11 +55,17 @@ export function createConferenceCtrl(api: Api) {
     });
   }
 
-  // mute-all
-  function mute() {}
+  async function mute() {
+    await api
+      .request('muteAll')
+      .send();
+  }
 
-  // unmute-all
-  function unmute() {}
+  async function unmute() {
+    await api
+      .request('unmuteAll')
+      .send();
+  }
 
   // reject-all-hand-up
   function rejectHandup() {}
@@ -69,6 +75,8 @@ export function createConferenceCtrl(api: Api) {
 
   // set-speak-mode
   function setSpeakMode(mode: SpeakMode) {}
+
+  function isLocked() {}
 
   return {
     invite,

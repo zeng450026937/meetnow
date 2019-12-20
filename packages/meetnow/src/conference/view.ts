@@ -1,18 +1,17 @@
 import { createEvents } from '../events';
-import { ConferenceView, EntityState } from './conference-info';
+import { ConferenceView } from './conference-info';
 import { createReactive } from '../reactive';
+import { Context } from './context';
 
-export function createView(data: ConferenceView) {
+export function createView(data: ConferenceView, context: Context) {
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
-  let layout: EntityState;
   let view;
 
   function watch(target) {
     /* eslint-disable no-use-before-define */
-    layout = getLayout();
-    target.focusUserEntity = layout && layout['focus-video-user-entity'];
+    target.focusUserEntity = getFocusUserEntity();
     /* eslint-enable no-use-before-define */
     return target;
   }
@@ -23,9 +22,17 @@ export function createView(data: ConferenceView) {
     events.emit('updated', view as View);
   }
 
+  function getVideoView() {
+    return data['entity-view'].find((view) => view.entity === 'audio-video');
+  }
   function getLayout() {
-    const view = data['entity-view'].find((view) => view.entity === 'audio-video');
-    return view && view['entity-state'];
+    return getVideoView()['entity-state'];
+  }
+  function getFocusUserEntity() {
+    return getLayout()['focus-video-user-entity'];
+  }
+  function getDanmaku() {
+    return getVideoView().title;
   }
 
   return view = {
@@ -41,7 +48,10 @@ export function createView(data: ConferenceView) {
 
     update,
 
+    getVideoView,
     getLayout,
+    getFocusUserEntity,
+    getDanmaku,
   };
 }
 

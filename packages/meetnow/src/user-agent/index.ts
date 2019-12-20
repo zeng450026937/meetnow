@@ -15,6 +15,7 @@ export function createUA() {
   let worker: Worker;
   let ua;
 
+  const anonymous: boolean = true;
   let token: string | undefined;
   let partyId: string | undefined;
   let url: string | undefined;
@@ -39,7 +40,10 @@ export function createUA() {
   }
 
   function setup(): UA {
+    // create api
     api = createApi({ baseURL: '/webapp/' });
+
+    // setup token for all api request
     api.interceptors.request.use((config) => {
       if (token) {
         config.headers = config.headers || {};
@@ -48,6 +52,7 @@ export function createUA() {
       return config;
     });
 
+    // creat auth() worker
     worker = createWorker({
       interval : 5 * 60 * 1000,
       work     : () => auth(),

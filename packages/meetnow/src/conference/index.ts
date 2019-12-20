@@ -5,6 +5,7 @@ import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
 import { createInformation, Information } from './information';
+import { createContext } from './context';
 import { createEvents } from '../events';
 
 export interface JoinOptions {
@@ -28,6 +29,7 @@ export function createConference(config: ConferenceConfigs) {
   let conference;
 
   let connected: boolean = false;
+  let url: string | undefined;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
 
@@ -73,6 +75,7 @@ export function createConference(config: ConferenceConfigs) {
 
     ({ data } = response);
 
+    ({ url } = options);
     ({
       'conference-user-id': userId,
       'conference-uuid': uuid,
@@ -110,8 +113,10 @@ export function createConference(config: ConferenceConfigs) {
 
     const info = data.data as ConferenceInformation;
 
+    // create context
+    const context = createContext(conference);
     // create information
-    information = createInformation(info);
+    information = createInformation(info, context);
 
     // step 3
     // get pull im messages
@@ -212,6 +217,13 @@ export function createConference(config: ConferenceConfigs) {
   return conference = {
     ...events,
 
+    get api() {
+      return api;
+    },
+
+    get url() {
+      return url;
+    },
     get uuid() {
       return uuid;
     },

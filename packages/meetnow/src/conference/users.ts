@@ -1,9 +1,10 @@
 import { createEvents } from '../events';
-import { ConferenceUsers } from './conference-info';
+import { ConferenceUser, ConferenceUsers } from './conference-info';
 import { createUser, User } from './user';
 import { createReactive } from '../reactive';
+import { Context } from './context';
 
-export function createUsers(data: ConferenceUsers) {
+export function createUsers(data: ConferenceUsers, context: Context) {
   const events = createEvents();
   const userMap = new Map<string, User>();
   /* eslint-disable-next-line no-use-before-define */
@@ -21,7 +22,7 @@ export function createUsers(data: ConferenceUsers) {
       if (user) {
         user.update(userdata);
       } else {
-        user = createUser(userdata);
+        user = createUser(userdata, context);
         userMap.set(entity, user);
       }
       return user;
@@ -33,9 +34,9 @@ export function createUsers(data: ConferenceUsers) {
 
 
   function update(diff?: ConferenceUsers) {
-    const added: string[] = [];
-    const updated: string[] = [];
-    const deleted: string[] = [];
+    const added: ConferenceUser[] = [];
+    const updated: ConferenceUser[] = [];
+    const deleted: ConferenceUser[] = [];
 
     if (diff) {
       /* eslint-disable no-use-before-define */
@@ -43,24 +44,27 @@ export function createUsers(data: ConferenceUsers) {
         const { entity, state } = userdata;
         hasUser(entity)
           ? state === 'deleted'
-            ? deleted.push(entity)
-            : updated.push(entity)
-          : added.push(entity);
+            ? deleted.push(userdata)
+            : updated.push(userdata)
+          : added.push(userdata);
       });
       /* eslint-enable no-use-before-define */
     }
     // fire status change events
     watch(reactive);
 
-    added.forEach((entity) => {
+    added.forEach((userdata) => {
+      const { entity } = userdata;
       users.emit('user:added', userMap.get(entity));
     });
-    updated.forEach((entity) => {
+    updated.forEach((userdata) => {
+      const { entity } = userdata;
       const user = userMap.get(entity);
       user.update();
       users.emit('user:updated', user);
     });
-    deleted.forEach((entity) => {
+    deleted.forEach((userdata) => {
+      const { entity } = userdata;
       users.emit('user:deleted', userMap.get(entity));
       userMap.delete(entity);
     });

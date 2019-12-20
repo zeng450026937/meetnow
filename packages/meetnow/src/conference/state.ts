@@ -1,8 +1,9 @@
 import { createEvents } from '../events';
 import { ConferenceState } from './conference-info';
 import { createReactive } from '../reactive';
+import { Context } from './context';
 
-export function createState(data: ConferenceState) {
+export function createState(data: ConferenceState, context: Context) {
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);

@@ -23,11 +23,11 @@ interface CtrlApiData {
 
 export interface ApiHeaderMap {
   [apiName: string]: any;
-  'getVirtualJWT': { id: string }
 }
 
 export interface ApiParamsMap {
   [apiName: string]: any;
+  'getVirtualJWT': { id: string }
 }
 
 export interface ApiDataMap {

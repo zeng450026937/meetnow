@@ -21,7 +21,7 @@ export enum ActionTypes {
   FOCUSIN = 'FocusIn',
 }
 
-export function createCameraCtrl(entity: string, api: Api) {
+export function createCameraCtrl(api: Api, entity: string) {
   async function action(type: ActionType) {
     await api
       .request('setFecc')

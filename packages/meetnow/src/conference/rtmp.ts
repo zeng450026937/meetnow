@@ -1,11 +1,15 @@
 import { createEvents } from '../events';
 import { ConferenceRTMPUsers } from './conference-info';
 import { createReactive } from '../reactive';
+import { createRTMPCtrl } from './rtmp-ctrl';
+import { Context } from './context';
 
-export function createRTMP(data: ConferenceRTMPUsers) {
+export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
+  const { api } = context;
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
+  const ctrl = createRTMPCtrl(api);
   let rtmp;
 
   function watch(target) {
@@ -67,6 +71,9 @@ export function createRTMP(data: ConferenceRTMPUsers) {
     getStatus,
     getReason,
     getDetail,
+
+    // rtmp ctrl
+    ...ctrl,
   };
 }
 

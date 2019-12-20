@@ -1,14 +1,24 @@
-import { Api } from '../api';
 import { createEvents } from '../events';
 import {
   ConferenceUser, MediaFilter, UserEndpoint, UserMedia,
 } from './conference-info';
 import { createReactive } from '../reactive';
+import { Context } from './context';
+import { createCameraCtrl } from './camera-ctrl';
 
-export function createUser(data: ConferenceUser, api?: Api) {
+export interface FilterOptions {
+  label: UserMedia['label']
+  enable: boolean;
+}
+
+export function createUser(data: ConferenceUser, context: Context) {
+  const { api } = context;
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
+  /* eslint-disable-next-line no-use-before-define */
+  const entity = getEntity();
+  const camera = createCameraCtrl(api, entity);
   let user;
 
   function watch(target) {
@@ -131,6 +141,67 @@ export function createUser(data: ConferenceUser, api?: Api) {
     return data.protocol.toLowerCase() === 'rtmp';
   }
 
+  // user ctrl
+
+  async function setFilter(options: FilterOptions) {
+    const { label, enable } = options;
+    const endpoint = user.getEndpoint('audio-video');
+    const media = user.getMedia(label);
+
+    await api
+      .request('setUserMedia')
+      .data({
+        'user-entity'          : entity,
+        'endpoint-entity'      : endpoint.entity,
+        'media-id'             : media.id,
+        'media-ingress-filter' : enable ? 'unblock' : 'block',
+      })
+      .send();
+  }
+
+  async function setAudioFilter(enable: boolean) {
+    await setFilter({ label: 'main-audio', enable });
+  }
+  async function setVideoFilter(enable: boolean) {
+    await setFilter({ label: 'main-video', enable });
+  }
+
+  async function setDisplayText(displayText: string) {
+    await api
+      .request('setUserDisplayText')
+      .data({
+        'user-entity'  : entity,
+        'display-text' : displayText,
+      })
+      .send();
+  }
+
+  async function setRole(role: 'attendee' | 'presenter') {
+    await api
+      .request('setUserRole')
+      .data({
+        'user-entity' : entity,
+        role,
+      })
+      .send();
+  }
+
+  async function setFocus(enable: boolean = true) {
+    await api
+      .request('setFocusVideo')
+      .data({
+        'user-entity' : enable ? entity : '',
+      })
+      .send();
+  }
+
+  async function getStats() {
+    await api
+      .request('getStats')
+      .data({ 'user-entity-list': [entity] })
+      .send();
+  }
+
   return user = {
     ...events,
 
@@ -174,6 +245,20 @@ export function createUser(data: ConferenceUser, api?: Api) {
     isSIP,
     isHTTP,
     isRTMP,
+
+    // user ctrl
+    setFilter,
+    setAudioFilter,
+    setVideoFilter,
+
+    setDisplayText,
+    setRole,
+    setFocus,
+
+    getStats,
+
+    // camera ctrl
+    camera,
   };
 }
 

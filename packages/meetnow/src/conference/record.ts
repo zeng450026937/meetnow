@@ -1,11 +1,15 @@
 import { createEvents } from '../events';
 import { ConferenceRecordUsers } from './conference-info';
 import { createReactive } from '../reactive';
+import { createRecordCtrl } from './record-ctrl';
+import { Context } from './context';
 
-export function createRecord(data: ConferenceRecordUsers) {
+export function createRecord(data: ConferenceRecordUsers, context: Context) {
+  const { api } = context;
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
+  const ctrl = createRecordCtrl(api);
   let record;
 
   function watch(target) {
@@ -47,7 +51,6 @@ export function createRecord(data: ConferenceRecordUsers) {
     };
   }
 
-
   return record = {
     ...events,
 
@@ -65,6 +68,9 @@ export function createRecord(data: ConferenceRecordUsers) {
     getStatus,
     getReason,
     getDetail,
+
+    // record ctrl
+    ...ctrl,
   };
 }
 

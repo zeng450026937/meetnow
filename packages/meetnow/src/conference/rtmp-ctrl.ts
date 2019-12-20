@@ -16,6 +16,7 @@ export function createRTMPCtrl(api: Api) {
       .data({ operate: type })
       .send();
   }
+
   function start() {
     return operation(OperationTypes.START);
   }
