@@ -2,13 +2,22 @@ import { createEvents } from '../events';
 import { ConferenceUser, ConferenceUsers } from './conference-info';
 import { createUser, User } from './user';
 import { createReactive } from '../reactive';
+import { createLobbyCtrl } from './lobby-ctrl';
 import { Context } from './context';
 
+export interface InviteOptions {
+  uid: string[];
+  sipURL: string;
+  h323URL: string;
+}
+
 export function createUsers(data: ConferenceUsers, context: Context) {
+  const { api } = context;
   const events = createEvents();
   const userMap = new Map<string, User>();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
+  const lobby = createLobbyCtrl(api);
   let userList: User[];
   let users;
 
@@ -74,8 +83,8 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     events.emit('updated', users as Users);
   }
 
-  function getUserList() {
-    return userList;
+  function getUserList(filter?: (user?: User) => boolean) {
+    return userList.filter(filter || (() => true));
   }
 
   function getUser(entity: string) {
@@ -126,6 +135,34 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     return userList.filter((user) => user.isRTMP());
   }
 
+
+  async function invite(option: Partial<InviteOptions>) {
+    await api
+      .request('inviteUser')
+      .data({
+        uid        : option.uid,
+        'sip-url'  : option.sipURL,
+        'h323-url' : option.h323URL,
+      });
+  }
+  async function kick(entity: string) {
+    await api
+      .request('deleteUser')
+      .data({ 'user-entity': entity })
+      .send();
+  }
+
+  async function mute() {
+    await api
+      .request('muteAll')
+      .send();
+  }
+  async function unmute() {
+    await api
+      .request('unmuteAll')
+      .send();
+  }
+
   return users = {
     ...events,
 
@@ -136,6 +173,8 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     get(key: keyof ConferenceUsers) {
       return data[key];
     },
+
+    ...lobby,
 
     update,
 
@@ -159,6 +198,12 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     getSIP,
     getHTTP,
     getRTMP,
+
+    invite,
+    kick,
+
+    mute,
+    unmute,
   };
 }
 

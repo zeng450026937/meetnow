@@ -4,7 +4,7 @@ import { createReactive } from '../reactive';
 import { Context } from './context';
 
 export interface LockOptions {
-  policy: ConferenceDescription['admission-policy'];
+  admissionPolicy: ConferenceDescription['admission-policy'];
   attendeeByPass?: boolean;
 }
 
@@ -17,7 +17,7 @@ export function createDescription(data: ConferenceDescription, context: Context)
 
   function watch(target) {
     /* eslint-disable no-use-before-define */
-    target.lock = isLocked();
+    target.locked = isLocked();
     /* eslint-enable no-use-before-define */
     return target;
   }
@@ -30,17 +30,17 @@ export function createDescription(data: ConferenceDescription, context: Context)
 
   function getLock() {
     return {
-      policy         : data['admission-policy'],
-      attendeeByPass : data['attendee-by-pass'],
+      admissionPolicy : data['admission-policy'],
+      attendeeByPass  : data['attendee-by-pass'],
     };
   }
   async function setLock(options: LockOptions) {
-    const { policy, attendeeByPass = true } = options;
+    const { admissionPolicy, attendeeByPass = true } = options;
 
     await api
       .request('setLock')
       .data({
-        'admission-policy'      : policy,
+        'admission-policy'      : admissionPolicy,
         'attendee-lobby-bypass' : attendeeByPass,
       })
       .send();
@@ -48,18 +48,18 @@ export function createDescription(data: ConferenceDescription, context: Context)
 
   async function lock(attendeeByPass: boolean = false, presenterOnly: boolean = true) {
     await setLock({
-      policy : presenterOnly ? 'closedAuthenticated' : 'openAuthenticated',
+      admissionPolicy : presenterOnly ? 'closedAuthenticated' : 'openAuthenticated',
       attendeeByPass,
     });
   }
   async function unlock() {
     await setLock({
-      policy : 'anonymous',
+      admissionPolicy : 'anonymous',
     });
   }
 
   function isLocked() {
-    return getLock().policy !== 'anonymous';
+    return getLock().admissionPolicy !== 'anonymous';
   }
 
   return description = {

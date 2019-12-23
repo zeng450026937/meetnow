@@ -1,8 +1,8 @@
 import { Api } from '../api';
 
-export type OperationType = 'start'| 'stop'| 'pause'| 'resume';
+export type RTMPOperationType = 'start'| 'stop'| 'pause'| 'resume';
 
-export enum OperationTypes {
+export enum RTMPOperationTypes {
   START = 'start',
   STOP = 'stop',
   PAUSE = 'pause',
@@ -10,7 +10,7 @@ export enum OperationTypes {
 }
 
 export function createRTMPCtrl(api: Api) {
-  async function operation(type: OperationType) {
+  async function operation(type: RTMPOperationType) {
     await api
       .request('setRTMP')
       .data({ operate: type })
@@ -18,16 +18,16 @@ export function createRTMPCtrl(api: Api) {
   }
 
   function start() {
-    return operation(OperationTypes.START);
+    return operation(RTMPOperationTypes.START);
   }
   function stop() {
-    return operation(OperationTypes.STOP);
+    return operation(RTMPOperationTypes.STOP);
   }
   function pause() {
-    return operation(OperationTypes.PAUSE);
+    return operation(RTMPOperationTypes.PAUSE);
   }
   function resume() {
-    return operation(OperationTypes.RESUME);
+    return operation(RTMPOperationTypes.RESUME);
   }
 
   return {

@@ -64,7 +64,6 @@ export function createRecord(data: ConferenceRecordUsers, context: Context) {
 
     update,
 
-    getUser,
     getStatus,
     getReason,
     getDetail,

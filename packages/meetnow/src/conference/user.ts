@@ -12,7 +12,7 @@ export interface FilterOptions {
 }
 
 export function createUser(data: ConferenceUser, context: Context) {
-  const { api } = context;
+  const { api, userId } = context;
   const events = createEvents();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
@@ -51,9 +51,12 @@ export function createUser(data: ConferenceUser, context: Context) {
   function getUID() {
     return data['subject-id'];
   }
-
   function getRole() {
     return data.roles && data.roles.role;
+  }
+
+  function isCurrent() {
+    return entity === userId;
   }
   function isAttendee() {
     return getRole() === 'attendee';
@@ -202,6 +205,43 @@ export function createUser(data: ConferenceUser, context: Context) {
       .send();
   }
 
+  async function kick() {
+    await api
+      .request('deleteUser')
+      .data({ 'user-entity': entity })
+      .send();
+  }
+
+  async function hold() {
+    await api
+      .request('waitLobbyUser')
+      .data({ 'user-entity': entity })
+      .send();
+  }
+  async function unhold() {
+    await api
+      .request('acceptLobbyUser')
+      .data({ 'user-entity': entity })
+      .send();
+  }
+  async function allow() {
+    await api
+      .request('acceptLobbyUser')
+      .data({ 'user-entity': entity })
+      .send();
+  }
+
+  async function accept() {
+    await setAudioFilter(true);
+  }
+  async function reject() {
+    await setAudioFilter(false);
+  }
+
+  function sendMessage(msg: string) {
+
+  }
+
   return user = {
     ...events,
 
@@ -219,6 +259,7 @@ export function createUser(data: ConferenceUser, context: Context) {
     getUID,
     getRole,
 
+    isCurrent,
     isAttendee,
     isPresenter,
     isCastviewer,
@@ -256,6 +297,17 @@ export function createUser(data: ConferenceUser, context: Context) {
     setFocus,
 
     getStats,
+
+    kick,
+
+    hold,
+    unhold,
+    allow,
+
+    accept,
+    reject,
+
+    sendMessage,
 
     // camera ctrl
     camera,

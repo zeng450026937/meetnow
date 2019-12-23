@@ -67,7 +67,6 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
 
     update,
 
-    getUser,
     getStatus,
     getReason,
     getDetail,

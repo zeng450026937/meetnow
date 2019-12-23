@@ -12,8 +12,8 @@ import { ConferenceInformation } from './conference-info';
 
 export interface InformationParts<T extends keyof ConferenceInformation, P> {
   key: T;
-  delegate: P;
-  create: (data: ConferenceInformation[T], context: Context) => P;
+  part: P;
+  builder: (data: ConferenceInformation[T], context: Context) => P;
 }
 
 export function createInformation(data: ConferenceInformation, context: Context) {
@@ -26,39 +26,7 @@ export function createInformation(data: ConferenceInformation, context: Context)
     'rtmp-state': rtmpdata,
     'record-users': recorddata,
   } = data;
-  const parts = [
-    {
-      key     : 'conference-descriotion',
-      creator : (partsdata) => createDescription(partsdata, context),
-    },
-    {
-      key     : 'conference-state',
-      creator : (partsdata) => createState(partsdata, context),
-    },
-    {
-      key     : 'conference-view',
-      creator : (partsdata) => createView(partsdata, context),
-    },
-    {
-      key     : 'users',
-      creator : (partsdata) => createUsers(partsdata, context),
-    },
-    {
-      key     : 'rtmp-state',
-      creator : (partsdata) => createRTMP(partsdata, context),
-    },
-    {
-      key     : 'record-users',
-      creator : (partsdata) => createRecord(partsdata, context),
-    },
-  ].map((part) => {
-    const { key, creator } = part;
-    const delegate = creator(data[key]);
-    return {
-      key,
-      delegate,
-    };
-  });
+
   // create information parts
   const descriotion = createDescription(descriptiondata, context);
   const state = createState(statedata, context);
@@ -100,29 +68,33 @@ export function createInformation(data: ConferenceInformation, context: Context)
     // update & prepare all parts
     [
       {
-        key      : 'conference-descriotion',
-        delegate : descriotion,
+        key  : 'conference-descriotion',
+        part : descriotion,
       },
       {
-        key      : 'conference-state',
-        delegate : state,
+        key  : 'conference-state',
+        part : state,
       },
       {
-        key      : 'conference-view',
-        delegate : view,
+        key  : 'conference-view',
+        part : view,
       },
       {
-        key      : 'users',
-        delegate : users,
+        key  : 'users',
+        part : users,
       },
       {
-        key      : 'rtmp-state',
-        delegate : rtmp,
+        key  : 'rtmp-state',
+        part : rtmp,
+      },
+      {
+        key  : 'record-users',
+        part : record,
       },
     ].forEach((parts) => {
-      const { key, delegate } = parts;
+      const { key, part } = parts;
       if (hasOwn(val, key)) {
-        delegate.update(val[key]);
+        part.update(val[key]);
       }
     });
 

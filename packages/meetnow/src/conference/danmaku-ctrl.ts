@@ -31,7 +31,7 @@ export const DANMAKU_CONFIGS: DanmakuConfigs = {
 export function createDanmakuCtrl(api: Api) {
   let lastConfig: DanmakuConfigs = DANMAKU_CONFIGS;
 
-  async function config(config: Partial<DanmakuConfigs>) {
+  async function setDanmaku(config: Partial<DanmakuConfigs>) {
     const finalConfig = {
       ...lastConfig,
       config,
@@ -55,7 +55,7 @@ export function createDanmakuCtrl(api: Api) {
     lastConfig = finalConfig;
   }
 
-  async function send(msg: string, options?: Partial<DanmakuOptions>) {
+  async function sendDanmaku(msg: string, options?: Partial<DanmakuOptions>) {
     const {
       attendee = true,
       castviewer = true,
@@ -73,7 +73,7 @@ export function createDanmakuCtrl(api: Api) {
   }
 
   return {
-    config,
-    send,
+    setDanmaku,
+    sendDanmaku,
   };
 }

@@ -1,30 +1,31 @@
 import { Api } from '../api';
+import { ApiDataMap } from '../api/api-configs';
 
 export function createLayoutCtrl(api: Api) {
-  async function setLayout(options) {
+  async function setLayout(options: ApiDataMap['setFreeLayout']) {
     await api
       .request('setFreeLayout')
       .data(options)
       .send();
   }
-  async function setCustomizeLayout(options) {
+  async function setCustomizeLayout(options: ApiDataMap['setCustomizeLayout']) {
     await api
       .request('setCustomizeLayout')
       .data(options)
       .send();
   }
 
-  async function setPresenterLayout(options) {
+  async function setPresenterLayout(options: ApiDataMap['setCustomizeLayout']) {
     options.viewer = 'presenter';
     await setCustomizeLayout(options);
   }
 
-  async function setAttendeeLayout(options) {
+  async function setAttendeeLayout(options: ApiDataMap['setCustomizeLayout']) {
     options.viewer = 'attendee';
     await setCustomizeLayout(options);
   }
 
-  async function setCastViewerLayout(options) {
+  async function setCastViewerLayout(options: ApiDataMap['setCustomizeLayout']) {
     options.viewer = 'castviewer';
     await setCustomizeLayout(options);
   }

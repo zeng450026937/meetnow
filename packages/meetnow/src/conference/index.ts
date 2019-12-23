@@ -202,6 +202,13 @@ export function createConference(config: ConferenceConfigs) {
       .send();
   }
 
+  async function end() {
+    await api
+      .request('end')
+      .data({ 'conference-url': url })
+      .send();
+  }
+
   function cleanup() {
     if (keepalive) {
       keepalive.stop();
@@ -250,6 +257,7 @@ export function createConference(config: ConferenceConfigs) {
 
     join,
     leave,
+    end,
   };
 }
 

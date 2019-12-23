@@ -1,8 +1,8 @@
 import { Api } from '../api';
 
-export type OperationType = 'start'| 'stop'| 'pause'| 'resume';
+export type RecordOperationType = 'start'| 'stop'| 'pause'| 'resume';
 
-export enum OperationTypes {
+export enum RecordOperationTypes {
   START = 'start',
   STOP = 'stop',
   PAUSE = 'pause',
@@ -10,23 +10,24 @@ export enum OperationTypes {
 }
 
 export function createRecordCtrl(api: Api) {
-  async function operation(type: OperationType) {
+  async function operation(type: RecordOperationType) {
     await api
       .request('setRecord')
       .data({ operate: type })
       .send();
   }
+
   function start() {
-    return operation(OperationTypes.START);
+    return operation(RecordOperationTypes.START);
   }
   function stop() {
-    return operation(OperationTypes.STOP);
+    return operation(RecordOperationTypes.STOP);
   }
   function pause() {
-    return operation(OperationTypes.PAUSE);
+    return operation(RecordOperationTypes.PAUSE);
   }
   function resume() {
-    return operation(OperationTypes.RESUME);
+    return operation(RecordOperationTypes.RESUME);
   }
 
   return {
