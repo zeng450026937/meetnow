@@ -1,7 +1,10 @@
 import { createEvents } from '../events';
 import { getUserMedia } from '../media/get-user-media';
 import { closeMediaStream } from '../media/close-media-stream';
-import SDPTransform from '../sdp-transform';
+import { parse, write } from '../sdp-transform';
+
+const warn = (...args: any[]) => {};
+const debug = warn;
 
 export interface ChannelConfigs {
   sendOffer: (offer: { sdp: string }) => Promise<{
@@ -360,7 +363,7 @@ export function createChannel(config: ChannelConfigs) {
     }
   }
 
-  function hold() {
+  async function hold() {
     if (localHold) {
       console.warn('Already hold');
       return;
@@ -371,10 +374,10 @@ export function createChannel(config: ChannelConfigs) {
     onHold('local');
 
     /* eslint-disable-next-line no-use-before-define */
-    renegotiate();
+    await renegotiate();
   }
 
-  function unhold() {
+  async function unhold() {
     if (!localHold) {
       console.warn('Already unhold');
       return;
@@ -385,7 +388,7 @@ export function createChannel(config: ChannelConfigs) {
     onUnHold('local');
 
     /* eslint-disable-next-line no-use-before-define */
-    renegotiate();
+    await renegotiate();
   }
 
   async function renegotiate(options: RenegotiateOptions = {}) {
@@ -422,7 +425,7 @@ export function createChannel(config: ChannelConfigs) {
     // nothing to do
     if (!localHold && !remoteHold) return offer;
 
-    const sdp = SDPTransform.parse(offer);
+    const sdp = parse(offer);
 
     // Local hold.
     if (localHold && !remoteHold) {
@@ -462,20 +465,358 @@ export function createChannel(config: ChannelConfigs) {
       }
     }
 
-    return SDPTransform.write(sdp);
+    return write(sdp);
+  }
+
+  function getLocalStream() {
+    let stream: MediaStream | undefined;
+
+    if (!connection) return stream;
+
+    if (connection.getSenders) {
+      stream = new window.MediaStream();
+
+      connection
+        .getSenders()
+        .forEach((sender) => {
+          const { track } = sender;
+          if (track) {
+            stream.addTrack(track);
+          }
+        });
+    } else if ((connection as any).getLocalStreams) {
+      stream = (connection as any).getLocalStreams()[0];
+    }
+
+    return stream;
+  }
+  function getRemoteStream() {
+    let stream: MediaStream | undefined;
+
+    if (!connection) return stream;
+
+    if (connection.getReceivers) {
+      stream = new window.MediaStream();
+
+      connection
+        .getReceivers()
+        .forEach((receiver) => {
+          const { track } = receiver;
+          if (track) {
+            stream.addTrack(track);
+          }
+        });
+    } else if ((connection as any).getRemoteStreams) {
+      stream = (connection as any).getRemoteStreams()[0];
+    }
+
+    return connection;
+  }
+
+  function addLocalStream(stream: MediaStream) {
+    if (!connection || !stream) return;
+
+    if (connection.addTrack) {
+      stream
+        .getTracks()
+        .forEach((track) => {
+          connection.addTrack(track, stream);
+        });
+    } else if ((connection as any).addStream) {
+      (connection as any).addStream(stream);
+    }
+  }
+  function removeLocalStream() {
+    if (!connection) return;
+
+    if (connection.getSenders && connection.removeTrack) {
+      connection.getSenders().forEach((sender) => {
+        if (sender.track) {
+          sender.track.stop();
+        }
+        connection.removeTrack(sender);
+      });
+    } else if ((connection as any).getLocalStreams && (connection as any).removeStream) {
+      (connection as any)
+        .getLocalStreams()
+        .forEach((stream) => {
+          stream
+            .getTracks()
+            .forEach((track) => {
+              track.stop();
+            });
+
+          (connection as any).removeStream(stream);
+        });
+    }
+  }
+
+  async function replaceLocalStream(stream: MediaStream, renegotiation: boolean = false) {
+    if (!connection) return;
+
+    const audioTrack = stream ? stream.getAudioTracks()[0] : null;
+    const videoTrack = stream ? stream.getVideoTracks()[0] : null;
+
+    const queue = [];
+
+    let renegotiationNeeded = false;
+    let peerHasAudio = false;
+    let peerHasVideo = false;
+
+    if (connection.getSenders) {
+      connection.getSenders().forEach((sender) => {
+        if (!sender.track) return;
+        peerHasAudio = sender.track.kind === 'audio' || peerHasAudio;
+        peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
+      });
+
+      renegotiationNeeded = (Boolean(audioTrack) !== peerHasAudio)
+                             || (Boolean(videoTrack) !== peerHasVideo)
+                             || renegotiation;
+
+      if (renegotiationNeeded) {
+        this.removeLocalStream();
+        this.addLocalStream(stream);
+
+        queue.push(new Promise((resolve) => {
+          this.session.renegotiate({}, resolve);
+        }));
+      } else {
+        connection.getSenders().forEach((sender) => {
+          if (!sender.track) return;
+
+          if (!sender.replaceTrack
+            && !((sender as any).prototype && (sender as any).prototype.replaceTrack)
+          ) {
+            /* eslint-disable-next-line no-use-before-define */
+            shimReplaceTrack(sender);
+          }
+
+          if (audioTrack && sender.track.kind === 'audio') {
+            queue.push(
+              sender.replaceTrack(audioTrack)
+                .catch((e) => {
+                  warn('Replace audio track error: %o', e);
+                }),
+            );
+          }
+          if (videoTrack && sender.track.kind === 'video') {
+            queue.push(
+              sender.replaceTrack(videoTrack)
+                .catch((e) => {
+                  warn('Replace video track error: %o', e);
+                }),
+            );
+          }
+        });
+      }
+    }
+
+    function shimReplaceTrack(sender: RTCRtpSender) {
+      sender.replaceTrack = async function replaceTrack(newTrack: MediaStreamTrack) {
+        connection.removeTrack(sender);
+        connection.addTrack(newTrack, stream);
+
+        const offer = await connection.createOffer();
+
+        offer.type = connection.localDescription.type;
+        /* eslint-disable-next-line no-use-before-define */
+        offer.sdp = replaceSSRCs(connection.localDescription.sdp, offer.sdp);
+
+        await connection.setLocalDescription(offer);
+        await connection.setRemoteDescription(connection.remoteDescription);
+      };
+    }
+
+    await Promise.all(queue);
+  }
+
+  function replaceSSRCs(currentDescription, newDescription) {
+    let ssrcs = currentDescription.match(/a=ssrc-group:FID (\d+) (\d+)\r\n/);
+    let newssrcs = newDescription.match(/a=ssrc-group:FID (\d+) (\d+)\r\n/);
+
+    if (!ssrcs) { // Firefox offers wont have FID yet
+      ssrcs = currentDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)[1]
+        .match(/a=ssrc:(\d+)/);
+      newssrcs = newDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)[1]
+        .match(/a=ssrc:(\d+)/);
+    }
+    for (let i = 1; i < ssrcs.length; i++) {
+      newDescription = newDescription.replace(new RegExp(newssrcs[i], 'g'), ssrcs[i]);
+    }
+
+    return newDescription;
+  }
+
+  async function adjustBandWith({ audio, video }) {
+    if (!connection || !connection.getSenders) return;
+
+    const queue = [];
+
+    if ('RTCRtpSender' in window
+    && 'setParameters' in window.RTCRtpSender.prototype) {
+      connection.getSenders().forEach((sender) => {
+        if (sender.track) return;
+
+        const parameters = sender.getParameters();
+
+        if (typeof audio !== 'undefined' && sender.track.kind === 'audio') {
+          if (audio === 0) {
+            delete parameters.encodings[0].maxBitrate;
+          } else {
+            parameters.encodings[0].maxBitrate = audio * 1024;
+          }
+
+          queue.push(
+            sender.setParameters(parameters)
+              .catch((e) => {
+                warn('Apply audio parameters error: %o', e);
+              }),
+          );
+        }
+
+        if (typeof video !== 'undefined' && sender.track.kind === 'video') {
+          if (video === 0) {
+            delete parameters.encodings[0].maxBitrate;
+          } else {
+            parameters.encodings[0].maxBitrate = video * 1024;
+          }
+
+          queue.push(
+            sender.setParameters(parameters)
+              .catch((e) => {
+                warn('Apply video parameters error: %o', e);
+              }),
+          );
+        }
+      });
+
+      await Promise.all(queue);
+
+      return;
+    }
+
+    // Fallback to the SDP munging with local renegotiation way of limiting
+    // the bandwidth.
+    connection.createOffer()
+      .then((offer) => connection.setLocalDescription(offer))
+      .then(() => {
+        const sdp = parse(connection.remoteDescription.sdp);
+
+        for (const m of sdp.media) {
+          if (typeof audio !== 'undefined' && m.type === 'audio') {
+            if (audio === 0) {
+              m.bandwidth = [];
+            } else {
+              m.bandwidth = [
+                {
+                  type  : 'TIAS',
+                  limit : Math.ceil(audio * 1024),
+                },
+              ];
+            }
+          }
+          if (typeof video !== 'undefined' && m.type === 'video') {
+            if (video === 0) {
+              m.bandwidth = [];
+            } else {
+              m.bandwidth = [
+                {
+                  type  : 'TIAS',
+                  limit : Math.ceil(video * 1024),
+                },
+              ];
+            }
+          }
+        }
+
+        const desc = {
+          type : connection.remoteDescription.type,
+          sdp  : write(sdp),
+        };
+
+        return connection.setRemoteDescription(desc);
+      })
+      .catch((e) => {
+        warn('Applying bandwidth restriction to setRemoteDescription error: %o', e);
+      });
+
+    await Promise.all(queue);
+  }
+
+  async function applyConstraints({ audio, video }) {
+    if (!connection) return;
+
+    const queue = [];
+
+    if (connection.getSenders && window.MediaStreamTrack.prototype.applyConstraints) {
+      connection.getSenders().forEach((sender) => {
+        if (audio && sender.track && sender.track.kind === 'audio') {
+          queue.push(
+            sender.track.applyConstraints(audio)
+              .catch((e) => {
+                warn('Apply audio constraints error: %o', e);
+              }),
+          );
+        }
+
+        if (video && sender.track && sender.track.kind === 'video') {
+          queue.push(
+            sender.track.applyConstraints(video)
+              .catch((e) => {
+                warn('Apply video constraints error: %o', e);
+              }),
+          );
+        }
+      });
+    }
+
+    await Promise.all(queue);
+  }
+
+  async function createDataChannel(options?: RTCDataChannelInit) {
+    let datachannel;
+
+    if (!connection) return datachannel;
+
+    // createDataChannel will failed if DTLS is disabled.
+    datachannel = connection.createDataChannel('data', options);
+
+    await renegotiate();
+
+    return datachannel;
   }
 
   return {
     ...events,
+
     get connection() {
       return connection;
     },
+
     connect,
     close,
+
     renegotiate,
+
     mute,
     unmute,
+
     hold,
     unhold,
+
+    getLocalStream,
+    getRemoteStream,
+
+    addLocalStream,
+    removeLocalStream,
+    replaceLocalStream,
+
+    adjustBandWith,
+    applyConstraints,
+
+    createDataChannel,
   };
 }
+
+export type Channel = ReturnType<typeof createChannel>;

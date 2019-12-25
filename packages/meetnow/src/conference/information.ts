@@ -10,12 +10,6 @@ import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
 
-export interface InformationParts<T extends keyof ConferenceInformation, P> {
-  key: T;
-  part: P;
-  builder: (data: ConferenceInformation[T], context: Context) => P;
-}
-
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents();
   const {

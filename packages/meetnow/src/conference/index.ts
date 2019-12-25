@@ -203,6 +203,10 @@ export function createConference(config: ConferenceConfigs) {
   }
 
   async function end() {
+    if (!connected) {
+      console.warn('already disconnected');
+      return;
+    }
     await api
       .request('end')
       .data({ 'conference-url': url })
@@ -253,6 +257,12 @@ export function createConference(config: ConferenceConfigs) {
     },
     get users() {
       return information && information.users;
+    },
+    get rtmp() {
+      return information && information.rtmp;
+    },
+    get record() {
+      return information && information.record;
     },
 
     join,

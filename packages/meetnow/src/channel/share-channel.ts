@@ -12,11 +12,13 @@ export function createShareChannel(config: MediaChannelConfigs) {
 
   const channel = createChannel({
     sendOffer : async (offer) => {
-      let sdp: string;
+      let { sdp } = offer;
+
+      const apiName = mediaVersion ? 'renegShare' : 'joinShare';
       const response = await api
-        .request(mediaVersion ? 'renegShare' : 'joinShare')
+        .request(apiName)
         .data({
-          sdp             : offer.sdp,
+          sdp,
           'media-version' : mediaVersion,
         })
         .send();

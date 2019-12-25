@@ -65,19 +65,19 @@ export function createEvents() {
   return instance = {
     on(event: string | string[], fn: Function) {
       on(event, fn);
-      return instance;
+      return instance as Events;
     },
     off(event: string | string[], fn?: Function) {
       off(event, fn);
-      return instance;
+      return instance as Events;
     },
     once(event: string | string[], fn: Function) {
       once(event, fn);
-      return instance;
+      return instance as Events;
     },
     emit(event: string, ...args: any[]) {
       emit(event, ...args);
-      return instance;
+      return instance as Events;
     },
   };
 }
