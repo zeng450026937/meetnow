@@ -1,6 +1,9 @@
+import debug from 'debug';
 import { Api, createApi } from '../api';
 import { createWorker, Worker } from '../utils/worker';
 import { createConference } from '../conference';
+
+const log = debug('UA');
 
 export interface ConnectOptions {
   number: string;
@@ -8,22 +11,33 @@ export interface ConnectOptions {
   displayName?: string;
 }
 
-export interface UAConfigs {}
+export interface UAConfigs {
+  username?: string;
+  password?: string;
+  language?: string;
+}
 
-export function createUA() {
-  let api: Api;
-  let worker: Worker;
-  let ua;
-
-  const anonymous: boolean = true;
+export function createUA(config?: UAConfigs) {
+  const { username, password } = config || {};
+  const anonymous: boolean = !!username && !!password;
+  const api = createApi({ baseURL: '/webapp/' });
+  let worker: Worker | undefined;
   let token: string | undefined;
   let partyId: string | undefined;
-  let url: string | undefined;
+  let ua;
+
+  // setup token for all api request
+  api.interceptors.request.use((config) => {
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.token = token;
+    }
+    return config;
+  });
 
   async function auth() {
     if (!partyId) {
-      console.error('internal error');
-      debugger;
+      throw new Error('Authorization Error');
     }
 
     const response = await api
@@ -34,38 +48,39 @@ export function createUA() {
     ({ token } = response.data.data);
 
     if (!token) {
-      console.error('internal error');
-      debugger;
+      throw new Error('Authorization Error');
     }
   }
 
-  function setup(): UA {
-    // create api
-    api = createApi({ baseURL: '/webapp/' });
+  function start() {
+    log('start()');
 
-    // setup token for all api request
-    api.interceptors.request.use((config) => {
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers.token = token;
-      }
-      return config;
-    });
+    if (!worker) {
+      // creat auth() worker
+      worker = createWorker({
+        interval : 5 * 60 * 1000,
+        work     : async () => {
+          await auth();
+        },
+      });
+    }
 
-    // creat auth() worker
-    worker = createWorker({
-      interval : 5 * 60 * 1000,
-      work     : () => auth(),
-    });
+    worker.start(false);
+  }
 
-    return ua;
+  function stop() {
+    log('stop()');
+
+    if (worker) {
+      worker.stop();
+    }
   }
 
   async function connect(options: ConnectOptions) {
     const {
       number,
       password,
-      displayName = 'Yealink Meeting',
+      displayName,
     } = options;
 
     const response = await api
@@ -73,16 +88,13 @@ export function createUA() {
       .data({ 'long-number': number })
       .send();
 
-    const { data } = response;
-
-    // TODO
-    // check bizCode
-
-    ({ 'party-id': partyId, url } = data.data);
+    const { data } = response.data;
+    let url;
+    ({ 'party-id': partyId, url } = data);
 
     await auth();
 
-    worker.start();
+    worker.start(false);
 
     const conference = createConference({ api });
 
@@ -92,7 +104,9 @@ export function createUA() {
   }
 
   return ua = {
-    setup,
+    start,
+    stop,
+
     connect,
   };
 }

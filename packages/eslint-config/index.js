@@ -30,7 +30,8 @@ module.exports = {
     'no-iterator'           : 0,
     'no-restricted-syntax'  : 0,
     'no-continue'           : 0,
-    // 'no-unused-vars': 1,
+    'no-use-before-define'  : 1,
+    'no-unused-vars'        : 0,
     'max-len'               : [2, 120,
       {
         tabWidth               : 2,

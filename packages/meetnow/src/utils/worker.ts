@@ -25,6 +25,8 @@ export function createWorker(config: WorkerConfig) {
   async function start(immediate: boolean = true) {
     log('start()');
 
+    if (!stoped) return;
+
     stoped = false;
 
     if (work && immediate) {
@@ -43,6 +45,8 @@ export function createWorker(config: WorkerConfig) {
 
   function stop() {
     log('stop()');
+
+    if (stoped) return;
 
     if (timeout) {
       clearTimeout(timeout);

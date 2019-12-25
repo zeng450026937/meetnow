@@ -1,3 +1,4 @@
+import debug from 'debug';
 import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { RequestResult } from '../api/request';
@@ -8,6 +9,8 @@ import { createInformation, Information } from './information';
 import { createContext } from './context';
 import { createEvents } from '../events';
 
+const log = debug('Conference');
+
 export interface JoinOptions {
   number: string;
   password?: string;
@@ -17,10 +20,13 @@ export interface JoinOptions {
 
 export interface ConferenceConfigs {
   api: Api;
+  url?: string;
+  password?: string;
 }
 
 export function createConference(config: ConferenceConfigs) {
   const { api } = config;
+  let { url, password } = config;
   const events = createEvents();
   let keepalive: KeepAlive | undefined;
   let polling: Polling | undefined;
@@ -29,7 +35,6 @@ export function createConference(config: ConferenceConfigs) {
   let conference;
 
   let connected: boolean = false;
-  let url: string | undefined;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
 
@@ -42,6 +47,8 @@ export function createConference(config: ConferenceConfigs) {
   // 5. create keepalive worker
   // 6. create polling worker
   async function join(options: JoinOptions) {
+    log('join()');
+
     if (connected) {
       console.warn('already connected');
       return;
@@ -53,6 +60,18 @@ export function createConference(config: ConferenceConfigs) {
 
     const hasMedia = true;
 
+    if (!url && !options.url && options.number) {
+      response = await api
+        .request('getURL')
+        .data({ 'long-number': options.number })
+        .send();
+
+      ({ data } = response);
+
+      // extract url
+      ({ url } = data.data);
+    }
+
     // step 1
     // join focus
     response = await api
@@ -60,8 +79,8 @@ export function createConference(config: ConferenceConfigs) {
       .data({
         // 'conference-uuid'     : null,
         // 'conference-user-id'  : null,
-        'conference-url'      : options.url,
-        'conference-pwd'      : options.password,
+        'conference-url'      : options.url || url,
+        'conference-pwd'      : options.password || password,
         'user-agent'          : 'Yealink Meeting WebRTC',
         'client-url'          : options.url.replace(/\w+@/g, 'webrtc@'),
         'client-display-text' : options.displayName || 'Yealink Meeting',
@@ -76,7 +95,9 @@ export function createConference(config: ConferenceConfigs) {
 
     ({ data } = response);
 
-    ({ url } = options);
+    url = options.url || url;
+    password = options.password || password;
+
     ({
       'conference-user-id': userId,
       'conference-uuid': uuid,
