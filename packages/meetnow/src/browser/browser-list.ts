@@ -16,6 +16,7 @@ export function browser(name: string, version: string) {
     version,
     firefox : name === 'firefox',
     chrome  : name === 'chrome' || name === 'chromium',
+    wechet  : name === 'wechat',
   };
 }
 

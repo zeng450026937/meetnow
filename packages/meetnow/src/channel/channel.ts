@@ -1,10 +1,10 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { getUserMedia } from '../media/get-user-media';
 import { closeMediaStream } from '../media/close-media-stream';
 import { parse, write } from '../sdp-transform';
 
-const warn = (...args: any[]) => {};
-const debug = warn;
+const log = debug('Channel');
 
 export interface ChannelConfigs {
   sendOffer: (offer: { sdp: string }) => Promise<{
@@ -575,12 +575,10 @@ export function createChannel(config: ChannelConfigs) {
                              || renegotiation;
 
       if (renegotiationNeeded) {
-        this.removeLocalStream();
-        this.addLocalStream(stream);
+        removeLocalStream();
+        addLocalStream(stream);
 
-        queue.push(new Promise((resolve) => {
-          this.session.renegotiate({}, resolve);
-        }));
+        queue.push(renegotiate());
       } else {
         connection.getSenders().forEach((sender) => {
           if (!sender.track) return;
@@ -596,7 +594,7 @@ export function createChannel(config: ChannelConfigs) {
             queue.push(
               sender.replaceTrack(audioTrack)
                 .catch((e) => {
-                  warn('Replace audio track error: %o', e);
+                  log('Replace audio track error: %o', e);
                 }),
             );
           }
@@ -604,7 +602,7 @@ export function createChannel(config: ChannelConfigs) {
             queue.push(
               sender.replaceTrack(videoTrack)
                 .catch((e) => {
-                  warn('Replace video track error: %o', e);
+                  log('Replace video track error: %o', e);
                 }),
             );
           }
@@ -670,7 +668,7 @@ export function createChannel(config: ChannelConfigs) {
           queue.push(
             sender.setParameters(parameters)
               .catch((e) => {
-                warn('Apply audio parameters error: %o', e);
+                log('Apply audio parameters error: %o', e);
               }),
           );
         }
@@ -685,7 +683,7 @@ export function createChannel(config: ChannelConfigs) {
           queue.push(
             sender.setParameters(parameters)
               .catch((e) => {
-                warn('Apply video parameters error: %o', e);
+                log('Apply video parameters error: %o', e);
               }),
           );
         }
@@ -738,7 +736,7 @@ export function createChannel(config: ChannelConfigs) {
         return connection.setRemoteDescription(desc);
       })
       .catch((e) => {
-        warn('Applying bandwidth restriction to setRemoteDescription error: %o', e);
+        log('Applying bandwidth restriction to setRemoteDescription error: %o', e);
       });
 
     await Promise.all(queue);
@@ -755,7 +753,7 @@ export function createChannel(config: ChannelConfigs) {
           queue.push(
             sender.track.applyConstraints(audio)
               .catch((e) => {
-                warn('Apply audio constraints error: %o', e);
+                log('Apply audio constraints error: %o', e);
               }),
           );
         }
@@ -764,7 +762,7 @@ export function createChannel(config: ChannelConfigs) {
           queue.push(
             sender.track.applyConstraints(video)
               .catch((e) => {
-                warn('Apply video constraints error: %o', e);
+                log('Apply video constraints error: %o', e);
               }),
           );
         }

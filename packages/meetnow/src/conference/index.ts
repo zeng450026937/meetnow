@@ -70,6 +70,7 @@ export function createConference(config: ConferenceConfigs) {
         'pure-ctrl-channel'   : !hasMedia,
         // if join with media
         'is-webrtc'           : hasMedia,
+        'is-wechat'           : false,
       })
       .send();
 

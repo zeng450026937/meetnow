@@ -1,4 +1,7 @@
+import debug from 'debug';
 import { Api } from '../api';
+
+const log = debug('Record');
 
 export type RecordOperationType = 'start'| 'stop'| 'pause'| 'resume';
 
@@ -18,15 +21,23 @@ export function createRecordCtrl(api: Api) {
   }
 
   function start() {
+    log('start()');
+
     return operation(RecordOperationTypes.START);
   }
   function stop() {
+    log('stop()');
+
     return operation(RecordOperationTypes.STOP);
   }
   function pause() {
+    log('pause()');
+
     return operation(RecordOperationTypes.PAUSE);
   }
   function resume() {
+    log('resume()');
+
     return operation(RecordOperationTypes.RESUME);
   }
 

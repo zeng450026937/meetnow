@@ -1,9 +1,12 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { ConferenceUser, ConferenceUsers } from './conference-info';
 import { createUser, User } from './user';
 import { createReactive } from '../reactive';
 import { createLobbyCtrl } from './lobby-ctrl';
 import { Context } from './context';
+
+const log = debug('Users');
 
 export interface InviteOptions {
   uid: string[];
@@ -137,6 +140,8 @@ export function createUsers(data: ConferenceUsers, context: Context) {
 
 
   async function invite(option: Partial<InviteOptions>) {
+    log('invite');
+
     await api
       .request('inviteUser')
       .data({
@@ -146,6 +151,8 @@ export function createUsers(data: ConferenceUsers, context: Context) {
       });
   }
   async function kick(entity: string) {
+    log('kick');
+
     await api
       .request('deleteUser')
       .data({ 'user-entity': entity })
@@ -153,11 +160,15 @@ export function createUsers(data: ConferenceUsers, context: Context) {
   }
 
   async function mute() {
+    log('mute');
+
     await api
       .request('muteAll')
       .send();
   }
   async function unmute() {
+    log('unmute');
+
     await api
       .request('unmuteAll')
       .send();

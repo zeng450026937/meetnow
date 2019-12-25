@@ -1,7 +1,10 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { ConferenceDescription } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
+
+const log = debug('Description');
 
 export interface LockOptions {
   admissionPolicy: ConferenceDescription['admission-policy'];
@@ -29,12 +32,16 @@ export function createDescription(data: ConferenceDescription, context: Context)
   }
 
   function getLock() {
+    log('getLock()');
+
     return {
       admissionPolicy : data['admission-policy'],
       attendeeByPass  : data['attendee-by-pass'],
     };
   }
   async function setLock(options: LockOptions) {
+    log('setLock()');
+
     const { admissionPolicy, attendeeByPass = true } = options;
 
     await api
@@ -47,12 +54,16 @@ export function createDescription(data: ConferenceDescription, context: Context)
   }
 
   async function lock(attendeeByPass: boolean = false, presenterOnly: boolean = true) {
+    log('lock()');
+
     await setLock({
       admissionPolicy : presenterOnly ? 'closedAuthenticated' : 'openAuthenticated',
       attendeeByPass,
     });
   }
   async function unlock() {
+    log('unlock()');
+
     await setLock({
       admissionPolicy : 'anonymous',
     });

@@ -1,4 +1,7 @@
+import debug from 'debug';
 import { Api } from '../api';
+
+const log = debug('Camera');
 
 export type ActionType =
   | 'PanLeft'
@@ -23,6 +26,8 @@ export enum ActionTypes {
 
 export function createCameraCtrl(api: Api, entity: string) {
   async function action(type: ActionType) {
+    log('action()');
+
     await api
       .request('setFecc')
       .data({
@@ -32,27 +37,43 @@ export function createCameraCtrl(api: Api, entity: string) {
       .send();
   }
   function left() {
+    log('left()');
+
     return action(ActionTypes.LEFT);
   }
   function right() {
+    log('right()');
+
     return action(ActionTypes.RIGHT);
   }
   function down() {
+    log('down()');
+
     return action(ActionTypes.DOWN);
   }
   function up() {
+    log('up()');
+
     return action(ActionTypes.UP);
   }
   function zoomout() {
+    log('zoomout()');
+
     return action(ActionTypes.ZOOMOUT);
   }
   function zoomin() {
+    log('zoomin()');
+
     return action(ActionTypes.ZOOMIN);
   }
   function focusout() {
+    log('focusout()');
+
     return action(ActionTypes.FOCUSOUT);
   }
   function focusin() {
+    log('focusin()');
+
     return action(ActionTypes.FOCUSIN);
   }
 

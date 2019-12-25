@@ -1,4 +1,7 @@
+import debug from 'debug';
 import { isFunction } from '.';
+
+const log = debug('Worker');
 
 export interface WorkerConfig {
   work: (times: number) => Promise<void> | void;
@@ -20,6 +23,8 @@ export function createWorker(config: WorkerConfig) {
   } = config;
 
   async function start(immediate: boolean = true) {
+    log('start()');
+
     stoped = false;
 
     if (work && immediate) {
@@ -37,6 +42,8 @@ export function createWorker(config: WorkerConfig) {
   }
 
   function stop() {
+    log('stop()');
+
     if (timeout) {
       clearTimeout(timeout);
       timeout = null;

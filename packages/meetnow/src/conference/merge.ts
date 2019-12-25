@@ -1,6 +1,9 @@
+import debug from 'debug';
 import {
   hasOwn, isArray, isDef, isObject,
 } from '../utils';
+
+const log = debug('Item');
 
 export type ItemValue = string | number | boolean | Item | null;
 
@@ -23,6 +26,8 @@ export function isPartialableItem(item: ItemValue | ItemValue[]): item is Partia
 }
 
 export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[] {
+  log('mergelist()');
+
   for (const item of items) {
     if (!isPartialableItem(item)) {
       return items;
@@ -32,8 +37,8 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     const key = entity || id;
 
     if (!key) {
-      console.warn('internal error');
-      debugger;
+      log('Error: missing item identity(entity or id).');
+      continue;
     }
 
     const index = (rhys as PartialableItem[])
@@ -42,8 +47,8 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     // not find
     if (index === -1) {
       if (state === 'deleted') {
-        console.warn('internal error');
-        debugger;
+        log('Error: can not delete item not exsit.');
+        continue;
       }
       rhys.push(item);
       break;
@@ -65,6 +70,8 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
 }
 
 export function mergeItem<T extends Item>(rhys: T, item: T): T | null {
+  log('merge()');
+
   if (rhys === item) {
     return rhys;
   }
@@ -81,14 +88,16 @@ export function mergeItem<T extends Item>(rhys: T, item: T): T | null {
     return null;
   }
   if (state !== 'partial') {
-    console.warn('internal error');
-    debugger;
+    log(`Error: unknown item state. ${ state }`);
+    log('use merge policy as "partial"');
   }
 
   for (const key in item) {
     if (hasOwn(item, key)) {
       const value = item[key];
       const current = rhys[key];
+
+      log('item key: %s value: %o -> %o', key, value, current);
 
       (rhys as Item)[key] = isArray(value)
         ? mergeItemList(current as ItemValue[], value)

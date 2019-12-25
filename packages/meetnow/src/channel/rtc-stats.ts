@@ -18,7 +18,6 @@ export function createRTCStats() {
   let outbound = { direction: 'outbound' } as ParsedStats;
   let archives = [] as ParsedStatsReport[];
   const maxArchiveSize = MAX_ARCHIVE_SIZE;
-  let stats;
 
   function clear() {
     quality = -1;
@@ -311,7 +310,7 @@ export function createRTCStats() {
     return archives[index];
   }
 
-  return stats = {
+  return {
     get quality() {
       return quality;
     },

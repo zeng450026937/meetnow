@@ -1,3 +1,4 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { createDescription } from './description';
 import { createState } from './state';
@@ -9,6 +10,8 @@ import { mergeItem } from './merge';
 import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
+
+const log = debug('Information');
 
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents();
@@ -32,28 +35,27 @@ export function createInformation(data: ConferenceInformation, context: Context)
   let information;
 
   function update(val: ConferenceInformation) {
+    log('update()');
+
     const { version } = data;
     const { version: newVersion, state: newState } = val;
 
     if (!newVersion) {
-      console.warn('internal error');
-      debugger;
+      log('Error: receive information without version.');
       return;
     }
     if (newVersion <= version) {
-      console.warn('internal error');
-      debugger;
+      log('Error: receive information with invalid version.');
       return;
     }
     if (newVersion - version > 1) {
-      console.warn('internal error');
-      debugger;
+      log('information version jumped.');
+      // TODO
+      // get full information
       return;
     }
     if (newState === 'deleted') {
-      // can not delete root information
-      console.warn('internal error');
-      debugger;
+      log('Error: can not delete root information.');
       return;
     }
 

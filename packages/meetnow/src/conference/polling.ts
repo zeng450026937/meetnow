@@ -1,8 +1,12 @@
 import { AxiosResponse } from 'axios';
+import debug from 'debug';
 import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
 import { ApiError } from '../api/api-error';
+import { isDef } from '../utils';
+
+const log = debug('Polling');
 
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;
@@ -23,6 +27,8 @@ function computeTimeout(upperBound: number) {
 }
 
 function computeNextTimeout(attempts: number) {
+  log(`computeNextTimeout() attempts: ${ attempts }`);
+
   /* eslint-disable-next-line no-restricted-properties */
   let k = Math.floor((Math.random() * Math.pow(2, attempts)) + 1);
 
@@ -49,10 +55,8 @@ export function createPolling(config: PollingConfigs) {
 
     const { version: newVersion, category, body } = data;
 
-    if (newVersion == null) return;
-
-    if (newVersion <= version) {
-      console.warn(`illegal version: ${ newVersion }, current version: ${ version }`);
+    if (!isDef(newVersion) || newVersion <= version) {
+      log(`illegal version: ${ newVersion }, current version: ${ version }.`);
       return;
     }
 
@@ -74,7 +78,7 @@ export function createPolling(config: PollingConfigs) {
         break;
 
       default:
-        console.warn(`unsupported category: ${ category }`);
+        log(`unsupported category: ${ category }`);
         break;
     }
 
@@ -82,6 +86,8 @@ export function createPolling(config: PollingConfigs) {
   }
 
   async function poll() {
+    log('poll()');
+
     let response: AxiosResponse<RequestResult>;
     let error: ApiError;
     let canceled: boolean = false;
@@ -119,8 +125,7 @@ export function createPolling(config: PollingConfigs) {
     try {
       analyze(data);
     } catch (error) {
-      console.error('internal error', error);
-      debugger;
+      log('Error: failed to process data.');
     }
 
     attempts = 0;

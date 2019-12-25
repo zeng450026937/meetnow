@@ -124,6 +124,7 @@ export interface ApiDataMap {
     'client-info'?: string;
     'pure-ctrl-channel': boolean;
     'is-webrtc'?: boolean;
+    'is-wechat'?: boolean;
   };
   'joinMedia': CtrlApiData & {
     'sdp': string;

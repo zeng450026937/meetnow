@@ -1,7 +1,10 @@
 import { AxiosResponse } from 'axios';
+import debug from 'debug';
 import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
+
+const log = debug('Keepalive');
 
 export const DEFAULT_INTERVAL = 30 * 1000;
 export const MIN_INTERVAL = 2;
@@ -18,6 +21,8 @@ function computeTimeout(upperBound: number) {
 }
 
 function computeNextTimeout(attempts: number) {
+  log(`computeNextTimeout() attempts: ${ attempts }`);
+
   /* eslint-disable-next-line no-restricted-properties */
   let k = Math.floor((Math.random() * Math.pow(2, attempts)) + 1);
 
@@ -39,6 +44,8 @@ export function createKeepAlive(config: KeepAliveConfigs) {
   let attempts: number = 0;
 
   async function keepalive() {
+    log('keepalive()');
+
     let response: AxiosResponse<RequestResult>;
     let error;
 

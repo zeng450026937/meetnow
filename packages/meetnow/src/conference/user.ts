@@ -1,3 +1,4 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import {
   ConferenceUser, MediaFilter, UserEndpoint, UserMedia,
@@ -5,6 +6,8 @@ import {
 import { createReactive } from '../reactive';
 import { Context } from './context';
 import { createCameraCtrl } from './camera-ctrl';
+
+const log = debug('User');
 
 export interface FilterOptions {
   label: UserMedia['label']
@@ -147,6 +150,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   // user ctrl
 
   async function setFilter(options: FilterOptions) {
+    log('setFilter()');
+
     const { label, enable } = options;
     const endpoint = user.getEndpoint('audio-video');
     const media = user.getMedia(label);
@@ -163,13 +168,19 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function setAudioFilter(enable: boolean) {
+    log('setAudioFilter()');
+
     await setFilter({ label: 'main-audio', enable });
   }
   async function setVideoFilter(enable: boolean) {
+    log('setVideoFilter()');
+
     await setFilter({ label: 'main-video', enable });
   }
 
   async function setDisplayText(displayText: string) {
+    log('setDisplayText()');
+
     await api
       .request('setUserDisplayText')
       .data({
@@ -180,6 +191,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function setRole(role: 'attendee' | 'presenter') {
+    log('setRole()');
+
     await api
       .request('setUserRole')
       .data({
@@ -190,6 +203,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function setFocus(enable: boolean = true) {
+    log('setFocus()');
+
     await api
       .request('setFocusVideo')
       .data({
@@ -199,6 +214,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function getStats() {
+    log('getStats()');
+
     await api
       .request('getStats')
       .data({ 'user-entity-list': [entity] })
@@ -206,6 +223,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function kick() {
+    log('kick()');
+
     await api
       .request('deleteUser')
       .data({ 'user-entity': entity })
@@ -213,18 +232,24 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function hold() {
+    log('hold()');
+
     await api
       .request('waitLobbyUser')
       .data({ 'user-entity': entity })
       .send();
   }
   async function unhold() {
+    log('unhold()');
+
     await api
       .request('acceptLobbyUser')
       .data({ 'user-entity': entity })
       .send();
   }
   async function allow() {
+    log('allow()');
+
     await api
       .request('acceptLobbyUser')
       .data({ 'user-entity': entity })
@@ -232,9 +257,13 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   async function accept() {
+    log('accept()');
+
     await setAudioFilter(true);
   }
   async function reject() {
+    log('reject()');
+
     await setAudioFilter(false);
   }
 

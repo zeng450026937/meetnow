@@ -1,4 +1,7 @@
+import debug from 'debug';
 import { isArray } from '../utils';
+
+const log = debug('Events');
 
 export function createEvents() {
   let instance;
@@ -49,6 +52,8 @@ export function createEvents() {
   }
 
   function emit(event: string, ...args: any[]) {
+    log(`emit() "${ event }"`);
+
     const callbacks = events[event];
 
     if (!callbacks) return;

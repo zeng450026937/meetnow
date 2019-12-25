@@ -1,4 +1,7 @@
+import debug from 'debug';
 import { Api } from '../api';
+
+const log = debug('Danmaku');
 
 export type DanmakuType = 'dynamic'| 'static';
 export type DanmakuPosition = 'top'| 'medium'| 'bottom';
@@ -32,6 +35,8 @@ export function createDanmakuCtrl(api: Api) {
   let lastConfig: DanmakuConfigs = DANMAKU_CONFIGS;
 
   async function setDanmaku(config: Partial<DanmakuConfigs>) {
+    log('setDanmaku()');
+
     const finalConfig = {
       ...lastConfig,
       config,
@@ -56,6 +61,8 @@ export function createDanmakuCtrl(api: Api) {
   }
 
   async function sendDanmaku(msg: string, options?: Partial<DanmakuOptions>) {
+    log('sendDanmaku()');
+
     const {
       attendee = true,
       castviewer = true,

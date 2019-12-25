@@ -1,6 +1,9 @@
 import axios, {
   AxiosInstance, AxiosPromise, AxiosRequestConfig, CancelTokenSource,
 } from 'axios';
+import debug from 'debug';
+
+const log = debug('Request');
 
 export const { isCancel } = axios;
 
@@ -52,11 +55,15 @@ export function createRequest<
     return request;
   }
   function send(): AxiosPromise<RequestResult> {
+    log('send()');
+
     source = axios.CancelToken.source();
     config.cancelToken = source.token;
     return delegate(config);
   }
   function cancel(reason: string = 'canceled') {
+    log('cancel()');
+
     return source.cancel(reason);
   }
 
