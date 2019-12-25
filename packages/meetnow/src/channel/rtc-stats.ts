@@ -1,7 +1,6 @@
 const MAX_ARCHIVE_SIZE = 10;
 
 export interface ParsedStats {
-  direction: 'inbound' | 'outbound';
   audio?: any;
   video?: any;
 }
@@ -14,8 +13,8 @@ export interface ParsedStatsReport {
 
 export function createRTCStats() {
   let quality: number = -1;
-  let inbound = { direction: 'inbound' } as ParsedStats;
-  let outbound = { direction: 'outbound' } as ParsedStats;
+  let inbound = {} as ParsedStats;
+  let outbound = {} as ParsedStats;
   let archives = [] as ParsedStatsReport[];
   const maxArchiveSize = MAX_ARCHIVE_SIZE;
 
@@ -27,8 +26,8 @@ export function createRTCStats() {
   }
 
   function update(report: RTCStatsReport) {
-    const latestInbound = { direction: 'inbound' } as ParsedStats;
-    const latestOutbound = { direction: 'outbound' } as ParsedStats;
+    const latestInbound = {} as ParsedStats;
+    const latestOutbound = {} as ParsedStats;
     let isLegacyStats = false;
 
     report.forEach((stats) => {
