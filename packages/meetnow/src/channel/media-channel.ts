@@ -1,9 +1,9 @@
+import debug from 'debug';
 import { Api } from '../api';
 import { createChannel } from './channel';
 import { createModifier } from './sdp-modifier';
-import { getBrowser } from '../browser';
 
-const browser = getBrowser();
+const log = debug('Meetnow:MediaChannel');
 
 export interface MediaChannelConfigs {
   api: Api;
@@ -14,6 +14,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
   const { api, type = 'main' } = config;
   let mediaVersion: number;
   let callId: string;
+  let icetimmeout;
 
   const channel = createChannel({
     sendOffer : async (offer) => {
@@ -40,6 +41,8 @@ export function createMediaChannel(config: MediaChannelConfigs) {
         'mcu-callid': callId,
       } = response.data.data);
 
+      log('MCU call-id: %s', callId);
+
       return { sdp };
     },
   });
@@ -51,6 +54,22 @@ export function createMediaChannel(config: MediaChannelConfigs) {
       .prefer('h264')
       .build(),
   );
+
+  channel.on('icecandidate', (data) => {
+    const { candidate, ready } = data;
+
+    if (icetimmeout) {
+      clearTimeout(icetimmeout);
+      icetimmeout = null;
+    }
+
+    if (candidate) {
+      icetimmeout = setTimeout(() => {
+        log('ICE gathering timeout in 3 seconds');
+        ready();
+      }, 3000);
+    }
+  });
 
   return {
     ...channel,
