@@ -35,10 +35,22 @@ export function createConference(config: ConferenceConfigs) {
   let information: Information | undefined;
   let interceptor: number | undefined;
   let conference;
+  let user; // current user
 
   let connected: boolean = false;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
+
+  function getCurrentUser() {
+    if (user) return;
+
+    // try to get current user
+    user = information.users.getCurrent();
+
+    if (user) {
+      events.emit('user', user);
+    }
+  }
 
   // Sequence of join conference
   //
@@ -151,11 +163,18 @@ export function createConference(config: ConferenceConfigs) {
     // create information
     information = createInformation(info, context);
 
+    getCurrentUser();
+
     // step 3
     // get pull im messages
-    response = await api
-      .request('pullMessage')
-      .send();
+    // fail if we don't have permission yet, eg. in lobby
+    try {
+      response = await api
+        .request('pullMessage')
+        .send();
+    } catch (error) {
+      log('connect message failed: %o', error);
+    }
 
 
     connected = true;
@@ -179,6 +198,8 @@ export function createConference(config: ConferenceConfigs) {
         information.update(data);
 
         events.emit('information', information);
+
+        getCurrentUser();
       },
 
       onMessage : (data: any) => {
@@ -275,8 +296,12 @@ export function createConference(config: ConferenceConfigs) {
     get uuid() {
       return uuid;
     },
-    get useId() {
-      return userId;
+    // in conference info
+    // user entity is string type
+    // while we may receive number type
+    // change to string type
+    get userId() {
+      return `${ userId }`;
     },
 
     get information() {

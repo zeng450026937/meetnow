@@ -90,7 +90,7 @@ export function createUsers(data: ConferenceUsers, context: Context) {
   }
 
   function getUserList(filter?: (user?: User) => boolean) {
-    return userList.filter(filter || (() => true));
+    return filter ? userList.filter(filter) : userList;
   }
 
   function getUser(entity: string) {
@@ -100,6 +100,9 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     return userMap.has(entity);
   }
 
+  function getCurrent() {
+    return userList.find((user) => user.isCurrent());
+  }
   function getAttendee() {
     return userList.filter((user) => user.isAttendee());
   }
@@ -197,6 +200,7 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     getUser,
     hasUser,
 
+    getCurrent,
     getAttendee,
     getPresenter,
     getCastviewer,

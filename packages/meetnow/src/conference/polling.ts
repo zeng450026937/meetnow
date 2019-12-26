@@ -74,7 +74,7 @@ export function createPolling(config: PollingConfigs) {
         break;
 
       case 'quit-conference':
-        config.onMessage && config.onQuit(body);
+        config.onQuit && config.onQuit(body);
         break;
 
       default:

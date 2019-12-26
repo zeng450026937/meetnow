@@ -170,7 +170,7 @@ export function createModifier() {
             preferCodec = vp8Payloads;
           }
 
-          if (!preferCodec.size && !unsupportCodec.size) {
+          if (!preferCodec.size || !unsupportCodec.size) {
             let payloads: (string | number)[] = String(m.payloads).split(' ');
 
             payloads = payloads.filter((p) => { return !preferCodec.has(Number(p)); });
