@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { isFunction } from '.';
 
-const log = debug('Worker');
+const log = debug('Meetnow:Worker');
 
 export interface WorkerConfig {
   work: (times: number) => Promise<void> | void;
@@ -10,8 +10,8 @@ export interface WorkerConfig {
 }
 
 export function createWorker(config: WorkerConfig) {
-  let stoped: boolean = true;
   let running: boolean = false;
+  let working: boolean = false;
   let interval: number = 0;
   let times: number = 0;
   let timeout;
@@ -22,43 +22,54 @@ export function createWorker(config: WorkerConfig) {
     cancel,
   } = config;
 
-  async function start(immediate: boolean = true) {
-    log('start()');
-
-    if (!stoped) return;
-
-    stoped = false;
-
+  async function dowork(immediate: boolean = true) {
     if (work && immediate) {
-      running = true;
+      working = true;
       await work(times++);
-      running = false;
+      working = false;
     }
 
-    if (stoped) return;
+    if (!running) return;
 
     interval = isFunction(nextInterval) ? nextInterval() : nextInterval;
 
     // schedule next
-    timeout = setTimeout(start, interval);
+    timeout = setTimeout(dowork, interval);
+  }
+
+  async function start(immediate: boolean = true) {
+    log('start()');
+
+    if (running) return;
+
+    running = true;
+
+    await dowork(immediate);
   }
 
   function stop() {
     log('stop()');
 
-    if (stoped) return;
+    if (!running) return;
 
     if (timeout) {
       clearTimeout(timeout);
       timeout = null;
     }
-    if (running) {
+    if (working) {
       cancel && cancel();
     }
-    stoped = true;
+
+    running = false;
   }
 
   return {
+    config,
+
+    get running() {
+      return running;
+    },
+
     start,
     stop,
   };

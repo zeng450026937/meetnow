@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 
-const log = debug('Lobby');
+const log = debug('Meetnow:Information:Lobby');
 
 export function createLobbyCtrl(api: Api) {
   async function reject(entity?: string) {

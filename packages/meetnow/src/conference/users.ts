@@ -6,7 +6,7 @@ import { createReactive } from '../reactive';
 import { createLobbyCtrl } from './lobby-ctrl';
 import { Context } from './context';
 
-const log = debug('Users');
+const log = debug('Meetnow:Information:Users');
 
 export interface InviteOptions {
   uid: string[];

@@ -3,7 +3,7 @@ import {
   hasOwn, isArray, isDef, isObject,
 } from '../utils';
 
-const log = debug('Item');
+const log = debug('Meetnow:Information:Item');
 
 export type ItemValue = string | number | boolean | Item | null;
 
@@ -44,12 +44,15 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     const index = (rhys as PartialableItem[])
       .findIndex((it) => it.entity === key || it.id === key);
 
+    log('item identity: %o', key);
+
     // not find
     if (index === -1) {
       if (state === 'deleted') {
         log('Error: can not delete item not exsit.');
         continue;
       }
+      log('item added');
       rhys.push(item);
       break;
     }
@@ -57,6 +60,7 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     // finded
     // wanna delete
     if (state === 'deleted') {
+      log('item deleted');
       rhys.splice(index, 1);
       break;
     }
@@ -97,7 +101,7 @@ export function mergeItem<T extends Item>(rhys: T, item: T): T | null {
       const value = item[key];
       const current = rhys[key];
 
-      log('item key: %s value: %o -> %o', key, value, current);
+      log('item key: %s value: %o -> %o', key, current, value);
 
       (rhys as Item)[key] = isArray(value)
         ? mergeItemList(current as ItemValue[], value)

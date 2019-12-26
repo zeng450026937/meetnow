@@ -11,12 +11,12 @@ import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
 
-const log = debug('Information');
+const log = debug('Meetnow:Information');
 
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents();
   const {
-    'conference-descriotion': descriptiondata,
+    'conference-description': descriptiondata,
     'conference-state': statedata,
     'conference-view': viewdata,
     users: usersdata,

@@ -12,7 +12,8 @@ export default Vue.extend({
 
   async created() {
     const ua = createUA();
-    await ua.setup().connect({ number: '123456.11111', password: '123456' });
+    const conf = await ua.connect({ number: '123456.11111', password: '123456' });
+    conf.join();
   },
 });
 </script>

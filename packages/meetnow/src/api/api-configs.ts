@@ -105,7 +105,8 @@ export interface ApiDataMap {
   'setRecord': CtrlApiData & { 'operate': string };
   'setRTMP': CtrlApiData & { 'operate': string };
   'getFullInfo': CtrlApiData;
-  'getBasicInfo': CtrlApiData;
+  'getBasicInfo': CtrlApiData & { 'conference-url': string };
+  'getBasicInfoOffline': CtrlApiData & { 'long-number': string };
   'getURL': { 'long-number': string };
   'pushMessage': CtrlApiData & {
     'user-entity-list'?: string[];
@@ -116,7 +117,7 @@ export interface ApiDataMap {
   };
   'joinFocus': {
     'conference-url': string;
-    'conference-pwd': string;
+    'conference-pwd'?: string;
     'user-agent'?: string;
     'client-url'?: string;
     'client-display-text'?: string;

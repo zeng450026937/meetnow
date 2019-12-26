@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 
-const log = debug('RTMP');
+const log = debug('Meetnow:Information:RTMP');
 
 export type RTMPOperationType = 'start'| 'stop'| 'pause'| 'resume';
 

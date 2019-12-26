@@ -6,7 +6,7 @@ import {
 import { ApiError } from './api-error';
 import { createRequest, RequestResult } from './request';
 
-const log = debug('Api');
+const log = debug('Meetnow:Api');
 
 // long polling timeout within 30 seconds
 const DEFAULT_TIMEOUT = 30 * 1000;

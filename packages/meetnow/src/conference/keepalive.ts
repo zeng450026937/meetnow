@@ -4,7 +4,7 @@ import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
 import { createWorker } from '../utils/worker';
 
-const log = debug('Keepalive');
+const log = debug('Meetnow:Keepalive');
 
 export const DEFAULT_INTERVAL = 30 * 1000;
 export const MIN_INTERVAL = 2;

@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 
-const log = debug('Danmaku');
+const log = debug('Meetnow:Information:Danmaku');
 
 export type DanmakuType = 'dynamic'| 'static';
 export type DanmakuPosition = 'top'| 'medium'| 'bottom';

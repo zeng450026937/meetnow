@@ -7,7 +7,7 @@ import { createReactive } from '../reactive';
 import { Context } from './context';
 import { createCameraCtrl } from './camera-ctrl';
 
-const log = debug('User');
+const log = debug('Meetnow:Information:User');
 
 export interface FilterOptions {
   label: UserMedia['label']

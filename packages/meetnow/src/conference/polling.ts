@@ -6,7 +6,7 @@ import { createWorker } from '../utils/worker';
 import { ApiError } from '../api/api-error';
 import { isDef } from '../utils';
 
-const log = debug('Polling');
+const log = debug('Meetnow:Polling');
 
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;
@@ -70,7 +70,7 @@ export function createPolling(config: PollingConfigs) {
         break;
 
       case 'port-change':
-        config.onMessage && config.onRenegotiate(body);
+        config.onRenegotiate && config.onRenegotiate(body);
         break;
 
       case 'quit-conference':

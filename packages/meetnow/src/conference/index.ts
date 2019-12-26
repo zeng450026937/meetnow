@@ -9,29 +9,30 @@ import { createInformation, Information } from './information';
 import { createContext } from './context';
 import { createEvents } from '../events';
 
-const log = debug('Conference');
+const log = debug('Meetnow:Conference');
 
 export interface JoinOptions {
-  number: string;
-  password?: string;
-  displayName?: string;
   url: string;
+  number: string;
+  password: string;
+  displayName: string;
 }
 
-export interface ConferenceConfigs {
+export interface ConferenceConfigs extends Partial<JoinOptions> {
   api: Api;
-  url?: string;
-  password?: string;
 }
 
 export function createConference(config: ConferenceConfigs) {
   const { api } = config;
-  let { url, password } = config;
+  let {
+    url,
+    password,
+  } = config;
   const events = createEvents();
   let keepalive: KeepAlive | undefined;
   let polling: Polling | undefined;
-  let interceptor: number | undefined;
   let information: Information | undefined;
+  let interceptor: number | undefined;
   let conference;
 
   let connected: boolean = false;
@@ -46,13 +47,19 @@ export function createConference(config: ConferenceConfigs) {
   // 4. fetch conference info
   // 5. create keepalive worker
   // 6. create polling worker
-  async function join(options: JoinOptions) {
+  async function join(options?: Partial<JoinOptions>) {
     log('join()');
 
     if (connected) {
-      console.warn('already connected');
+      log('already connected');
       return;
     }
+
+    options = {
+      ...config,
+      ...options,
+    };
+
     events.emit('connecting');
 
     let response: AxiosResponse<RequestResult>;
@@ -60,7 +67,11 @@ export function createConference(config: ConferenceConfigs) {
 
     const hasMedia = true;
 
-    if (!url && !options.url && options.number) {
+    if (!options.url && !options.number) {
+      throw new TypeError('Invalid url or number.');
+    }
+
+    if (!options.url && options.number) {
       response = await api
         .request('getURL')
         .data({ 'long-number': options.number })
@@ -79,8 +90,8 @@ export function createConference(config: ConferenceConfigs) {
       .data({
         // 'conference-uuid'     : null,
         // 'conference-user-id'  : null,
-        'conference-url'      : options.url || url,
-        'conference-pwd'      : options.password || password,
+        'conference-url'      : options.url,
+        'conference-pwd'      : options.password,
         'user-agent'          : 'Yealink Meeting WebRTC',
         'client-url'          : options.url.replace(/\w+@/g, 'webrtc@'),
         'client-display-text' : options.displayName || 'Yealink Meeting',
@@ -95,18 +106,17 @@ export function createConference(config: ConferenceConfigs) {
 
     ({ data } = response);
 
-    url = options.url || url;
-    password = options.password || password;
-
     ({
       'conference-user-id': userId,
       'conference-uuid': uuid,
     } = data.data);
 
     if (!userId || !uuid) {
-      console.error('internal error');
-      debugger;
+      log('internal error');
+      throw new Error('Internal Error');
     }
+
+    ({ url, password } = options);
 
     // setup request interceptor for ctrl api
     interceptor = api
