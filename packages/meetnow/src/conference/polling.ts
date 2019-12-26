@@ -14,7 +14,7 @@ export const MAX_INTERVAL = 30;
 
 export interface PollingConfigs {
   api: Api;
-  onInfomation?: (...args: any[]) => void;
+  onInformation?: (...args: any[]) => void;
   onMessage?: (...args: any[]) => void;
   onRenegotiate?: (...args: any[]) => void;
   onQuit?: (...args: any[]) => void;
@@ -62,7 +62,7 @@ export function createPolling(config: PollingConfigs) {
 
     switch (category) {
       case 'conference-info':
-        config.onInfomation && config.onInfomation(body);
+        config.onInformation && config.onInformation(body);
         break;
 
       case 'im-record':

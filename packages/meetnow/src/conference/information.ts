@@ -25,7 +25,7 @@ export function createInformation(data: ConferenceInformation, context: Context)
   } = data;
 
   // create information parts
-  const descriotion = createDescription(descriptiondata, context);
+  const description = createDescription(descriptiondata, context);
   const state = createState(statedata, context);
   const view = createView(viewdata, context);
   const users = createUsers(usersdata, context);
@@ -64,8 +64,8 @@ export function createInformation(data: ConferenceInformation, context: Context)
     // update & prepare all parts
     [
       {
-        key  : 'conference-descriotion',
-        part : descriotion,
+        key  : 'conference-description',
+        part : description,
       },
       {
         key  : 'conference-state',
@@ -111,8 +111,8 @@ export function createInformation(data: ConferenceInformation, context: Context)
       return data[key];
     },
 
-    get descriotion() {
-      return descriotion;
+    get description() {
+      return description;
     },
     get state() {
       return state;

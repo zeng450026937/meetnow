@@ -232,7 +232,7 @@ export interface ConferenceRTMPUsers extends Partialable {
 // Conference Information
 
 export interface ConferenceInformation extends Partialable {
-  'conference-descriotion'?: ConferenceDescription;
+  'conference-description'?: ConferenceDescription;
   'conference-state'?: ConferenceState;
   'conference-view'?: ConferenceView;
   'entity': string;

@@ -173,7 +173,7 @@ export function createConference(config: ConferenceConfigs) {
     polling = createPolling({
       api,
 
-      onInfomation : (data: ConferenceInformation) => {
+      onInformation : (data: ConferenceInformation) => {
         log('receive information: %o', data);
 
         information.update(data);
@@ -283,8 +283,8 @@ export function createConference(config: ConferenceConfigs) {
       return information;
     },
 
-    get descriotion() {
-      return information && information.descriotion;
+    get description() {
+      return information && information.description;
     },
     get state() {
       return information && information.state;
