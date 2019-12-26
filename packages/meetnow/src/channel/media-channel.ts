@@ -2,6 +2,7 @@ import debug from 'debug';
 import { Api } from '../api';
 import { createChannel } from './channel';
 import { createModifier } from './sdp-modifier';
+import { Request } from '../api/request';
 
 const log = debug('Meetnow:MediaChannel');
 
@@ -14,10 +15,11 @@ export function createMediaChannel(config: MediaChannelConfigs) {
   const { api, type = 'main' } = config;
   let mediaVersion: number;
   let callId: string;
+  let request: Request | undefined;
   let icetimmeout;
 
   const channel = createChannel({
-    sendOffer : async (offer) => {
+    invite : async (offer) => {
       let { sdp } = offer;
 
       const apiName = mediaVersion
@@ -27,13 +29,15 @@ export function createMediaChannel(config: MediaChannelConfigs) {
         : type === 'main'
           ? 'joinMedia'
           : 'joinShare';
-      const response = await api
+
+      request = api
         .request(apiName)
         .data({
           sdp,
           'media-version' : mediaVersion,
-        })
-        .send();
+        });
+
+      const response = await request.send();
 
       ({
         sdp,
@@ -45,6 +49,8 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
       return { sdp };
     },
+    cancel : () => request.cancel(),
+    bye    : () => {},
   });
 
   channel.on(

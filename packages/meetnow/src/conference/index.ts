@@ -16,6 +16,14 @@ import { ApiError } from '../api/api-error';
 const log = debug('Meetnow:Conference');
 const miniprogram = isMiniProgram();
 
+export enum Status {
+  kNull = 0,
+  kConnecting = 1,
+  kConnected = 2,
+  kDisconnecting = 3,
+  kDisconnected = 4,
+}
+
 export interface JoinOptions {
   url: string;
   number: string;
