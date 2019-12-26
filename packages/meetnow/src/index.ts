@@ -26,7 +26,7 @@ export interface ConnectOptions {
 }
 
 // global setup
-function setup() {
+export function setup() {
   setupConfig();
 
   debug.enable(
@@ -37,7 +37,7 @@ function setup() {
   );
 }
 
-function connect(options: ConnectOptions) {
+export function connect(options: ConnectOptions) {
   const ua = createUA();
 }
 

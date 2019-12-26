@@ -180,19 +180,9 @@ export interface ApiDataMap {
 export const configs = {
   // user manager
 
-  getUserInfo : {
-    method : RequestMethod.GET,
-    url    : `${ baseURL.usermgr }current/user/info`,
-  },
-
   getVirtualJWT : {
     method : RequestMethod.GET,
     url    : `${ baseURL.usermgr }external/virtualJwt/party`,
-  },
-
-  getSystemConfig : {
-    method : RequestMethod.GET,
-    url    : `${ baseURL.usermgr }external/config/system`,
   },
 
   // info

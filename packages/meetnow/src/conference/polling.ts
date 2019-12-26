@@ -116,7 +116,7 @@ export function createPolling(config: PollingConfigs) {
       config.onError && config.onError(error, attempts);
     }
 
-    if (error) return;
+    if (error || !response) return;
 
     const { bizCode, data } = response.data;
 

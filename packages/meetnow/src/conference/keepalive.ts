@@ -70,7 +70,7 @@ export function createKeepAlive(config: KeepAliveConfigs) {
       config.onError && config.onError(error, attempts);
     }
 
-    if (error) return;
+    if (error || !response) return;
 
     const {
       bizCode,

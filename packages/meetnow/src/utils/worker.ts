@@ -22,7 +22,7 @@ export function createWorker(config: WorkerConfig) {
     cancel,
   } = config;
 
-  async function dowork(immediate: boolean = true) {
+  async function job(immediate: boolean = true) {
     if (work && immediate) {
       working = true;
       await work(times++);
@@ -34,7 +34,7 @@ export function createWorker(config: WorkerConfig) {
     interval = isFunction(nextInterval) ? nextInterval() : nextInterval;
 
     // schedule next
-    timeout = setTimeout(dowork, interval);
+    timeout = setTimeout(job, interval);
   }
 
   async function start(immediate: boolean = true) {
@@ -44,7 +44,7 @@ export function createWorker(config: WorkerConfig) {
 
     running = true;
 
-    await dowork(immediate);
+    await job(immediate);
   }
 
   function stop() {
