@@ -1,4 +1,6 @@
 export interface MeetnowConfig {
+  useragent?: string;
+  clientinfo?: string;
   debug?: string;
   persistent?: boolean;
   testing?: boolean;
@@ -44,7 +46,7 @@ export class Config {
   }
 }
 
-export const config = new Config();
+export const CONFIG = new Config();
 
 export const configFromSession = (win: Window): any => {
   try {

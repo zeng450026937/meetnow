@@ -30,11 +30,8 @@ export function createUA(config?: UAConfigs) {
   let token: string | undefined;
   let partyId: string | undefined;
   let url: string | undefined;
-  let ua;
 
   function createUserApi() {
-    log('createUserApi()');
-
     const api = createApi({ baseURL: '/webapp/' });
 
     api.interceptors.request.use((config) => {
@@ -74,6 +71,7 @@ export function createUA(config?: UAConfigs) {
       worker.stop();
     }
 
+    // clear token will break all api request
     token = null;
   }
 
@@ -136,6 +134,7 @@ export function createUA(config?: UAConfigs) {
     };
   }
 
+  // currently, we don't support connect multiple conference for authenticate reason
   async function connect(options: ConnectOptions) {
     log('connect()');
 
@@ -168,14 +167,25 @@ export function createUA(config?: UAConfigs) {
 
     await worker.start();
 
-    return createConference({
-      api : createUserApi(),
-      url,
-      ...options,
-    });
+    const conference = createConference({ api: createUserApi() });
+
+    // hack join method
+    const { join } = conference;
+    conference.join = (additional) => {
+      return join({
+        url,
+        ...options,
+        ...additional,
+      });
+    };
+
+    // stop auth worker as we can only connect one conference
+    conference.once('disconnect', stop);
+
+    return conference;
   }
 
-  return ua = {
+  return {
     stop,
 
     fetch,

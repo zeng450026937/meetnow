@@ -127,6 +127,24 @@ export interface ApiDataMap {
     'is-webrtc'?: boolean;
     'is-wechat'?: boolean;
   };
+  'joinWechat': {
+    'conference-url': string;
+    'conference-pwd'?: string;
+    'user-agent'?: string;
+    'client-url'?: string;
+    'client-display-text'?: string;
+    'client-type': string;
+    'client-info'?: string;
+    'pure-ctrl-channel': boolean;
+    'is-webrtc'?: boolean;
+    'is-wechat'?: boolean;
+    'video-session-info': {
+      'bitrate': number;
+      'video-width': number;
+      'video-height': number;
+      'frame-rate': number;
+    };
+  }
   'joinMedia': CtrlApiData & {
     'sdp': string;
   };
@@ -228,6 +246,11 @@ export const configs = {
   joinFocus : {
     method : RequestMethod.POST,
     url    : `${ baseURL.ctrl }join-focus`,
+  },
+
+  joinWechat : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.ctrl }join-wechat`,
   },
 
   // media

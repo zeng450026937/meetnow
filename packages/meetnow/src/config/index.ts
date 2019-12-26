@@ -1,5 +1,5 @@
 import {
-  config,
+  CONFIG,
   configFromSession,
   configFromURL,
   saveConfig,
@@ -21,18 +21,18 @@ export function setupConfig() {
     ...configFromURL(win),
   };
 
-  config.reset(configObj);
+  CONFIG.reset(configObj);
 
-  if (config.getBoolean('persistent')) {
+  if (CONFIG.getBoolean('persistent')) {
     saveConfig(win, configObj);
   }
 
   // first see if the mode was set as an attribute on <html>
   // which could have been set by the user, or by pre-rendering
   // otherwise get the mode via config settings, and fallback to md
-  Meetnow.config = config;
+  Meetnow.config = CONFIG;
 
-  if (config.getBoolean('testing')) {
-    config.set('debug', 'Meetnow:*');
+  if (CONFIG.getBoolean('testing')) {
+    CONFIG.set('debug', 'Meetnow:*');
   }
 }

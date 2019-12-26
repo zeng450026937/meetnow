@@ -16,6 +16,10 @@ export default Vue.extend({
     const ua = meetnow.createUA();
     const conf = await ua.connect({ number: '123456.11111', password: '123456' });
     conf.join();
+
+    setTimeout(() => {
+      conf.leave();
+    }, 3000);
   },
 });
 </script>

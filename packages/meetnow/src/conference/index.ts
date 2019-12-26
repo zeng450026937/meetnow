@@ -2,15 +2,19 @@ import debug from 'debug';
 import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { RequestResult } from '../api/request';
+import { createContext } from './context';
+import { createEvents } from '../events';
 import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
 import { createInformation, Information } from './information';
-import { createContext } from './context';
-import { createEvents } from '../events';
 import { createMediaChannel } from '../channel/media-channel';
+import { CONFIG } from '../config';
+import { isMiniProgram } from '../browser';
+import { ApiError } from '../api/api-error';
 
 const log = debug('Meetnow:Conference');
+const miniprogram = isMiniProgram();
 
 export interface JoinOptions {
   url: string;
@@ -19,16 +23,12 @@ export interface JoinOptions {
   displayName: string;
 }
 
-export interface ConferenceConfigs extends Partial<JoinOptions> {
+export interface ConferenceConfigs {
   api: Api;
 }
 
 export function createConference(config: ConferenceConfigs) {
   const { api } = config;
-  let {
-    url,
-    password,
-  } = config;
   const events = createEvents(log);
   let keepalive: KeepAlive | undefined;
   let polling: Polling | undefined;
@@ -40,26 +40,21 @@ export function createConference(config: ConferenceConfigs) {
   let connected: boolean = false;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
+  let url: string | undefined;
 
   function getCurrentUser() {
-    if (user) return;
+    if (!user) {
+      // try to get current user
+      user = information.users.getCurrent();
 
-    // try to get current user
-    user = information.users.getCurrent();
-
-    if (user) {
-      events.emit('user', user);
+      if (user) {
+        events.emit('user', user);
+      }
     }
+
+    return user;
   }
 
-  // Sequence of join conference
-  //
-  // 1. connect focus channel
-  // 2. connect media channel
-  // 3. connect share channel
-  // 4. fetch conference info
-  // 5. create keepalive worker
-  // 6. create polling worker
   async function join(options?: Partial<JoinOptions>) {
     log('join()');
 
@@ -67,11 +62,6 @@ export function createConference(config: ConferenceConfigs) {
       log('already connected');
       return;
     }
-
-    options = {
-      ...config,
-      ...options,
-    };
 
     events.emit('connecting');
 
@@ -81,7 +71,7 @@ export function createConference(config: ConferenceConfigs) {
     const hasMedia = true;
 
     if (!options.url && !options.number) {
-      throw new TypeError('Invalid url or number.');
+      throw new TypeError('URL or Number is required');
     }
 
     if (!options.url && options.number) {
@@ -91,29 +81,36 @@ export function createConference(config: ConferenceConfigs) {
         .send();
 
       ({ data } = response);
-
       // extract url
-      ({ url } = data.data);
+      ({ url: options.url } = data.data);
     }
 
     // step 1
     // join focus
+    const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
+
     response = await api
-      .request('joinFocus')
+      .request(apiName)
       .data({
         // 'conference-uuid'     : null,
         // 'conference-user-id'  : null,
         'conference-url'      : options.url,
         'conference-pwd'      : options.password,
-        'user-agent'          : 'Yealink Meeting WebRTC',
+        'user-agent'          : CONFIG.get('useragent', 'Yealink Meeting WebRTC'),
         'client-url'          : options.url.replace(/\w+@/g, 'webrtc@'),
         'client-display-text' : options.displayName || 'Yealink Meeting',
         'client-type'         : 'http',
-        'client-info'         : 'Apollo_WebRTC',
+        'client-info'         : CONFIG.get('clientinfo', 'Apollo_WebRTC'),
         'pure-ctrl-channel'   : !hasMedia,
         // if join with media
-        'is-webrtc'           : hasMedia,
-        'is-wechat'           : false,
+        'is-webrtc'           : !miniprogram && hasMedia,
+        'is-wechat'           : miniprogram,
+        'video-session-info'  : miniprogram && {
+          bitrate        : 600 * 1024,
+          'video-width'  : 640,
+          'video-height' : 480,
+          'frame-rate'   : 15,
+        },
       })
       .send();
 
@@ -129,7 +126,8 @@ export function createConference(config: ConferenceConfigs) {
       throw new Error('Internal Error');
     }
 
-    ({ url, password } = options);
+    // save url
+    ({ url } = options);
 
     // setup request interceptor for ctrl api
     interceptor = api
@@ -217,15 +215,18 @@ export function createConference(config: ConferenceConfigs) {
       onQuit : (data: any) => {
         log('receive quit: %o', data);
 
-        connected = false;
+        // bizCode = 901314 ended by presenter
+        // bizCode = 901320 kicked by presenter
 
         /* eslint-disable-next-line no-use-before-define */
         cleanup();
 
+        connected = false;
+
         events.emit('disconnect', data);
       },
 
-      onError : (data: any) => {
+      onError : (data: ApiError) => {
         log('polling error, about to leave... %o', data);
 
         events.emit('error', data);
@@ -234,7 +235,11 @@ export function createConference(config: ConferenceConfigs) {
         // leave conference
         //
         /* eslint-disable-next-line no-use-before-define */
-        leave();
+        cleanup();
+
+        connected = false;
+
+        events.emit('disconnect', data);
       },
     });
 

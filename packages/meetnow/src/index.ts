@@ -1,5 +1,5 @@
 import debug from 'debug';
-import { config, setupConfig } from './config';
+import { CONFIG, setupConfig } from './config';
 import { createUA } from './user-agent';
 
 export { debug };
@@ -26,18 +26,18 @@ export interface ConnectOptions {
 }
 
 // global setup
-export function setup() {
+function setup() {
   setupConfig();
 
   debug.enable(
-    config.get(
+    CONFIG.get(
       'debug',
       'Meetnow:*,-Meetnow:Api*,-Meetnow:Information:Item,-Meetnow:Worker',
     ),
   );
 }
 
-export function connect(options: ConnectOptions) {
+function connect(options: ConnectOptions) {
   const ua = createUA();
 }
 

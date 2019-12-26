@@ -43,12 +43,12 @@ export function createEvents(scopedlog: Debugger = log) {
   }
 
   function once(event: string | string[], fn: Function) {
-    function on(...args: any[]) {
-      off(event, on);
+    function wrapper(...args: any[]) {
+      off(event, wrapper);
       fn.apply(this, args);
     }
-    on.fn = fn;
-    on(event, on);
+    wrapper.fn = fn;
+    on(event, wrapper);
   }
 
   function emit(event: string, ...args: any[]) {

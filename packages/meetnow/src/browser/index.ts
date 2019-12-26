@@ -30,6 +30,8 @@ export function getBrowser() {
   return parseBrowser();
 }
 
+export const BROWSER = parseBrowser();
+
 export function isBrowser(name: string) {
   return parseBrowser().name === name;
 }
