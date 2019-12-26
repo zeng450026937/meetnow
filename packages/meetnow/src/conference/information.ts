@@ -14,7 +14,7 @@ import { ConferenceInformation } from './conference-info';
 const log = debug('Meetnow:Information');
 
 export function createInformation(data: ConferenceInformation, context: Context) {
-  const events = createEvents();
+  const events = createEvents(log);
   const {
     'conference-description': descriptiondata,
     'conference-state': statedata,
@@ -41,11 +41,11 @@ export function createInformation(data: ConferenceInformation, context: Context)
     const { version: newVersion, state: newState } = val;
 
     if (!newVersion) {
-      log('Error: receive information without version.');
+      log('receive information without version.');
       return;
     }
     if (newVersion <= version) {
-      log('Error: receive information with invalid version.');
+      log('receive information with invalid version.');
       return;
     }
     if (newVersion - version > 1) {
@@ -55,7 +55,7 @@ export function createInformation(data: ConferenceInformation, context: Context)
       return;
     }
     if (newState === 'deleted') {
-      log('Error: can not delete root information.');
+      log('can not delete root information.');
       return;
     }
 

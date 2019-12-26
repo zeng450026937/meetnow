@@ -1,8 +1,11 @@
+import debug from 'debug';
 import { createEvents, Events } from '../events';
 import { camelize, hasChanged, hasOwn } from '../utils';
 
+const log = debug('Meetnow:Reactive');
+
 export function createReactive(data: object = {}, events?: Events) {
-  events = events || createEvents();
+  events = events || createEvents(log);
   return new Proxy(data, {
     set(target: object, prop: string, value: unknown, receiver: object) {
       const oldValue = target[prop];

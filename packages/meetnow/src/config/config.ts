@@ -1,4 +1,5 @@
 export interface MeetnowConfig {
+  debug?: string;
   persistent?: boolean;
   testing?: boolean;
 }

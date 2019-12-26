@@ -33,6 +33,6 @@ export function setupConfig() {
   Meetnow.config = config;
 
   if (config.getBoolean('testing')) {
-    // config.set('animated', false);
+    config.set('debug', 'Meetnow:*');
   }
 }

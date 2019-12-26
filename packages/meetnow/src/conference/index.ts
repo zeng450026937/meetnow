@@ -8,6 +8,7 @@ import { ConferenceInformation } from './conference-info';
 import { createInformation, Information } from './information';
 import { createContext } from './context';
 import { createEvents } from '../events';
+import { createMediaChannel } from '../channel/media-channel';
 
 const log = debug('Meetnow:Conference');
 
@@ -28,7 +29,7 @@ export function createConference(config: ConferenceConfigs) {
     url,
     password,
   } = config;
-  const events = createEvents();
+  const events = createEvents(log);
   let keepalive: KeepAlive | undefined;
   let polling: Polling | undefined;
   let information: Information | undefined;
@@ -173,7 +174,7 @@ export function createConference(config: ConferenceConfigs) {
       api,
 
       onInfomation : (data: ConferenceInformation) => {
-        console.log('onInfomation', data);
+        log('receive information: %o', data);
 
         information.update(data);
 
@@ -181,19 +182,19 @@ export function createConference(config: ConferenceConfigs) {
       },
 
       onMessage : (data: any) => {
-        console.log('onMessage', data);
+        log('receive message: %o', data);
 
         events.emit('message', data);
       },
 
       onRenegotiate : (data: any) => {
-        console.log('onRenegotiate', data);
+        log('receive renegotiate: %o', data);
 
         events.emit('renegotiate', data);
       },
 
       onQuit : (data: any) => {
-        console.log('onQuit', data);
+        log('receive quit: %o', data);
 
         connected = false;
 
@@ -204,7 +205,7 @@ export function createConference(config: ConferenceConfigs) {
       },
 
       onError : (data: any) => {
-        console.log('onError', data);
+        log('polling error, about to leave... %o', data);
 
         events.emit('error', data);
 
@@ -219,11 +220,15 @@ export function createConference(config: ConferenceConfigs) {
     // start keepalive & polling
     keepalive.start();
     polling.start();
+
+    // test
+    const mediaChannel = createMediaChannel({ api });
+    await mediaChannel.connect();
   }
 
   async function leave() {
     if (!connected) {
-      console.warn('already disconnected');
+      log('already disconnected');
       return;
     }
 
@@ -236,7 +241,7 @@ export function createConference(config: ConferenceConfigs) {
 
   async function end() {
     if (!connected) {
-      console.warn('already disconnected');
+      log('already disconnected');
       return;
     }
     await api

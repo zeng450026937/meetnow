@@ -13,7 +13,7 @@ export interface LockOptions {
 
 export function createDescription(data: ConferenceDescription, context: Context) {
   const { api } = context;
-  const events = createEvents();
+  const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   let description;
@@ -32,8 +32,6 @@ export function createDescription(data: ConferenceDescription, context: Context)
   }
 
   function getLock() {
-    log('getLock()');
-
     return {
       admissionPolicy : data['admission-policy'],
       attendeeByPass  : data['attendee-by-pass'],

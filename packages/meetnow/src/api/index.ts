@@ -31,7 +31,7 @@ export function createApi(config: AxiosRequestConfig = {}) {
 
       if (ret < 0) throw new ApiError(bizCode, error);
 
-      log('request success. %o', data);
+      log('request success: %o', data);
 
       // TBD
       // replace response data with actual data. eg. response.data = data;
@@ -41,12 +41,12 @@ export function createApi(config: AxiosRequestConfig = {}) {
       return response;
     },
     (error) => {
-      log('request error. %o', error);
+      log('request error: %o', error);
     },
   );
 
   function request<T extends ApiNames = ApiNames>(apiName: T) {
-    log('request()');
+    log(`request() "${ apiName }"`);
 
     return createRequest<ApiDataMap[T], ApiParamsMap[T], ApiHeaderMap[T]>(
       { ...CONFIGS[apiName] },

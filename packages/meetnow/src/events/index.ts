@@ -1,9 +1,9 @@
-import debug from 'debug';
+import debug, { Debugger } from 'debug';
 import { isArray } from '../utils';
 
 const log = debug('Meetnow:Events');
 
-export function createEvents() {
+export function createEvents(scopedlog: Debugger = log) {
   let instance;
   const events = {} as Record<string, Function[]>;
 
@@ -52,7 +52,7 @@ export function createEvents() {
   }
 
   function emit(event: string, ...args: any[]) {
-    log(`emit() "${ event }"`);
+    scopedlog(`emit() "${ event }"`);
 
     const callbacks = events[event];
 

@@ -36,7 +36,7 @@ const holdMediaTypes = ['audio', 'video'];
 
 export function createChannel(config: ChannelConfigs) {
   const { sendOffer } = config;
-  const events = createEvents();
+  const events = createEvents(log);
 
   // The RTCPeerConnection instance (public attribute).
   let connection: RTCPeerConnection | undefined;
@@ -244,7 +244,7 @@ export function createChannel(config: ChannelConfigs) {
       try {
         connection.close();
       } catch (error) {
-        console.warn('erro closing RTCPeerConnection', error);
+        log('error closing RTCPeerConnection %o', error);
       }
       connection = null;
     }

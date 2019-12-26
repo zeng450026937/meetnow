@@ -7,8 +7,6 @@ import { createConference } from '../conference';
 
 const log = debug('Meetnow:UA');
 
-debug.enable('Meetnow*');
-
 export interface ConnectOptions {
   number: string;
   password?: string;
@@ -58,6 +56,8 @@ export function createUA(config?: UAConfigs) {
   }
 
   function createUserApi() {
+    log('createUserApi()');
+
     const api = createApi({ baseURL: '/webapp/' });
 
     api.interceptors.request.use((config) => {
@@ -72,6 +72,8 @@ export function createUA(config?: UAConfigs) {
   }
 
   async function auth() {
+    log('auth()');
+
     if (anonymous) {
       if (!partyId) {
         throw new Error('Authorization Error');
@@ -176,6 +178,8 @@ export function createUA(config?: UAConfigs) {
   }
 
   async function connect(options: ConnectOptions) {
+    log('connect()');
+
     const { number } = options;
 
     // get conference url

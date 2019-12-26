@@ -5,13 +5,15 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { createUA } from '../packages/meetnow/src/user-agent';
+import meetnow from '../packages/meetnow/src';
 
 export default Vue.extend({
   name : 'app',
 
   async created() {
-    const ua = createUA();
+    meetnow.setup();
+
+    const ua = meetnow.createUA();
     const conf = await ua.connect({ number: '123456.11111', password: '123456' });
     conf.join();
   },

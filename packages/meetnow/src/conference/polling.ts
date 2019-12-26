@@ -112,6 +112,7 @@ export function createPolling(config: PollingConfigs) {
       attempts++;
       interval = computeNextTimeout(attempts);
 
+      log('polling error: %o', error);
       config.onError && config.onError(error, attempts);
     }
 
@@ -125,7 +126,7 @@ export function createPolling(config: PollingConfigs) {
     try {
       analyze(data);
     } catch (error) {
-      log('Error: failed to process data.');
+      log('failed to process data.');
     }
 
     attempts = 0;

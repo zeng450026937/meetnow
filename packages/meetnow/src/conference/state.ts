@@ -1,10 +1,13 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { ConferenceState } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
 
+const log = debug('Meetnow:Information:State');
+
 export function createState(data: ConferenceState, context: Context) {
-  const events = createEvents();
+  const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   let description;

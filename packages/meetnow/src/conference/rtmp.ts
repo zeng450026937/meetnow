@@ -1,12 +1,15 @@
+import debug from 'debug';
 import { createEvents } from '../events';
 import { ConferenceRTMPUsers } from './conference-info';
 import { createReactive } from '../reactive';
 import { createRTMPCtrl } from './rtmp-ctrl';
 import { Context } from './context';
 
+const log = debug('Meetnow:Information:RTMP');
+
 export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
   const { api } = context;
-  const events = createEvents();
+  const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   const ctrl = createRTMPCtrl(api);

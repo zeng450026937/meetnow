@@ -15,8 +15,10 @@ export interface FilterOptions {
 }
 
 export function createUser(data: ConferenceUser, context: Context) {
+  log('createUser()');
+
   const { api, userId } = context;
-  const events = createEvents();
+  const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   /* eslint-disable-next-line no-use-before-define */
@@ -53,6 +55,9 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
   function getUID() {
     return data['subject-id'];
+  }
+  function getDisplayText() {
+    return data['display-text'];
   }
   function getRole() {
     return data.roles && data.roles.role;
@@ -286,6 +291,7 @@ export function createUser(data: ConferenceUser, context: Context) {
 
     getEntity,
     getUID,
+    getDisplayText,
     getRole,
 
     isCurrent,

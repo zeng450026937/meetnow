@@ -13,6 +13,7 @@ export const MAX_INTERVAL = 30;
 export interface KeepAliveConfigs {
   api: Api;
   interval?: number;
+  onError?: (...args: any[]) => void;
 }
 
 function computeTimeout(upperBound: number) {
@@ -64,6 +65,9 @@ export function createKeepAlive(config: KeepAliveConfigs) {
       // increase next request timeout
       attempts++;
       interval = computeNextTimeout(attempts);
+
+      log('keepalive error: %o', error);
+      config.onError && config.onError(error, attempts);
     }
 
     if (error) return;

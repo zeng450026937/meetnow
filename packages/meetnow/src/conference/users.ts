@@ -16,7 +16,7 @@ export interface InviteOptions {
 
 export function createUsers(data: ConferenceUsers, context: Context) {
   const { api } = context;
-  const events = createEvents();
+  const events = createEvents(log);
   const userMap = new Map<string, User>();
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
@@ -31,9 +31,7 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     userList = data.user.map((userdata) => {
       const { entity } = userdata;
       let user = userMap.get(entity);
-      if (user) {
-        user.update(userdata);
-      } else {
+      if (!user) {
         user = createUser(userdata, context);
         userMap.set(entity, user);
       }
@@ -67,17 +65,22 @@ export function createUsers(data: ConferenceUsers, context: Context) {
 
     added.forEach((userdata) => {
       const { entity } = userdata;
-      users.emit('user:added', userMap.get(entity));
+      const user = userMap.get(entity);
+      log('added user:\n\n %s(%s) \n', user.getDisplayText(), user.getEntity());
+      users.emit('user:added', user);
     });
     updated.forEach((userdata) => {
       const { entity } = userdata;
       const user = userMap.get(entity);
-      user.update();
+      user.update(userdata);
+      log('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:updated', user);
     });
     deleted.forEach((userdata) => {
       const { entity } = userdata;
-      users.emit('user:deleted', userMap.get(entity));
+      const user = userMap.get(entity);
+      log('deleted user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
+      users.emit('user:deleted', user);
       userMap.delete(entity);
     });
 

@@ -1,6 +1,8 @@
+import debug from 'debug';
 import { parse, write } from '../sdp-transform';
 import { getBrowser } from '../browser';
 
+const log = debug('Meetnow:SDP');
 const browser = getBrowser();
 
 export interface Data {
@@ -147,7 +149,7 @@ export function createModifier() {
 
           let preferCodec = prefer === 'vp8'
             ? vp8Payloads
-            : unsupport === 'h264'
+            : prefer === 'h264'
               ? h264Payloads
               : new Set<number>();
 
@@ -266,6 +268,8 @@ export function createModifier() {
       }
 
       data.sdp = write(sdp);
+
+      log(`${ originator } sdp: \n\n %s \n`, data.sdp);
     };
   }
 

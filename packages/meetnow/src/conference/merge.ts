@@ -37,7 +37,7 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     const key = entity || id;
 
     if (!key) {
-      log('Error: missing item identity(entity or id).');
+      log('missing item identity(entity or id).');
       continue;
     }
 
@@ -49,7 +49,7 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     // not find
     if (index === -1) {
       if (state === 'deleted') {
-        log('Error: can not delete item not exsit.');
+        log('can not delete item not exsit.');
         continue;
       }
       log('item added');
