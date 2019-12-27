@@ -1,15 +1,19 @@
 import debug from 'debug';
 import { createEvents } from '../events';
-import { createDescription } from './description';
-import { createState } from './state';
-import { createView } from './view';
-import { createUsers } from './users';
+import { createDescription, Description } from './description';
+import { createState, State } from './state';
+import { createView, View } from './view';
+import { createUsers, User, Users } from './users';
 import { createRTMP } from './rtmp';
 import { createRecord } from './record';
 import { mergeItem } from './merge';
 import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
+
+export {
+  Description, State, View, Users, User,
+};
 
 const log = debug('Meetnow:Information');
 

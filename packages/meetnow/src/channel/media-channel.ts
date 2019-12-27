@@ -4,6 +4,8 @@ import { createChannel } from './channel';
 import { createModifier } from './sdp-modifier';
 import { Request } from '../api/request';
 
+export * from './channel';
+
 const log = debug('Meetnow:MediaChannel');
 
 export interface MediaChannelConfigs {

@@ -15,8 +15,6 @@ export interface FilterOptions {
 }
 
 export function createUser(data: ConferenceUser, context: Context) {
-  log('createUser()');
-
   const { api, userId } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */

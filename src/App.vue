@@ -14,12 +14,17 @@ export default Vue.extend({
     meetnow.setup();
 
     const ua = meetnow.createUA();
-    const conf = await ua.connect({ number: '123456.11111', password: '123456' });
+    const conf = await ua.connect({ number: '666666.66666' });
     conf.join();
 
     setTimeout(() => {
-      conf.leave();
-    }, 3000);
+      conf.share();
+      // conf.mediaChannel && conf.mediaChannel.connect();
+
+      // setTimeout(() => {
+      //   conf.shareChannel && conf.shareChannel.connect();
+      // }, 5000);
+    }, 5000);
   },
 });
 </script>

@@ -11,6 +11,7 @@ const log = debug('Meetnow:Polling');
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;
 export const MAX_INTERVAL = 30;
+export const MAX_ATTEMPTS = 15;
 
 export interface PollingConfigs {
   api: Api;
@@ -103,7 +104,7 @@ export function createPolling(config: PollingConfigs) {
       if (canceled) return;
 
       // polling timeout
-      timeouted = [900408, 901323].includes(error.bizCode);
+      timeouted = [900408, 901323].includes(error && error.bizCode);
 
       if (timeouted) return;
 
@@ -114,6 +115,15 @@ export function createPolling(config: PollingConfigs) {
 
       log('polling error: %o', error);
       config.onError && config.onError(error, attempts);
+    }
+
+    if (!response) {
+      attempts++;
+      interval = computeNextTimeout(attempts);
+    }
+
+    if (attempts > MAX_ATTEMPTS) {
+      config.onError && config.onError(new Error('Max Attempts'), attempts);
     }
 
     if (error || !response) return;

@@ -108,8 +108,6 @@ export function createMessage(config: MessageConfigs) {
   }
 
   function incoming(data: MessageData) {
-    log('incoming()');
-
     direction = 'incoming';
 
     content = data['im-context'];

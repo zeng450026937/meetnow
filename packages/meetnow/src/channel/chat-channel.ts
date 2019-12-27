@@ -15,8 +15,11 @@ export function createChatChannel(config: ChatChannelConfigs) {
   const events = createEvents(log);
   let messages: Message[] = [];
   let request: Request;
+  let ready = false;
 
   async function connect(count?: number) {
+    log('connect()');
+
     request = api.request('pullMessage').data({ count });
 
     const response = await request.send();
@@ -27,18 +30,36 @@ export function createChatChannel(config: ChatChannelConfigs) {
       .map((msg) => {
         return createMessage({ api }).incoming(msg);
       });
+
+    ready = true;
+
+    events.emit('ready');
+    events.emit('connected');
   }
 
   async function terminate() {
-    if (!request) return;
+    log('terminate()');
 
-    request.cancel();
+    messages = [];
+    ready = false;
 
-    request = null;
+    if (request) {
+      request.cancel();
+      request = null;
+    }
+
+    events.emit('disconnected');
   }
 
   async function sendMessage(msg: string, target?: string[]) {
+    log('sendMessage()');
+
     const message = createMessage({ api });
+
+    events.emit('message', {
+      originator : 'local',
+      message,
+    });
 
     await message.send(msg, target);
 
@@ -46,13 +67,26 @@ export function createChatChannel(config: ChatChannelConfigs) {
   }
 
   function incoming(data: MessageData) {
+    log('incoming()');
+
     const message = createMessage({ api }).incoming(data);
 
+    events.emit('message', {
+      originator : 'remote',
+      message,
+    });
+
     messages.push(message);
+
+    return message;
   }
 
   return {
     ...events,
+
+    get ready() {
+      return ready;
+    },
 
     connect,
     terminate,

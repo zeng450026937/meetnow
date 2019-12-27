@@ -13,8 +13,8 @@ export enum STATUS {
   kNull = 0,
   kProgress = 1,
   kOffered = 2,
-  kAccepted = 3,
-  kAnswered = 4,
+  kAnswered = 3,
+  kAccepted = 4,
   kCanceled = 5,
   kTerminated = 6,
 }
@@ -100,6 +100,44 @@ export function createChannel(config: ChannelConfigs) {
     throwIfStatus(STATUS.kTerminated, message);
   }
 
+
+  function isInProgress() {
+    switch (status) {
+      case STATUS.kProgress:
+      case STATUS.kOffered:
+      case STATUS.kAnswered:
+        return true;
+      default:
+        return false;
+    }
+  }
+  function isEstablished() {
+    return status === STATUS.kAccepted;
+  }
+  function isEnded() {
+    switch (status) {
+      case STATUS.kCanceled:
+      case STATUS.kTerminated:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function getMute() {
+    return {
+      audio : audioMuted,
+      video : videoMuted,
+    };
+  }
+  function getHold() {
+    return {
+      local  : localHold,
+      remote : remoteHold,
+    };
+  }
+
+
   function createRTCConnection(rtcConstraints?: RTCConfiguration) {
     log('createRTCConnection()');
 
@@ -131,6 +169,7 @@ export function createChannel(config: ChannelConfigs) {
       try {
         desc = await connection.createOffer(constraints);
       } catch (error) {
+        log('createOffer failed: %o', error);
         events.emit('peerconnection:createofferfailed', error);
         throw error;
       }
@@ -138,16 +177,18 @@ export function createChannel(config: ChannelConfigs) {
       try {
         desc = await connection.createAnswer(constraints);
       } catch (error) {
+        log('createAnswer failed: %o', error);
         events.emit('peerconnection:createanswerfailed', error);
         throw error;
       }
     } else {
-      throw new Error('invalid type');
+      throw new TypeError('Invalid Type');
     }
 
     try {
       await connection.setLocalDescription(desc);
     } catch (error) {
+      log('setLocalDescription failed: %o', error);
       rtcReady = true;
       events.emit('peerconnection:setlocaldescriptionfailed', error);
       throw error;
@@ -276,7 +317,18 @@ export function createChannel(config: ChannelConfigs) {
 
     status = STATUS.kOffered;
 
-    const answer = await invite({ sdp: localSDP });
+    let answer: OfferAnswer;
+
+    try {
+      answer = await invite({ sdp: localSDP });
+    } catch (error) {
+      /* eslint-disable-next-line no-use-before-define */
+      onFailed('local', 'Request Error');
+
+      log('invite failed: %o', error);
+
+      throw error;
+    }
 
     status = STATUS.kAnswered;
 
@@ -329,7 +381,16 @@ export function createChannel(config: ChannelConfigs) {
       throw error;
     }
 
-    await confirm();
+    try {
+      await confirm();
+    } catch (error) {
+      /* eslint-disable-next-line no-use-before-define */
+      onFailed('local', 'Request Error');
+
+      log('confirm failed: %o', error);
+
+      throw error;
+    }
 
     status = STATUS.kAccepted;
     /* eslint-disable-next-line no-use-before-define */
@@ -342,6 +403,8 @@ export function createChannel(config: ChannelConfigs) {
 
     switch (status) {
       case STATUS.kNull:
+        // nothing to do
+        break;
       case STATUS.kProgress:
       case STATUS.kOffered:
         log('canceling channel');
@@ -1000,6 +1063,13 @@ export function createChannel(config: ChannelConfigs) {
     get connection() {
       return connection;
     },
+
+    isInProgress,
+    isEstablished,
+    isEnded,
+
+    getMute,
+    getHold,
 
     connect,
     terminate,

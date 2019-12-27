@@ -7,8 +7,9 @@ import { createEvents } from '../events';
 import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
-import { createInformation, Information } from './information';
+import { createInformation, Information, User } from './information';
 import { createMediaChannel, MediaChannel } from '../channel/media-channel';
+import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
 import { isMiniProgram } from '../browser';
 import { ApiError } from '../api/api-error';
@@ -25,8 +26,8 @@ export enum STATUS {
 }
 
 export interface JoinOptions {
-  url: string;
-  number: string;
+  url?: string;
+  number?: string;
   password: string;
   displayName: string;
 }
@@ -47,7 +48,8 @@ export function createConference(config: ConferenceConfigs) {
   let conference;
   let mediaChannel: MediaChannel | undefined;
   let shareChannel: MediaChannel | undefined;
-  let user; // current user
+  let chatChannel: ChatChannel | undefined;
+  let user: User | undefined; // current user
 
   let status: STATUS = STATUS.kNull;
   let uuid: string | undefined;
@@ -56,6 +58,7 @@ export function createConference(config: ConferenceConfigs) {
 
   let request: Request | undefined; // request chain
 
+
   function getCurrentUser() {
     if (!user) {
       // try to get current user
@@ -63,6 +66,9 @@ export function createConference(config: ConferenceConfigs) {
 
       if (user) {
         events.emit('user', user);
+
+        /* eslint-disable-next-line no-use-before-define */
+        user.on('holdChanged', maybeChat);
       }
     }
 
@@ -87,6 +93,9 @@ export function createConference(config: ConferenceConfigs) {
   function onConnected() {
     log('conference connected');
 
+    /* eslint-disable-next-line no-use-before-define */
+    setup();
+
     status = STATUS.kConnected;
     events.emit('connected');
   }
@@ -104,6 +113,13 @@ export function createConference(config: ConferenceConfigs) {
 
     status = STATUS.kDisconnected;
     events.emit('disconnected', data);
+  }
+
+  async function maybeChat() {
+    if (!chatChannel) return;
+    if (chatChannel.ready) return;
+
+    await chatChannel.connect(2000).catch();
   }
 
   async function join(options?: Partial<JoinOptions>) {
@@ -210,6 +226,67 @@ export function createConference(config: ConferenceConfigs) {
     // create information
     information = createInformation(info, context);
 
+    onConnected();
+
+    return conference as Conference;
+  }
+
+  async function leave() {
+    throwIfStatus(STATUS.kDisconnecting);
+    throwIfStatus(STATUS.kDisconnected);
+
+    switch (status) {
+      case STATUS.kNull:
+        // nothing to do
+        break;
+      case STATUS.kConnecting:
+      case STATUS.kConnected:
+        if (status === STATUS.kConnected) {
+          onDisconnecting();
+
+          await api
+            .request('leave')
+            .send();
+        } else if (request) {
+          request.cancel();
+
+          onDisconnected();
+        }
+        break;
+      case STATUS.kDisconnecting:
+      case STATUS.kDisconnected:
+      default:
+        break;
+    }
+
+    return conference as Conference;
+  }
+
+  async function end() {
+    throwIfNotStatus(STATUS.kConnected);
+
+    await leave();
+
+    await api
+      .request('end')
+      .data({ 'conference-url': url })
+      .send();
+
+    return conference as Conference;
+  }
+
+  function setup() {
+    getCurrentUser();
+
+    const { state, users } = information;
+
+    state.on('sharingUserEntityChanged', (val) => {
+      events.emit('sharinguser', users.getUser(val));
+    });
+    state.on('speechUserEntityChanged', (val) => {
+      events.emit('speechuser', users.getUser(val));
+    });
+
     // create keepalive worker
     keepalive = createKeepAlive({ api });
 
@@ -230,13 +307,13 @@ export function createConference(config: ConferenceConfigs) {
       onMessage : (data: any) => {
         log('receive message: %o', data);
 
-        events.emit('message', data);
+        chatChannel.incoming(data);
       },
 
       onRenegotiate : (data: any) => {
         log('receive renegotiate: %o', data);
 
-        events.emit('renegotiate', data);
+        mediaChannel.renegotiate();
       },
 
       onQuit : (data: any) => {
@@ -263,64 +340,14 @@ export function createConference(config: ConferenceConfigs) {
     keepalive.start();
     polling.start();
 
-    onConnected();
-    getCurrentUser();
-
-
-    // get pull im messages
-    // fail if we don't have permission yet, eg. in lobby
-    try {
-      response = await api
-        .request('pullMessage')
-        .send();
-    } catch (error) {
-      log('connect message failed: %o', error);
-    }
-
-
-    // create media channels
+    // create channels
     mediaChannel = createMediaChannel({ api, type: 'main' });
     shareChannel = createMediaChannel({ api, type: 'slides' });
+    chatChannel = createChatChannel({ api });
 
-    await mediaChannel.connect();
-  }
+    chatChannel.on('message', (...args: any[]) => events.emit('message', ...args));
 
-  async function leave() {
-    throwIfStatus(STATUS.kDisconnecting);
-    throwIfStatus(STATUS.kDisconnected);
-
-    switch (status) {
-      case STATUS.kNull:
-      case STATUS.kConnecting:
-      case STATUS.kConnected:
-        if (status === STATUS.kConnected) {
-          onDisconnecting();
-
-          await api
-            .request('leave')
-            .send();
-        } else if (request) {
-          request.cancel();
-
-          onDisconnected();
-        }
-        break;
-      case STATUS.kDisconnecting:
-      case STATUS.kDisconnected:
-      default:
-        break;
-    }
-  }
-
-  async function end() {
-    throwIfNotStatus(STATUS.kConnected);
-
-    await leave();
-
-    await api
-      .request('end')
-      .data({ 'conference-url': url })
-      .send();
+    maybeChat();
   }
 
   function cleanup() {
@@ -339,8 +366,21 @@ export function createConference(config: ConferenceConfigs) {
     if (shareChannel) {
       shareChannel.terminate();
     }
+    if (chatChannel) {
+      chatChannel.terminate();
+    }
 
     request = null;
+  }
+
+  async function share() {
+    if (!shareChannel.isInProgress() && !shareChannel.isEstablished()) {
+      await shareChannel.connect();
+    }
+    await api
+      .request('switchShare')
+      .data({ share: true })
+      .send();
   }
 
   return conference = {
@@ -393,10 +433,15 @@ export function createConference(config: ConferenceConfigs) {
     get shareChannel() {
       return shareChannel;
     },
+    get chatChannel() {
+      return chatChannel;
+    },
 
     join,
     leave,
     end,
+
+    share,
   };
 }
 

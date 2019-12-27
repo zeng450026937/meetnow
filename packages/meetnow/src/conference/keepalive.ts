@@ -9,6 +9,7 @@ const log = debug('Meetnow:Keepalive');
 export const DEFAULT_INTERVAL = 30 * 1000;
 export const MIN_INTERVAL = 2;
 export const MAX_INTERVAL = 30;
+export const MAX_ATTEMPTS = 15;
 
 export interface KeepAliveConfigs {
   api: Api;
@@ -54,7 +55,6 @@ export function createKeepAlive(config: KeepAliveConfigs) {
       canceled = false;
       request = api.request('keepalive');
       response = await request.send();
-      attempts = 0;
     } catch (e) {
       error = e;
       canceled = isCancel(e);
@@ -68,6 +68,15 @@ export function createKeepAlive(config: KeepAliveConfigs) {
 
       log('keepalive error: %o', error);
       config.onError && config.onError(error, attempts);
+    }
+
+    if (!response) {
+      attempts++;
+      interval = computeNextTimeout(attempts);
+    }
+
+    if (attempts > MAX_ATTEMPTS) {
+      config.onError && config.onError(new Error('Max Attempts'), attempts);
     }
 
     if (error || !response) return;
