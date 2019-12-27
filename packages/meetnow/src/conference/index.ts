@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { AxiosResponse } from 'axios';
 import { Api } from '../api';
-import { RequestResult } from '../api/request';
+import { Request, RequestResult } from '../api/request';
 import { createContext } from './context';
 import { createEvents } from '../events';
 import { createKeepAlive, KeepAlive } from './keepalive';
@@ -45,14 +45,16 @@ export function createConference(config: ConferenceConfigs) {
   let interceptor: number | undefined;
 
   let conference;
-  let media: MediaChannel | undefined;
-  let share: MediaChannel | undefined;
+  let mediaChannel: MediaChannel | undefined;
+  let shareChannel: MediaChannel | undefined;
   let user; // current user
 
   let status: STATUS = STATUS.kNull;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
   let url: string | undefined;
+
+  let request: Request | undefined; // request chain
 
   function getCurrentUser() {
     if (!user) {
@@ -103,7 +105,6 @@ export function createConference(config: ConferenceConfigs) {
     status = STATUS.kDisconnected;
     events.emit('disconnected', data);
   }
-  function onFailed() {}
 
   async function join(options?: Partial<JoinOptions>) {
     log('join()');
@@ -123,10 +124,11 @@ export function createConference(config: ConferenceConfigs) {
     const hasMedia = true;
 
     if (!options.url && options.number) {
-      response = await api
+      request = api
         .request('getURL')
-        .data({ 'long-number': options.number })
-        .send();
+        .data({ 'long-number': options.number });
+
+      response = await request.send();
 
       ({ data } = response);
       // extract url
@@ -136,11 +138,11 @@ export function createConference(config: ConferenceConfigs) {
     // join focus
     const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 
-    response = await api
+    request = api
       .request(apiName)
       .data({
-        // 'conference-uuid'     : null,
-        // 'conference-user-id'  : null,
+      // 'conference-uuid'     : null,
+      // 'conference-user-id'  : null,
         'conference-url'      : options.url,
         'conference-pwd'      : options.password,
         'user-agent'          : CONFIG.get('useragent', `Yealink WEB-APP ${ process.env.VUE_APP_VERSION }`),
@@ -158,8 +160,9 @@ export function createConference(config: ConferenceConfigs) {
           'video-height' : 480,
           'frame-rate'   : 15,
         },
-      })
-      .send();
+      });
+
+    response = await request.send();
 
     ({ data } = response);
 
@@ -193,9 +196,10 @@ export function createConference(config: ConferenceConfigs) {
 
 
     // get full info
-    response = await api
-      .request('getFullInfo')
-      .send();
+    request = api
+      .request('getFullInfo');
+
+    response = await request.send();
 
     ({ data } = response);
 
@@ -205,21 +209,6 @@ export function createConference(config: ConferenceConfigs) {
     const context = createContext(conference);
     // create information
     information = createInformation(info, context);
-
-    getCurrentUser();
-
-    onConnected();
-
-    // get pull im messages
-    // fail if we don't have permission yet, eg. in lobby
-    try {
-      response = await api
-        .request('pullMessage')
-        .send();
-    } catch (error) {
-      log('connect message failed: %o', error);
-    }
-
 
     // create keepalive worker
     keepalive = createKeepAlive({ api });
@@ -274,20 +263,53 @@ export function createConference(config: ConferenceConfigs) {
     keepalive.start();
     polling.start();
 
-    // test
-    media = createMediaChannel({ api });
-    await media.connect();
+    onConnected();
+    getCurrentUser();
+
+
+    // get pull im messages
+    // fail if we don't have permission yet, eg. in lobby
+    try {
+      response = await api
+        .request('pullMessage')
+        .send();
+    } catch (error) {
+      log('connect message failed: %o', error);
+    }
+
+
+    // create media channels
+    mediaChannel = createMediaChannel({ api, type: 'main' });
+    shareChannel = createMediaChannel({ api, type: 'slides' });
+
+    await mediaChannel.connect();
   }
 
   async function leave() {
     throwIfStatus(STATUS.kDisconnecting);
     throwIfStatus(STATUS.kDisconnected);
 
-    onDisconnecting();
+    switch (status) {
+      case STATUS.kNull:
+      case STATUS.kConnecting:
+      case STATUS.kConnected:
+        if (status === STATUS.kConnected) {
+          onDisconnecting();
 
-    await api
-      .request('leave')
-      .send();
+          await api
+            .request('leave')
+            .send();
+        } else if (request) {
+          request.cancel();
+
+          onDisconnected();
+        }
+        break;
+      case STATUS.kDisconnecting:
+      case STATUS.kDisconnected:
+      default:
+        break;
+    }
   }
 
   async function end() {
@@ -311,12 +333,14 @@ export function createConference(config: ConferenceConfigs) {
     if (interceptor) {
       api.interceptors.request.eject(interceptor);
     }
-    if (media) {
-      media.terminate();
+    if (mediaChannel) {
+      mediaChannel.terminate();
     }
-    if (share) {
-      share.terminate();
+    if (shareChannel) {
+      shareChannel.terminate();
     }
+
+    request = null;
   }
 
   return conference = {
@@ -363,11 +387,11 @@ export function createConference(config: ConferenceConfigs) {
       return information && information.record;
     },
 
-    get media() {
-      return media;
+    get mediaChannel() {
+      return mediaChannel;
     },
-    get share() {
-      return share;
+    get shareChannel() {
+      return shareChannel;
     },
 
     join,
