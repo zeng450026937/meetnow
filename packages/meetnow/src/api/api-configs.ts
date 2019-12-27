@@ -154,7 +154,7 @@ export interface ApiDataMap {
   'joinShare': CtrlApiData & {
     'sdp': string;
   };
-  'switchShare': CtrlApiData & {};
+  'switchShare': CtrlApiData & { share: boolean };
   'leaveShare': CtrlApiData & {};
   'renegShare': CtrlApiData & {
     'sdp': string;

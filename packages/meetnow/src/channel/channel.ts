@@ -24,8 +24,9 @@ export type OfferAnswer = { sdp: string };
 
 export interface ChannelConfigs {
   invite: (offer: OfferAnswer) => OfferAnswer | Promise<OfferAnswer>;
-  cancel: () => void | Promise<void>;
-  bye: () => void | Promise<void>;
+  confirm: () => void | Promise<void>;
+  cancel: (reason?: string) => void | Promise<void>;
+  bye: (reason?: string) => void | Promise<void>;
 }
 
 export interface ConnectOptions {
@@ -50,6 +51,7 @@ const holdMediaTypes = ['audio', 'video'];
 export function createChannel(config: ChannelConfigs) {
   const {
     invite,
+    confirm,
     cancel,
     bye,
   } = config;
@@ -58,6 +60,7 @@ export function createChannel(config: ChannelConfigs) {
   // The RTCPeerConnection instance (public attribute).
   let connection: RTCPeerConnection | undefined;
   let status: STATUS = STATUS.kNull;
+  let canceled: boolean = false;
   const rtcStats: RTCStats = createRTCStats();
 
   // Prevent races on serial PeerConnction operations.
@@ -87,8 +90,14 @@ export function createChannel(config: ChannelConfigs) {
     if (status !== condition) return;
     throw new Error(message || 'Invalid State');
   }
+  function throwIfNotStatus(condition: STATUS, message?: string) {
+    if (status === condition) return;
+    throw new Error(message || 'Invalid State');
+  }
   function throwIfTerminated() {
-    throwIfStatus(STATUS.kTerminated, 'terminated');
+    const message = 'terminated';
+    if (canceled) throw new Error(message);
+    throwIfStatus(STATUS.kTerminated, message);
   }
 
   function createRTCConnection(rtcConstraints?: RTCConfiguration) {
@@ -105,7 +114,7 @@ export function createChannel(config: ChannelConfigs) {
       if (state === 'failed') {
         events.emit('peerconnection:connectionfailed');
         /* eslint-disable-next-line no-use-before-define */
-        close();
+        terminate('RTP Timeout');
       }
     });
 
@@ -198,7 +207,7 @@ export function createChannel(config: ChannelConfigs) {
   async function connect(options: ConnectOptions = {}) {
     log('connect()');
 
-    throwIfStatus(STATUS.kNull);
+    throwIfNotStatus(STATUS.kNull);
 
     if (!window.RTCPeerConnection) {
       throw new Error('WebRTC not supported');
@@ -228,8 +237,6 @@ export function createChannel(config: ChannelConfigs) {
       },
     } = options;
 
-    throwIfTerminated();
-
     createRTCConnection(rtcConstraints);
 
     if (mediaStream) {
@@ -238,14 +245,10 @@ export function createChannel(config: ChannelConfigs) {
     } else if (mediaConstraints.audio || mediaConstraints.video) {
       localMediaStream = await getUserMedia(mediaConstraints)
         .catch((error) => {
-          if (status === STATUS.kTerminated) {
-            throw new Error('terminated');
-          }
           /* eslint-disable-next-line no-use-before-define */
-          onFailed('local', null, 'User Denied Media Access');
+          onFailed('local', 'User Denied Media Access');
 
           log('getusermedia failed: %o', error);
-
           throw error;
         });
       localMediaStreamLocallyGenerated = true;
@@ -259,7 +262,15 @@ export function createChannel(config: ChannelConfigs) {
       });
     }
 
-    const localSDP = await createLocalDescription('offer', rtcOfferConstraints);
+    const localSDP = await createLocalDescription('offer', rtcOfferConstraints)
+      .catch((error) => {
+        /* eslint-disable-next-line no-use-before-define */
+        onFailed('local', 'WebRTC Error');
+
+        log('createOff|setLocalDescription failed: %o', error);
+
+        throw error;
+      });
 
     throwIfTerminated();
 
@@ -283,15 +294,42 @@ export function createChannel(config: ChannelConfigs) {
 
     events.emit('sdp', desc);
 
+    if (connection.signalingState === 'stable') {
+      try {
+        const offer = await connection.createOffer();
+
+        await connection.setLocalDescription(offer);
+      } catch (error) {
+        /* eslint-disable-next-line no-use-before-define */
+        onFailed('local', 'WebRTC Error');
+
+        log('createOff|setLocalDescription failed: %o', error);
+
+        await bye();
+
+        throw error;
+      }
+    }
+
     try {
-      connection.setRemoteDescription({
+      await connection.setRemoteDescription({
         type : 'answer',
         sdp  : desc.sdp,
       });
     } catch (error) {
+      /* eslint-disable-next-line no-use-before-define */
+      onFailed('local', 'Bad Media Description');
+
       events.emit('peerconnection:setremotedescriptionfailed', error);
+
+      log('setRemoteDescription failed: %o', error);
+
+      await bye();
+
       throw error;
     }
+
+    await confirm();
 
     status = STATUS.kAccepted;
     /* eslint-disable-next-line no-use-before-define */
@@ -299,22 +337,30 @@ export function createChannel(config: ChannelConfigs) {
     events.emit('connected');
   }
 
-  async function terminate() {
+  async function terminate(reason?: string) {
     throwIfStatus(STATUS.kTerminated);
 
     switch (status) {
+      case STATUS.kNull:
       case STATUS.kProgress:
       case STATUS.kOffered:
-        await cancel();
+        log('canceling channel');
+
+        if (status === STATUS.kOffered) {
+          await cancel(reason);
+        } else {
+          canceled = true;
+        }
+
         status = STATUS.kCanceled;
         /* eslint-disable-next-line no-use-before-define */
-        onFailed('local', null, 'Canceled');
+        onFailed('local', 'Canceled');
         break;
       case STATUS.kAnswered:
       case STATUS.kAccepted:
-        await bye();
+        await bye(reason);
         /* eslint-disable-next-line no-use-before-define */
-        onEnded('local', null, 'Terminated');
+        onEnded('local', 'Terminated');
         break;
       default:
         break;
@@ -402,7 +448,7 @@ export function createChannel(config: ChannelConfigs) {
     });
   }
 
-  function onEnded(originator: Originator, message?: string, cause?: string) {
+  function onEnded(originator: Originator, message?: string) {
     log('channel ended');
 
     close();
@@ -410,11 +456,10 @@ export function createChannel(config: ChannelConfigs) {
     events.emit('ended', {
       originator,
       message,
-      cause,
     });
   }
 
-  function onFailed(originator: Originator, message?: string, cause?: string) {
+  function onFailed(originator: Originator, message?: string) {
     log('channel failed');
 
     close();
@@ -422,7 +467,6 @@ export function createChannel(config: ChannelConfigs) {
     events.emit('failed', {
       originator,
       message,
-      cause,
     });
   }
 
@@ -614,28 +658,6 @@ export function createChannel(config: ChannelConfigs) {
     return write(sdp);
   }
 
-  function getLocalStream() {
-    log('getLocalStream()');
-
-    let stream: MediaStream | undefined;
-
-    if (connection.getSenders) {
-      stream = new window.MediaStream();
-
-      connection
-        .getSenders()
-        .forEach((sender) => {
-          const { track } = sender;
-          if (track) {
-            stream.addTrack(track);
-          }
-        });
-    } else if ((connection as any).getLocalStreams) {
-      stream = (connection as any).getLocalStreams()[0];
-    }
-
-    return stream;
-  }
   function getRemoteStream() {
     log('getRemoteStream()');
 
@@ -697,6 +719,32 @@ export function createChannel(config: ChannelConfigs) {
           (connection as any).removeStream(stream);
         });
     }
+  }
+  function getLocalStream() {
+    log('getLocalStream()');
+
+    let stream: MediaStream | undefined;
+
+    if (connection.getSenders) {
+      stream = new window.MediaStream();
+
+      connection
+        .getSenders()
+        .forEach((sender) => {
+          const { track } = sender;
+          if (track) {
+            stream.addTrack(track);
+          }
+        });
+    } else if ((connection as any).getLocalStreams) {
+      stream = (connection as any).getLocalStreams()[0];
+    }
+
+    return stream;
+  }
+  function setLocalStream(stream?: MediaStream) {
+    removeLocalStream();
+    addLocalStream(stream);
   }
 
   async function replaceLocalStream(stream?: MediaStream, renegotiation: boolean = false) {
@@ -964,11 +1012,13 @@ export function createChannel(config: ChannelConfigs) {
     hold,
     unhold,
 
-    getLocalStream,
     getRemoteStream,
 
     addLocalStream,
     removeLocalStream,
+    getLocalStream,
+    setLocalStream,
+
     replaceLocalStream,
 
     adjustBandWith,

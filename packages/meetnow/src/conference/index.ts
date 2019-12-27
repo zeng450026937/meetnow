@@ -8,7 +8,7 @@ import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
 import { createInformation, Information } from './information';
-import { createMediaChannel } from '../channel/media-channel';
+import { createMediaChannel, MediaChannel } from '../channel/media-channel';
 import { CONFIG } from '../config';
 import { isMiniProgram } from '../browser';
 import { ApiError } from '../api/api-error';
@@ -16,7 +16,7 @@ import { ApiError } from '../api/api-error';
 const log = debug('Meetnow:Conference');
 const miniprogram = isMiniProgram();
 
-export enum Status {
+export enum STATUS {
   kNull = 0,
   kConnecting = 1,
   kConnected = 2,
@@ -38,14 +38,18 @@ export interface ConferenceConfigs {
 export function createConference(config: ConferenceConfigs) {
   const { api } = config;
   const events = createEvents(log);
+
   let keepalive: KeepAlive | undefined;
   let polling: Polling | undefined;
   let information: Information | undefined;
   let interceptor: number | undefined;
+
   let conference;
+  let media: MediaChannel | undefined;
+  let share: MediaChannel | undefined;
   let user; // current user
 
-  let connected: boolean = false;
+  let status: STATUS = STATUS.kNull;
   let uuid: string | undefined;
   let userId: string | undefined; // as conference entity
   let url: string | undefined;
@@ -63,24 +67,60 @@ export function createConference(config: ConferenceConfigs) {
     return user;
   }
 
+  function throwIfStatus(condition: STATUS, message?: string) {
+    if (status !== condition) return;
+    throw new Error(message || 'Invalid State');
+  }
+  function throwIfNotStatus(condition: STATUS, message?: string) {
+    if (status === condition) return;
+    throw new Error(message || 'Invalid State');
+  }
+
+  function onConnecting() {
+    log('conference connecting');
+
+    status = STATUS.kConnecting;
+    events.emit('connecting');
+  }
+  function onConnected() {
+    log('conference connected');
+
+    status = STATUS.kConnected;
+    events.emit('connected');
+  }
+  function onDisconnecting() {
+    log('conference disconnecting');
+
+    status = STATUS.kDisconnecting;
+    events.emit('disconnecting');
+  }
+  function onDisconnected(data?) {
+    log('conference disconnected');
+
+    /* eslint-disable-next-line no-use-before-define */
+    cleanup();
+
+    status = STATUS.kDisconnected;
+    events.emit('disconnected', data);
+  }
+  function onFailed() {}
+
   async function join(options?: Partial<JoinOptions>) {
     log('join()');
 
-    if (connected) {
-      log('already connected');
-      return;
+    throwIfNotStatus(STATUS.kNull);
+
+    if (!options.url && !options.number) {
+      throw new TypeError('URL or Number is required');
     }
 
-    events.emit('connecting');
+    status = STATUS.kConnecting;
+    onConnecting();
 
     let response: AxiosResponse<RequestResult>;
     let data: RequestResult;
 
     const hasMedia = true;
-
-    if (!options.url && !options.number) {
-      throw new TypeError('URL or Number is required');
-    }
 
     if (!options.url && options.number) {
       response = await api
@@ -93,7 +133,6 @@ export function createConference(config: ConferenceConfigs) {
       ({ url: options.url } = data.data);
     }
 
-    // step 1
     // join focus
     const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 
@@ -104,11 +143,11 @@ export function createConference(config: ConferenceConfigs) {
         // 'conference-user-id'  : null,
         'conference-url'      : options.url,
         'conference-pwd'      : options.password,
-        'user-agent'          : CONFIG.get('useragent', 'Yealink Meeting WebRTC'),
-        'client-url'          : options.url.replace(/\w+@/g, 'webrtc@'),
-        'client-display-text' : options.displayName || 'Yealink Meeting',
+        'user-agent'          : CONFIG.get('useragent', `Yealink WEB-APP ${ process.env.VUE_APP_VERSION }`),
+        'client-url'          : options.url.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
+        'client-display-text' : options.displayName || 'Yealink WEB-APP',
         'client-type'         : 'http',
-        'client-info'         : CONFIG.get('clientinfo', 'Apollo_WebRTC'),
+        'client-info'         : CONFIG.get('clientinfo', miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'),
         'pure-ctrl-channel'   : !hasMedia,
         // if join with media
         'is-webrtc'           : !miniprogram && hasMedia,
@@ -153,14 +192,12 @@ export function createConference(config: ConferenceConfigs) {
       });
 
 
-    // step 2
     // get full info
     response = await api
       .request('getFullInfo')
       .send();
 
     ({ data } = response);
-
 
     const info = data.data as ConferenceInformation;
 
@@ -171,7 +208,8 @@ export function createConference(config: ConferenceConfigs) {
 
     getCurrentUser();
 
-    // step 3
+    onConnected();
+
     // get pull im messages
     // fail if we don't have permission yet, eg. in lobby
     try {
@@ -183,17 +221,9 @@ export function createConference(config: ConferenceConfigs) {
     }
 
 
-    connected = true;
-
-    events.emit('connected');
-
-
-    // step 4
     // create keepalive worker
     keepalive = createKeepAlive({ api });
 
-
-    // step 5
     // create polling worker
     polling = createPolling({
       api,
@@ -225,13 +255,7 @@ export function createConference(config: ConferenceConfigs) {
 
         // bizCode = 901314 ended by presenter
         // bizCode = 901320 kicked by presenter
-
-        /* eslint-disable-next-line no-use-before-define */
-        cleanup();
-
-        connected = false;
-
-        events.emit('disconnect', data);
+        onDisconnected(data);
       },
 
       onError : (data: ApiError) => {
@@ -242,12 +266,7 @@ export function createConference(config: ConferenceConfigs) {
         // there are some problems with polling
         // leave conference
         //
-        /* eslint-disable-next-line no-use-before-define */
-        cleanup();
-
-        connected = false;
-
-        events.emit('disconnect', data);
+        onDisconnected(data);
       },
     });
 
@@ -256,17 +275,15 @@ export function createConference(config: ConferenceConfigs) {
     polling.start();
 
     // test
-    const mediaChannel = createMediaChannel({ api });
-    await mediaChannel.connect();
+    media = createMediaChannel({ api });
+    await media.connect();
   }
 
   async function leave() {
-    if (!connected) {
-      log('already disconnected');
-      return;
-    }
+    throwIfStatus(STATUS.kDisconnecting);
+    throwIfStatus(STATUS.kDisconnected);
 
-    events.emit('disconnecting');
+    onDisconnecting();
 
     await api
       .request('leave')
@@ -274,10 +291,10 @@ export function createConference(config: ConferenceConfigs) {
   }
 
   async function end() {
-    if (!connected) {
-      log('already disconnected');
-      return;
-    }
+    throwIfNotStatus(STATUS.kConnected);
+
+    await leave();
+
     await api
       .request('end')
       .data({ 'conference-url': url })
@@ -293,6 +310,12 @@ export function createConference(config: ConferenceConfigs) {
     }
     if (interceptor) {
       api.interceptors.request.eject(interceptor);
+    }
+    if (media) {
+      media.terminate();
+    }
+    if (share) {
+      share.terminate();
     }
   }
 
@@ -338,6 +361,13 @@ export function createConference(config: ConferenceConfigs) {
     },
     get record() {
       return information && information.record;
+    },
+
+    get media() {
+      return media;
+    },
+    get share() {
+      return share;
     },
 
     join,

@@ -20,6 +20,8 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
   const channel = createChannel({
     invite : async (offer) => {
+      log('invite()');
+
       let { sdp } = offer;
 
       const apiName = mediaVersion
@@ -49,8 +51,20 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
       return { sdp };
     },
-    cancel : () => request.cancel(),
-    bye    : () => {},
+    confirm : () => {
+      log('confirm()');
+      // send confirm
+    },
+    cancel : () => {
+      log('cancel()');
+
+      request && request.cancel();
+    },
+    bye : () => {
+      log('bye()');
+
+      request = null;
+    },
   });
 
   channel.on(
@@ -81,3 +95,5 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     ...channel,
   };
 }
+
+export type MediaChannel = ReturnType<typeof createMediaChannel>;
