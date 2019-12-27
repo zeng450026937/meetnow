@@ -741,7 +741,7 @@ export function createChannel(config: ChannelConfigs) {
       stream = (connection as any).getRemoteStreams()[0];
     }
 
-    return connection;
+    return stream;
   }
 
   function addLocalStream(stream?: MediaStream) {

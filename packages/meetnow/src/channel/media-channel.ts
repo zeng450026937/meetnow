@@ -20,6 +20,9 @@ export function createMediaChannel(config: MediaChannelConfigs) {
   let request: Request | undefined;
   let icetimmeout;
 
+  let localstream: MediaStream | undefined;
+  let remotestream: MediaStream | undefined;
+
   const channel = createChannel({
     invite : async (offer) => {
       log('invite()');
@@ -55,6 +58,12 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     },
     confirm : () => {
       log('confirm()');
+
+      request = null;
+
+      localstream = channel.getLocalStream();
+
+      channel.emit('localstream', localstream);
       // send confirm
     },
     cancel : () => {
@@ -76,6 +85,45 @@ export function createMediaChannel(config: MediaChannelConfigs) {
       .prefer('h264')
       .build(),
   );
+
+  channel.on('peerconnection', (pc: RTCPeerConnection) => {
+    pc.addEventListener('connectionstatechange', () => {
+      log('peerconnection:connectionstatechange : %s', pc.connectionState);
+    });
+
+    pc.addEventListener('iceconnectionstatechange', () => {
+      log('peerconnection:iceconnectionstatechange : %s', pc.iceConnectionState);
+    });
+
+    pc.addEventListener('icegatheringstatechange', () => {
+      log('peerconnection:icegatheringstatechange : %s', pc.iceGatheringState);
+    });
+
+    pc.addEventListener('negotiationneeded', () => {
+      log('peerconnection:negotiationneeded');
+    });
+
+    pc.addEventListener('track', (event) => {
+      log('peerconnection:track: %o', event);
+      remotestream = event.streams[0];
+
+      channel.emit('remotestream', remotestream);
+    });
+
+    // for old browser(firefox)
+    pc.addEventListener('addstream', (event) => {
+      log('peerconnection:addstream: %o', event);
+      remotestream = event.stream;
+
+      channel.emit('remotestream', remotestream);
+    });
+    pc.addEventListener('removestream', (event) => {
+      log('peerconnection:removestream: %o', event);
+      remotestream = channel.getRemoteStream();
+
+      channel.emit('remotestream', remotestream);
+    });
+  });
 
   channel.on('icecandidate', (data) => {
     const { candidate, ready } = data;
