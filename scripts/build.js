@@ -6,12 +6,12 @@ module.exports = (api, options) => {
       usage       : 'vue-cli-service build:meetnow',
       details     : 'TBD',
     },
-    (args, rawArgs) => {
-      args.entry = './packages/meetnow/src/index.ts';
+    async (args, rawArgs) => {
       args.name = 'meetnow';
-      args.dest = './packages/meetnow/dist';
       args.target = 'lib';
-      api.service.run('build', args);
+      args.entry = './packages/meetnow/src/index.ts';
+      args.dest = './packages/meetnow/dist';
+      await api.service.run('build', args);
     },
   );
 };
