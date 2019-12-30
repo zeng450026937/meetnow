@@ -45,7 +45,7 @@ export function createConference(config: ConferenceConfigs) {
   let information: Information | undefined;
   let interceptor: number | undefined;
 
-  let conference;
+  let conference: any;
   let mediaChannel: MediaChannel | undefined;
   let shareChannel: MediaChannel | undefined;
   let chatChannel: ChatChannel | undefined;
@@ -62,7 +62,7 @@ export function createConference(config: ConferenceConfigs) {
   function getCurrentUser() {
     if (!user) {
       // try to get current user
-      user = information.users.getCurrent();
+      user = information!.users.getCurrent();
 
       if (user) {
         events.emit('user', user);
@@ -105,7 +105,7 @@ export function createConference(config: ConferenceConfigs) {
     status = STATUS.kDisconnecting;
     events.emit('disconnecting');
   }
-  function onDisconnected(data?) {
+  function onDisconnected(data?: any) {
     log('conference disconnected');
 
     /* eslint-disable-next-line no-use-before-define */
@@ -122,7 +122,7 @@ export function createConference(config: ConferenceConfigs) {
     await chatChannel.connect(2000).catch();
   }
 
-  async function join(options?: Partial<JoinOptions>) {
+  async function join(options: Partial<JoinOptions>) {
     log('join()');
 
     throwIfNotStatus(STATUS.kNull);
@@ -159,10 +159,10 @@ export function createConference(config: ConferenceConfigs) {
       .data({
       // 'conference-uuid'     : null,
       // 'conference-user-id'  : null,
-        'conference-url'      : options.url,
+        'conference-url'      : options.url!,
         'conference-pwd'      : options.password,
         'user-agent'          : CONFIG.get('useragent', `Yealink WEB-APP ${ process.env.VUE_APP_VERSION }`),
-        'client-url'          : options.url.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
+        'client-url'          : options.url!.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
         'client-display-text' : options.displayName || 'Yealink WEB-APP',
         'client-type'         : 'http',
         'client-info'         : CONFIG.get('clientinfo', miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'),
@@ -175,7 +175,7 @@ export function createConference(config: ConferenceConfigs) {
           'video-width'  : 640,
           'video-height' : 480,
           'frame-rate'   : 15,
-        },
+        } as any,
       });
 
     response = await request.send();
@@ -200,7 +200,7 @@ export function createConference(config: ConferenceConfigs) {
       .interceptors
       .request
       .use((config) => {
-        if (/conference-ctrl/.test(config.url) && config.method === 'post') {
+        if (/conference-ctrl/.test(config.url!) && config.method === 'post') {
           config.data = {
             'conference-user-id' : userId,
             'conference-uuid'    : uuid,
@@ -269,7 +269,7 @@ export function createConference(config: ConferenceConfigs) {
 
     await api
       .request('end')
-      .data({ 'conference-url': url })
+      .data({ 'conference-url': url! })
       .send();
 
     return conference as Conference;
@@ -278,12 +278,12 @@ export function createConference(config: ConferenceConfigs) {
   function setup() {
     getCurrentUser();
 
-    const { state, users } = information;
+    const { state, users } = information!;
 
-    state.on('sharingUserEntityChanged', (val) => {
+    state.on('sharingUserEntityChanged', (val: string) => {
       events.emit('sharinguser', users.getUser(val));
     });
-    state.on('speechUserEntityChanged', (val) => {
+    state.on('speechUserEntityChanged', (val: string) => {
       events.emit('speechuser', users.getUser(val));
     });
 
@@ -297,7 +297,7 @@ export function createConference(config: ConferenceConfigs) {
       onInformation : (data: ConferenceInformation) => {
         log('receive information: %o', data);
 
-        information.update(data);
+        information!.update(data);
 
         events.emit('information', information);
 
@@ -307,13 +307,13 @@ export function createConference(config: ConferenceConfigs) {
       onMessage : (data: any) => {
         log('receive message: %o', data);
 
-        chatChannel.incoming(data);
+        chatChannel!.incoming(data);
       },
 
       onRenegotiate : (data: any) => {
         log('receive renegotiate: %o', data);
 
-        mediaChannel.renegotiate();
+        mediaChannel!.renegotiate();
       },
 
       onQuit : (data: any) => {
@@ -370,12 +370,14 @@ export function createConference(config: ConferenceConfigs) {
       chatChannel.terminate();
     }
 
-    request = null;
+    request = undefined;
   }
 
   async function share() {
-    if (!shareChannel.isInProgress() && !shareChannel.isEstablished()) {
-      await shareChannel.connect();
+    throwIfNotStatus(STATUS.kConnected);
+
+    if (!shareChannel!.isInProgress() && !shareChannel!.isEstablished()) {
+      await shareChannel!.connect();
     }
     await api
       .request('switchShare')

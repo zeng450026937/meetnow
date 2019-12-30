@@ -3,11 +3,11 @@
 
 import { grammar } from './grammar';
 
-function toIntIfInt(v) {
+function toIntIfInt(v: any) {
   return String(Number(v)) === v ? Number(v) : v;
 }
 
-function attachProperties(match, location, names, rawName) {
+function attachProperties(match: any, location: any, names: any, rawName: any) {
   if (rawName && !names) {
     location[rawName] = toIntIfInt(match[1]);
   } else {
@@ -19,7 +19,7 @@ function attachProperties(match, location, names, rawName) {
   }
 }
 
-export function parseReg(obj, location, content) {
+export function parseReg(obj: any, location: any, content: any) {
   const needsBlank = obj.name && obj.names;
 
   if (obj.push && !location[obj.push]) {
@@ -205,7 +205,7 @@ export interface SDP {
 
 export function parse(sdp: string): SDP;
 export function parse(sdp: string) {
-  const media = [];
+  const media: any[] = [];
   const session = { media };
   let location = session; // points at where properties go under (one of the above)
 
@@ -220,10 +220,10 @@ export function parse(sdp: string) {
         location = media[media.length - 1]; // point at latest media line
       }
 
-      for (let j = 0; j < (grammar[type] || []).length; j += 1) {
-        const obj = grammar[type][j];
+      for (let j = 0; j < (grammar[(type as keyof typeof grammar)] || []).length; j += 1) {
+        const obj = grammar[(type as keyof typeof grammar)][j];
 
-        if (obj.reg.test(content)) {
+        if ((obj as any).reg.test(content)) {
           parseReg(obj, location, content);
           return;
         }
@@ -235,7 +235,7 @@ export function parse(sdp: string) {
   return session as SDP;
 }
 
-export function paramReducer(acc, expr) {
+export function paramReducer(acc: any, expr: any) {
   const s = expr.split(/=(.+)/, 2);
 
   if (s.length === 2) {
@@ -245,18 +245,18 @@ export function paramReducer(acc, expr) {
   return acc;
 }
 
-export function parseParams(str) {
+export function parseParams(str: any) {
   return str.split(/\;\s?/).reduce(paramReducer, {});
 }
 
 // For backward compatibility - alias will be removed in 3.0.0
 export const parseFmtpConfig = parseParams;
 
-export function parsePayloads(str) {
+export function parsePayloads(str: any) {
   return str.split(' ').map(Number);
 }
 
-export function parseRemoteCandidates(str) {
+export function parseRemoteCandidates(str: any) {
   const candidates = [];
   const parts = str.split(' ').map(toIntIfInt);
 
@@ -271,16 +271,16 @@ export function parseRemoteCandidates(str) {
   return candidates;
 }
 
-export function parseImageAttributes(str) {
-  return str.split(' ').map((item) => {
+export function parseImageAttributes(str: any) {
+  return str.split(' ').map((item: any) => {
     return item.substring(1, item.length - 1).split(',')
       .reduce(paramReducer, {});
   });
 }
 
-export function parseSimulcastStreamList(str) {
-  return str.split(';').map((stream) => {
-    return stream.split(',').map((format) => {
+export function parseSimulcastStreamList(str: any) {
+  return str.split(';').map((stream: any) => {
+    return stream.split(',').map((format: any) => {
       let scid; let
         paused = false;
 

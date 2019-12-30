@@ -22,9 +22,9 @@ export function createUser(data: ConferenceUser, context: Context) {
   /* eslint-disable-next-line no-use-before-define */
   const entity = getEntity();
   const camera = createCameraCtrl(api, entity);
-  let user;
+  let user: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
     target.displayText = data['display-text'];
 
@@ -271,7 +271,8 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   function sendMessage(msg: string) {
-
+    log('sendMessage()');
+    log('TBD');
   }
 
   return user = {

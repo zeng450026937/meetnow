@@ -17,9 +17,9 @@ export function createModifier() {
   let height = 1080;
   let frameRate = 30;
   let highFrameRate = false;
-  let prefer;
-  let unsupport;
-  let modifier;
+  let prefer: 'vp8' | 'h264' | undefined;
+  let unsupport: 'vp8' | 'h264' | undefined;
+  let modifier: any;
 
   function build() {
     return (data: Data) => {
@@ -45,7 +45,7 @@ export function createModifier() {
 
 
       // process sdp
-      for (const m of sdp.media) {
+      for (const m of sdp.media!) {
         /*
         m.candidates = m.candidates.filter((c) =>
         {
@@ -69,7 +69,7 @@ export function createModifier() {
           const h264Config = [`max-mbps=${ maxMbps }`, `max-fs=${ maxFrameSize }`];
 
           // find codec payload
-          for (const r of m.rtp) {
+          for (const r of m.rtp!) {
             const codec = r.codec.toUpperCase();
             let fmtp = null;
 
@@ -77,14 +77,14 @@ export function createModifier() {
               case 'VP8':
               case 'VP9':
                 vp8Payloads.add(Number(r.payload));
-                fmtp = m.fmtp.find((f) => (f.payload === r.payload));
+                fmtp = m.fmtp!.find((f) => (f.payload === r.payload));
                 if (fmtp) {
                   fmtp.config = fmtp.config.split(';')
                     .filter((p) => { return !(/^max-fr/.test(p) || /^max-fs/.test(p)); })
                     .concat(vp8Config)
                     .join(';');
                 } else {
-                  m.fmtp.push({
+                  m.fmtp!.push({
                     payload : r.payload,
                     config  : vp8Config.join(';'),
                   });
@@ -92,7 +92,7 @@ export function createModifier() {
                 break;
               case 'H264':
                 h264Payloads.add(Number(r.payload));
-                fmtp = m.fmtp.find((f) => (f.payload === r.payload));
+                fmtp = m.fmtp!.find((f) => (f.payload === r.payload));
                 if (fmtp) {
                   if (highFrameRate
                   && fmtp.config.indexOf('profile-level-id=42e01f') !== -1
@@ -119,7 +119,7 @@ export function createModifier() {
                       .join(';');
                   }
                 } else {
-                  m.fmtp.push({
+                  m.fmtp!.push({
                     payload : r.payload,
                     config  : h264Config.join(';'),
                   });
@@ -130,7 +130,7 @@ export function createModifier() {
             }
           }
 
-          for (const f of m.fmtp) {
+          for (const f of m.fmtp!) {
             const aptConfig = f.config
               .split(';')
               .find((p) => { return /^apt=/.test(p); });
@@ -179,15 +179,15 @@ export function createModifier() {
               .sort((x, y) => (x - y))
               .concat(payloads as any);
 
-            m.rtp = m.rtp.filter((r) => !unsupportCodec.has(Number(r.payload)));
-            m.fmtp = m.fmtp.filter((r) => !unsupportCodec.has(Number(r.payload)));
+            m.rtp = m.rtp!.filter((r) => !unsupportCodec.has(Number(r.payload)));
+            m.fmtp = m.fmtp!.filter((r) => !unsupportCodec.has(Number(r.payload)));
 
-            const rtps = []; const
-              fmtps = [];
+            const rtps: any[] = [];
+            const fmtps: any[] = [];
 
             payloads.forEach((p) => {
-              const rtp = m.rtp.find((r) => r.payload === Number(p));
-              const fmtp = m.fmtp.find((f) => f.payload === Number(p));
+              const rtp = m.rtp!.find((r) => r.payload === Number(p));
+              const fmtp = m.fmtp!.find((f) => f.payload === Number(p));
 
               if (rtp) rtps.push(rtp);
               if (fmtp) fmtps.push(fmtp);
@@ -211,14 +211,14 @@ export function createModifier() {
       }
 
       // filter out unsupported application media
-      sdp.media = sdp.media.filter((m) => m.type !== 'application' || /TLS/.test(m.protocol));
+      sdp.media = sdp.media!.filter((m) => m.type !== 'application' || /TLS/.test(m.protocol));
 
       if (originator === 'remote') {
         sdp.media.forEach((m) => {
           const payloads = String(m.payloads).split(' ');
 
           if (m.rtcpFb) {
-            const rtcpFb = [];
+            const rtcpFb: any[] = [];
 
             m.rtcpFb.forEach((fb) => {
               if (fb.payload === '*' || payloads.includes(`${ fb.payload }`)) {
@@ -230,7 +230,7 @@ export function createModifier() {
           }
 
           if (m.fmtp) {
-            const fmtp = [];
+            const fmtp: any[] = [];
 
             m.fmtp.forEach((fm) => {
               if (fm.payload === '*' || payloads.includes(`${ fm.payload }`)) {
@@ -242,7 +242,7 @@ export function createModifier() {
           }
 
           if (m.rtp) {
-            const rtp = [];
+            const rtp: any[] = [];
 
             m.rtp.forEach((r) => {
               if (r.payload === '*' || payloads.includes(`${ r.payload }`)) {

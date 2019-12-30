@@ -13,9 +13,9 @@ export function createRecord(data: ConferenceRecordUsers, context: Context) {
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   const ctrl = createRecordCtrl(api);
-  let record;
+  let record: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
     target.status = getStatus();
     /* eslint-enable no-use-before-define */

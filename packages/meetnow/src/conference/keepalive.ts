@@ -48,7 +48,7 @@ export function createKeepAlive(config: KeepAliveConfigs) {
   async function keepalive() {
     log('keepalive()');
 
-    let response: AxiosResponse<RequestResult>;
+    let response: AxiosResponse<RequestResult> | undefined;
     let error;
 
     try {

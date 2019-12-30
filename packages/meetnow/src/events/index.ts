@@ -4,8 +4,8 @@ import { isArray } from '../utils';
 const log = debug('MN:Events');
 
 export function createEvents(scopedlog: Debugger = log) {
-  let instance;
-  const events = {} as Record<string, Function[]>;
+  let instance: any;
+  const events = {} as Record<string, Function[] | null>;
 
   function on(event: string | string[], fn: Function) {
     if (isArray(event)) {
@@ -35,7 +35,7 @@ export function createEvents(scopedlog: Debugger = log) {
 
     while (index--) {
       callback = callbacks[index];
-      if (callback === fn || callback.fn === fn) {
+      if (callback === fn || (callback as any).fn === fn) {
         callbacks.splice(index, 1);
         break;
       }
@@ -43,7 +43,7 @@ export function createEvents(scopedlog: Debugger = log) {
   }
 
   function once(event: string | string[], fn: Function) {
-    function wrapper(...args: any[]) {
+    function wrapper(this: any, ...args: any[]) {
       off(event, wrapper);
       fn.apply(this, args);
     }

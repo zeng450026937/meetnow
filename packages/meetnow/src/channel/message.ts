@@ -49,8 +49,8 @@ export function createMessage(config: MessageConfigs) {
   let reciver: string[] | undefined;
   let isPrivate: boolean | undefined;
 
-  let message;
-  let request: Request;
+  let message: any;
+  let request: Request | undefined;
 
   async function send(message: string, target?: string[]) {
     log('send()');
@@ -73,7 +73,7 @@ export function createMessage(config: MessageConfigs) {
     } catch (error) {
       status = MessageStatus.kFailed;
 
-      onFailed && onFailed(this);
+      onFailed && onFailed(message as any);
 
       throw error;
     }
@@ -89,11 +89,13 @@ export function createMessage(config: MessageConfigs) {
 
     status = MessageStatus.kSuccess;
 
-    onSucceeded && onSucceeded(this);
+    onSucceeded && onSucceeded(message as any);
   }
 
   async function retry() {
     log('retry()');
+
+    if (!content) throw new Error('Invalid Message');
 
     await send(content, reciver);
   }
@@ -103,7 +105,7 @@ export function createMessage(config: MessageConfigs) {
 
     if (request) {
       request.cancel();
-      request = null;
+      request = undefined;
     }
   }
 

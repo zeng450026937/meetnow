@@ -72,34 +72,33 @@ export function createUA(config?: UAConfigs) {
     }
 
     // clear token will break all api request
-    token = null;
+    token = undefined;
   }
 
-  async function fetch(number: string, url?: string) {
+  async function fetch(number: string) {
     log('fetch()');
 
     let response: AxiosResponse<RequestResult>;
     let data: RequestResult;
     let info;
     let partyId: string;
+    let url: string;
 
-    if (!url) {
-      // get conference url
-      response = await api
-        .request('getURL')
-        .data({ 'long-number': number })
-        .send();
+    // get conference url
+    response = await api
+      .request('getURL')
+      .data({ 'long-number': number })
+      .send();
 
-      ({ data } = response);
-      /* eslint-disable-next-line prefer-const */
-      ({ 'party-id': partyId, url } = data.data);
-    }
+    ({ data } = response);
+    /* eslint-disable-next-line prefer-const */
+    ({ 'party-id': partyId, url } = data.data);
 
     // get conference info
     try {
       response = await api
         .request('getBasicInfo')
-        .data({ 'conference-url': url })
+        .data({ 'conference-url': (url as string) })
         .send();
 
       ({ data } = response);

@@ -18,7 +18,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
   let mediaVersion: number;
   let callId: string;
   let request: Request | undefined;
-  let icetimmeout;
+  let icetimmeout: number | undefined;
 
   let localstream: MediaStream | undefined;
   let remotestream: MediaStream | undefined;
@@ -59,7 +59,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     confirm : () => {
       log('confirm()');
 
-      request = null;
+      request = undefined;
 
       localstream = channel.getLocalStream();
 
@@ -74,7 +74,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     bye : () => {
       log('bye()');
 
-      request = null;
+      request = undefined;
     },
   });
 
@@ -111,7 +111,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     });
 
     // for old browser(firefox)
-    pc.addEventListener('addstream', (event) => {
+    pc.addEventListener('addstream', (event: any) => {
       log('peerconnection:addstream: %o', event);
       remotestream = event.stream;
 
@@ -125,12 +125,12 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     });
   });
 
-  channel.on('icecandidate', (data) => {
+  channel.on('icecandidate', (data: any) => {
     const { candidate, ready } = data;
 
     if (icetimmeout) {
       clearTimeout(icetimmeout);
-      icetimmeout = null;
+      icetimmeout = undefined;
     }
 
     if (candidate) {
@@ -143,6 +143,13 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
   return {
     ...channel,
+
+    get version() {
+      return mediaVersion;
+    },
+    get callId() {
+      return callId;
+    },
   };
 }
 

@@ -5,7 +5,7 @@ import {
 
 const log = debug('MN:Information:Item');
 
-export type ItemValue = string | number | boolean | Item | null;
+export type ItemValue = string | number | boolean | Item | null | undefined;
 
 export interface Item {
   [key: string]: ItemValue | ItemValue[];

@@ -41,13 +41,13 @@ export function createRTCStats() {
         case 'inbound-rtp':
           if (!stats.isRemote || stats.isRemote === false) {
             /* eslint-disable-next-line no-use-before-define */
-            latestInbound[stats.mediaType] = parseRTPStats(report, stats);
+            latestInbound[stats.mediaType as keyof ParsedStats] = parseRTPStats(report, stats);
           }
           break;
         case 'outbound-rtp':
           if (!stats.isRemote || stats.isRemote === false) {
             /* eslint-disable-next-line no-use-before-define */
-            latestOutbound[stats.mediaType] = parseRTPStats(report, stats);
+            latestOutbound[stats.mediaType as keyof ParsedStats] = parseRTPStats(report, stats);
           }
           break;
         // case 'remote-inbound-rtp':
@@ -83,10 +83,10 @@ export function createRTCStats() {
           parseSSRCStats(report, stats, isLegacyStats);
 
           if (/recv/g.test(stats.id)) {
-            latestInbound[stats.mediaType] = stats;
+            latestInbound[stats.mediaType as keyof ParsedStats] = stats;
           }
           if (/send/g.test(stats.id)) {
-            latestOutbound[stats.mediaType] = stats;
+            latestOutbound[stats.mediaType as keyof ParsedStats] = stats;
           }
           break;
         default:
@@ -128,7 +128,7 @@ export function createRTCStats() {
     archive();
   }
 
-  function parseRTPStats(report: RTCStatsReport, stats) {
+  function parseRTPStats(report: RTCStatsReport, stats: any) {
     const codec = report.get(stats.codecId);
     const track = report.get(stats.trackId);
     const transport = report.get(stats.transportId);
@@ -163,7 +163,7 @@ export function createRTCStats() {
     return stats;
   }
 
-  function parseSSRCStats(report: RTCStatsReport, stats, isLegacyStats: boolean = false) {
+  function parseSSRCStats(report: RTCStatsReport, stats: any, isLegacyStats: boolean = false) {
     if (isLegacyStats) {
       stats.mediaType = stats.stat('mediaType');
       stats.googCodecName = stats.stat('googCodecName');
@@ -198,21 +198,21 @@ export function createRTCStats() {
     return stats;
   }
 
-  function updateRTPStats(stats, direction: 'inbound' | 'outbound') {
+  function updateRTPStats(stats: any, direction: 'inbound' | 'outbound') {
     if (!stats) {
       return;
     }
 
     const prestats = stats[direction][stats.mediaType];
 
-    const diff = (x = {}, y = {}, key) => {
+    const diff = (x: any = {}, y: any = {}, key: string) => {
       if (typeof x[key] !== 'undefined' && typeof y[key] !== 'undefined') {
         return Math.abs(x[key] - y[key]);
       }
       return 0;
     };
 
-    const safe = (x) => {
+    const safe = (x: number) => {
       if (!Number.isFinite(x)) { return 0; }
       if (Number.isNaN(x)) { return 0; }
       return x;
@@ -226,7 +226,7 @@ export function createRTCStats() {
         // calc packetsLostRate
         if (direction === 'outbound' && !stats.packetsLostRate) {
           /* eslint-disable-next-line no-use-before-define */
-          const archived = getArchive()[direction][stats.mediaType];
+          const archived = getArchive()[direction][stats.mediaType as keyof ParsedStats];
 
           const lostDiff = diff(stats, archived, 'packetsLost');
           const sentDiff = diff(stats, archived, 'packetsSent');
@@ -237,7 +237,7 @@ export function createRTCStats() {
         }
         if (direction === 'inbound' && !stats.packetsLostRate) {
           /* eslint-disable-next-line no-use-before-define */
-          const archived = getArchive()[direction][stats.mediaType];
+          const archived = getArchive()[direction][stats.mediaType as keyof ParsedStats];
 
           const lostDiff = diff(stats, archived, 'packetsLost');
           const receivedDiff = diff(stats, archived, 'packetsReceived');
@@ -282,7 +282,7 @@ export function createRTCStats() {
             valueDiff = diff(stats.track, prestats.track, 'framesSent');
           }
 
-          stats.track.frameRate = safe(valueDiff / timeDiff * 1000);
+          stats.track.frameRate = valueDiff ? safe(valueDiff / timeDiff * 1000) : 0;
         }
 
         stats[direction][stats.mediaType] = stats;

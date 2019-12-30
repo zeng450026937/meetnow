@@ -1,9 +1,15 @@
 const path = require('path');
 
 module.exports = {
+
   chainWebpack : (config) => {
     config.module
-      .noParse(/^(vue|vue-router|vue-core)$/);
+      .noParse(/^(vue|vue-router|vue-core|dist)$/);
+
+    config.module
+      .rule('js')
+      .exclude
+      .add(/(vue-core|dist)/);
 
     // config.module
     //   .rule('js')
@@ -13,9 +19,10 @@ module.exports = {
     config.module
       .rule('eslint')
       .exclude
-      .add(/(vue-core)/);
+      .add(/(vue-core|dist)/);
 
-    config.resolve.alias
+    config.resolve
+      .alias
       .set('package', path.resolve(__dirname, 'package.json'));
   },
 
@@ -28,4 +35,5 @@ module.exports = {
       },
     },
   },
+
 };

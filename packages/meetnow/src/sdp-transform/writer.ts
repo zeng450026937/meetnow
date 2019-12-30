@@ -30,7 +30,7 @@ const format = function (formatStr: string, ...args: any[]) {
   // NB: we discard excess arguments - they are typically undefined from makeLine
 };
 
-const makeLine = function (type, obj, location) {
+const makeLine = function (type: any, obj: any, location: any) {
   const str = obj.format instanceof Function
     ? (obj.format(obj.push ? location : location[obj.name]))
     : obj.format;
@@ -65,7 +65,7 @@ const defaultOuterOrder = [
 const defaultInnerOrder = ['i', 'c', 'b', 'a'];
 
 
-export function write(session, opts?) {
+export function write(session: any, opts?: any) {
   opts = opts || {};
   // ensure certain properties exist
   if (session.version == null) {
@@ -74,7 +74,7 @@ export function write(session, opts?) {
   if (session.name == null) {
     session.name = ' '; // 's= ' must be there if no meaningful name set
   }
-  session.media.forEach((mLine) => {
+  session.media.forEach((mLine: any) => {
     if (mLine.payloads == null) {
       mLine.payloads = '';
     }
@@ -82,15 +82,15 @@ export function write(session, opts?) {
 
   const outerOrder = opts.outerOrder || defaultOuterOrder;
   const innerOrder = opts.innerOrder || defaultInnerOrder;
-  const sdp = [];
+  const sdp: any[] = [];
 
   // loop through outerOrder for matching properties on session
-  outerOrder.forEach((type) => {
-    grammar[type].forEach((obj) => {
+  outerOrder.forEach((type: any) => {
+    grammar[(type as keyof typeof grammar)].forEach((obj: any) => {
       if (obj.name in session && session[obj.name] != null) {
         sdp.push(makeLine(type, obj, session));
       } else if (obj.push in session && session[obj.push] != null) {
-        session[obj.push].forEach((el) => {
+        session[obj.push].forEach((el: any) => {
           sdp.push(makeLine(type, obj, el));
         });
       }
@@ -98,15 +98,15 @@ export function write(session, opts?) {
   });
 
   // then for each media line, follow the innerOrder
-  session.media.forEach((mLine) => {
+  session.media.forEach((mLine: any) => {
     sdp.push(makeLine('m', grammar.m[0], mLine));
 
-    innerOrder.forEach((type) => {
-      grammar[type].forEach((obj) => {
+    innerOrder.forEach((type: any) => {
+      grammar[(type as keyof typeof grammar)].forEach((obj: any) => {
         if (obj.name in mLine && mLine[obj.name] != null) {
           sdp.push(makeLine(type, obj, mLine));
         } else if (obj.push in mLine && mLine[obj.push] != null) {
-          mLine[obj.push].forEach((el) => {
+          mLine[obj.push].forEach((el: any) => {
             sdp.push(makeLine(type, obj, el));
           });
         }

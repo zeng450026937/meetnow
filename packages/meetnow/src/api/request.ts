@@ -15,7 +15,7 @@ export interface RequestResult {
   statusCode?: number;
 }
 
-export class Request<
+export interface Request<
   RequestData = any,
   RequestParams = any,
   RequestHeader = any,
@@ -40,7 +40,7 @@ export function createRequest<
   RequestHeader = any,
 >(config: AxiosRequestConfig, delegate: AxiosInstance = axios) {
   let source: CancelTokenSource | undefined;
-  let request;
+  let request: Request;
 
   function header(header: RequestHeader) {
     config.headers = header;
@@ -64,7 +64,7 @@ export function createRequest<
   function cancel(reason: string = 'canceled') {
     log('cancel()');
 
-    return source.cancel(reason);
+    return source && source.cancel(reason);
   }
 
   return request = {

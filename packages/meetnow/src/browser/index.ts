@@ -16,7 +16,7 @@ export function parseBrowser(ua?: string) {
     ua = ua || navigator.userAgent;
 
     const descriptor = browsersList.find((browser) => {
-      return browser.test.some(condition => condition.test(ua));
+      return browser.test.some(condition => condition.test((ua as string)));
     });
 
     if (descriptor) {

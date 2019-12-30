@@ -13,9 +13,9 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   const ctrl = createRTMPCtrl(api);
-  let rtmp;
+  let rtmp: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
     target.enable = data['rtmp-enable'];
     target.status = getStatus();
@@ -36,13 +36,13 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
   }
 
   function getStatus(entity?: string) {
-    return getUser(entity)['rtmp-status'];
+    return getUser(entity)!['rtmp-status'];
   }
   function getReason(entity?: string) {
-    return getUser(entity).reason;
+    return getUser(entity)!.reason;
   }
   function getDetail(entity?: string) {
-    const userdata = getUser(entity);
+    const userdata = getUser(entity)!;
     const {
       'rtmp-status': status,
       'rtmp-last-start-time': lastStartTime,

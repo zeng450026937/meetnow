@@ -16,9 +16,9 @@ export function createDescription(data: ConferenceDescription, context: Context)
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
-  let description;
+  let description: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
     target.locked = isLocked();
     /* eslint-enable no-use-before-define */
@@ -35,7 +35,7 @@ export function createDescription(data: ConferenceDescription, context: Context)
     return {
       admissionPolicy : data['admission-policy'],
       attendeeByPass  : data['attendee-by-pass'],
-    };
+    } as LockOptions;
   }
   async function setLock(options: LockOptions) {
     log('setLock()');

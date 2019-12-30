@@ -5,7 +5,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import meetnow from '../packages/meetnow/src';
+import meetnow from '@meetnow/meetnow';
+
+console.log(meetnow);
 
 export default Vue.extend({
   name : 'app',

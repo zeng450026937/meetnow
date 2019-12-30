@@ -15,9 +15,9 @@ export function createView(data: ConferenceView, context: Context) {
   const reactive = createReactive(watch({}), events);
   const layout = createLayoutCtrl(api);
   const danmaku = createDanmakuCtrl(api);
-  let view;
+  let view: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
     target.focusUserEntity = getFocusUserEntity();
     /* eslint-enable no-use-before-define */
@@ -34,13 +34,13 @@ export function createView(data: ConferenceView, context: Context) {
     return data['entity-view'].find((view) => view.entity === 'audio-video');
   }
   function getLayout() {
-    return getVideoView()['entity-state'];
+    return getVideoView()!['entity-state'];
   }
   function getFocusUserEntity() {
-    return getLayout()['focus-video-user-entity'];
+    return getLayout()!['focus-video-user-entity'];
   }
   function getDanmaku() {
-    return getVideoView().title;
+    return getVideoView()!.title;
   }
 
   return view = {

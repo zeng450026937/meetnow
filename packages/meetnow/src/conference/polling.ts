@@ -89,8 +89,8 @@ export function createPolling(config: PollingConfigs) {
   async function poll() {
     log('poll()');
 
-    let response: AxiosResponse<RequestResult>;
-    let error: ApiError;
+    let response: AxiosResponse<RequestResult> | undefined;
+    let error: ApiError | undefined;
     let canceled: boolean = false;
     let timeouted: boolean = false;
 
@@ -104,7 +104,7 @@ export function createPolling(config: PollingConfigs) {
       if (canceled) return;
 
       // polling timeout
-      timeouted = [900408, 901323].includes(error && error.bizCode);
+      timeouted = !!error && [900408, 901323].includes(error.bizCode);
 
       if (timeouted) return;
 

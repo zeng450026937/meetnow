@@ -14,11 +14,13 @@ export function createChatChannel(config: ChatChannelConfigs) {
   const { api } = config;
   const events = createEvents(log);
   let messages: Message[] = [];
-  let request: Request;
+  let request: Request | undefined;
   let ready = false;
 
   async function connect(count?: number) {
     log('connect()');
+
+    if (ready) return;
 
     request = api.request('pullMessage').data({ count });
 
@@ -45,7 +47,7 @@ export function createChatChannel(config: ChatChannelConfigs) {
 
     if (request) {
       request.cancel();
-      request = null;
+      request = undefined;
     }
 
     events.emit('disconnected');

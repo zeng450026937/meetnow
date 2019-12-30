@@ -6,7 +6,7 @@ import { createReactive } from '../reactive';
 import { createLobbyCtrl } from './lobby-ctrl';
 import { Context } from './context';
 
-export { User };
+export * from './user';
 
 const log = debug('MN:Information:Users');
 
@@ -24,9 +24,9 @@ export function createUsers(data: ConferenceUsers, context: Context) {
   const reactive = createReactive(watch({}), events);
   const lobby = createLobbyCtrl(api);
   let userList: User[];
-  let users;
+  let users: any;
 
-  function watch(target) {
+  function watch(target: any) {
     /* eslint-disable no-use-before-define */
 
     // update user list
@@ -67,20 +67,20 @@ export function createUsers(data: ConferenceUsers, context: Context) {
 
     added.forEach((userdata) => {
       const { entity } = userdata;
-      const user = userMap.get(entity);
+      const user = userMap.get(entity)!;
       log('added user:\n\n %s(%s) \n', user.getDisplayText(), user.getEntity());
       users.emit('user:added', user);
     });
     updated.forEach((userdata) => {
       const { entity } = userdata;
-      const user = userMap.get(entity);
+      const user = userMap.get(entity)!;
       user.update(userdata);
       log('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:updated', user);
     });
     deleted.forEach((userdata) => {
       const { entity } = userdata;
-      const user = userMap.get(entity);
+      const user = userMap.get(entity)!;
       log('deleted user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:deleted', user);
       userMap.delete(entity);

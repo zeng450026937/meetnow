@@ -17,6 +17,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@meetnow/*": [
+        "packages/*/src"
       ]
     },
     "lib": [
@@ -31,7 +34,9 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    "packages/*/src",
+    "packages/meetnow/interface.d.ts"
   ],
   "exclude": [
     "node_modules",

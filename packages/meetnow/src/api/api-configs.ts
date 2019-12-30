@@ -62,7 +62,7 @@ export interface ApiDataMap {
   };
   'setCustomizeLayout': CtrlApiData & {
     'enable'?: boolean;
-    'viewer': 'presenter' | 'attendee' | 'castviewer';
+    'viewer'?: 'presenter' | 'attendee' | 'castviewer';
     'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
     'speech-excitation-video-big-view'?: number;
     'speech-excitation-video-max-view'?: number;

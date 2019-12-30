@@ -52,7 +52,7 @@ export const grammar = {
       push  : 'rtp',
       reg   : /^rtpmap:(\d*) ([\w\-\.]*)(?:\s*\/(\d*)(?:\s*\/(\S*))?)?/,
       names : ['payload', 'codec', 'rate', 'encoding'],
-      format(o) {
+      format(o: any) {
         return (o.encoding)
           ? 'rtpmap:%d %s/%s/%s'
           : o.rate
@@ -76,7 +76,7 @@ export const grammar = {
       name  : 'rtcp',
       reg   : /^rtcp:(\d*)(?: (\S*) IP(\d) (\S*))?/,
       names : ['port', 'netType', 'ipVer', 'address'],
-      format(o) {
+      format(o: any) {
         return (o.address != null)
           ? 'rtcp:%d %s IP%d %s'
           : 'rtcp:%d';
@@ -92,7 +92,7 @@ export const grammar = {
       push  : 'rtcpFb',
       reg   : /^rtcp-fb:(\*|\d*) ([\w-_]*)(?: ([\w-_]*))?/,
       names : ['payload', 'type', 'subtype'],
-      format(o) {
+      format(o: any) {
         return (o.subtype != null)
           ? 'rtcp-fb:%s %s %s'
           : 'rtcp-fb:%s %s';
@@ -103,7 +103,7 @@ export const grammar = {
       push  : 'ext',
       reg   : /^extmap:(\d+)(?:\/(\w+))? (\S*)(?: (\S*))?/,
       names : ['value', 'direction', 'uri', 'config'],
-      format(o) {
+      format(o: any) {
         return `extmap:%d${ o.direction ? '/%s' : '%v' } %s${ o.config ? ' %s' : '' }`;
       },
     },
@@ -111,7 +111,7 @@ export const grammar = {
       push  : 'crypto',
       reg   : /^crypto:(\d*) ([\w_]*) (\S*)(?: (\S*))?/,
       names : ['id', 'suite', 'config', 'sessionConfig'],
-      format(o) {
+      format(o: any) {
         return (o.sessionConfig != null)
           ? 'crypto:%d %s %s %s'
           : 'crypto:%d %s %s';
@@ -174,7 +174,7 @@ export const grammar = {
       push  : 'candidates',
       reg   : /^candidate:(\S*) (\d*) (\S*) (\d*) (\S*) (\d*) typ (\S*)(?: raddr (\S*) rport (\d*))?(?: tcptype (\S*))?(?: generation (\d*))?(?: network-id (\d*))?(?: network-cost (\d*))?/,
       names : ['foundation', 'component', 'transport', 'priority', 'ip', 'port', 'type', 'raddr', 'rport', 'tcptype', 'generation', 'network-id', 'network-cost'],
-      format(o) {
+      format(o: any) {
         let str = 'candidate:%s %d %s %d %s %d typ %s';
 
         str += (o.raddr != null) ? ' raddr %s rport %d' : '%v%v';
@@ -210,7 +210,7 @@ export const grammar = {
       push  : 'ssrcs',
       reg   : /^ssrc:(\d*) ([\w_-]*)(?::(.*))?/,
       names : ['id', 'attribute', 'value'],
-      format(o) {
+      format(o: any) {
         let str = 'ssrc:%d';
 
         if (o.attribute != null) {
@@ -255,7 +255,7 @@ export const grammar = {
       name  : 'sctpmap',
       reg   : /^sctpmap:([\w_\/]*) (\S*)(?: (\S*))?/,
       names : ['sctpmapNumber', 'app', 'maxMessageSize'],
-      format(o) {
+      format(o: any) {
         return (o.maxMessageSize != null)
           ? 'sctpmap:%s %s %s'
           : 'sctpmap:%s %s';
@@ -280,7 +280,7 @@ export const grammar = {
       push  : 'rids',
       reg   : /^rid:([\d\w]+) (\w+)(?: ([\S| ]*))?/,
       names : ['id', 'direction', 'params'],
-      format(o) {
+      format(o: any) {
         return (o.params) ? 'rid:%s %s %s' : 'rid:%s %s';
       },
     },
@@ -297,7 +297,7 @@ export const grammar = {
         + '(?:[\\s\\t]+(recv|send)[\\s\\t]+(\\*|\\[\\S+\\](?:[\\s\\t]+\\[\\S+\\])*))?',
       ),
       names : ['pt', 'dir1', 'attrs1', 'dir2', 'attrs2'],
-      format(o) {
+      format(o: any) {
         return `imageattr:%s %s %s${ o.dir2 ? ' %s %s' : '' }`;
       },
     },
@@ -315,7 +315,7 @@ export const grammar = {
         + '$',
       ),
       names : ['dir1', 'list1', 'dir2', 'list2'],
-      format(o) {
+      format(o: any) {
         return `simulcast:%s %s${ o.dir2 ? ' %s %s' : '' }`;
       },
     },
@@ -351,9 +351,9 @@ export const grammar = {
 
 // set sensible defaults to avoid polluting the grammar with boring details
 Object.keys(grammar).forEach((key) => {
-  const objs = grammar[key];
+  const objs = grammar[(key as keyof typeof grammar)];
 
-  objs.forEach((obj) => {
+  objs.forEach((obj: any) => {
     if (!obj.reg) {
       obj.reg = /(.*)/;
     }

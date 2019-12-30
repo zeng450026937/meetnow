@@ -7,11 +7,9 @@ module.exports = (api, options) => {
       details     : 'TBD',
     },
     (args, rawArgs) => {
-      api.chainWebpack(config => {
-        config.entry('app')
-          .clear()
-          .add(api.resolve('./packages/meetnow/src/index.ts'));
-      });
+      args.entry = './packages/meetnow/src/index.ts';
+      args.name = 'meetnow';
+      args.dest = './packages/meetnow/dist';
       args.target = 'lib';
       api.service.run('build', args);
     },

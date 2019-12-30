@@ -16,6 +16,8 @@ export function createLayoutCtrl(api: Api) {
   async function setCustomizeLayout(options: ApiDataMap['setCustomizeLayout']) {
     log('setCustomizeLayout()');
 
+    options.viewer = options.viewer || 'attendee';
+
     await api
       .request('setCustomizeLayout')
       .data(options)
@@ -26,6 +28,7 @@ export function createLayoutCtrl(api: Api) {
     log('setPresenterLayout()');
 
     options.viewer = 'presenter';
+
     await setCustomizeLayout(options);
   }
 
@@ -33,6 +36,7 @@ export function createLayoutCtrl(api: Api) {
     log('setAttendeeLayout()');
 
     options.viewer = 'attendee';
+
     await setCustomizeLayout(options);
   }
 
@@ -40,6 +44,7 @@ export function createLayoutCtrl(api: Api) {
     log('setCastViewerLayout()');
 
     options.viewer = 'castviewer';
+
     await setCustomizeLayout(options);
   }
 
@@ -47,6 +52,7 @@ export function createLayoutCtrl(api: Api) {
     log('setOSD()');
 
     const { name, icon } = options;
+
     await api
       .request('setGlobalLayout')
       .data({

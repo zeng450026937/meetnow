@@ -14,7 +14,7 @@ export function createWorker(config: WorkerConfig) {
   let working: boolean = false;
   let interval: number = 0;
   let times: number = 0;
-  let timeout;
+  let timeout: number | undefined;
 
   const {
     interval: nextInterval = interval,
@@ -54,7 +54,7 @@ export function createWorker(config: WorkerConfig) {
 
     if (timeout) {
       clearTimeout(timeout);
-      timeout = null;
+      timeout = undefined;
     }
     if (working) {
       cancel && cancel();

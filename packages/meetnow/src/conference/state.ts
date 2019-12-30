@@ -10,9 +10,9 @@ export function createState(data: ConferenceState, context: Context) {
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
-  let description;
+  let description: any;
 
-  function watch(target) {
+  function watch(target: any) {
     const {
       active,
       locked,

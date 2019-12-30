@@ -1,9 +1,9 @@
 import debug from 'debug';
 import { createEvents } from '../events';
-import { createDescription, Description } from './description';
-import { createState, State } from './state';
-import { createView, View } from './view';
-import { createUsers, User, Users } from './users';
+import { createDescription } from './description';
+import { createState } from './state';
+import { createView } from './view';
+import { createUsers } from './users';
 import { createRTMP } from './rtmp';
 import { createRecord } from './record';
 import { mergeItem } from './merge';
@@ -11,9 +11,12 @@ import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
 
-export {
-  Description, State, View, Users, User,
-};
+export * from './description';
+export * from './state';
+export * from './view';
+export * from './users';
+export * from './rtmp';
+export * from './record';
 
 const log = debug('MN:Information');
 
@@ -29,14 +32,14 @@ export function createInformation(data: ConferenceInformation, context: Context)
   } = data;
 
   // create information parts
-  const description = createDescription(descriptiondata, context);
-  const state = createState(statedata, context);
-  const view = createView(viewdata, context);
-  const users = createUsers(usersdata, context);
-  const rtmp = createRTMP(rtmpdata, context);
-  const record = createRecord(recorddata, context);
+  const description = createDescription(descriptiondata!, context);
+  const state = createState(statedata!, context);
+  const view = createView(viewdata!, context);
+  const users = createUsers(usersdata!, context);
+  const rtmp = createRTMP(rtmpdata!, context);
+  const record = createRecord(recorddata!, context);
 
-  let information;
+  let information: any;
 
   function update(val: ConferenceInformation) {
     log('update()');
@@ -63,7 +66,7 @@ export function createInformation(data: ConferenceInformation, context: Context)
       return;
     }
 
-    data = mergeItem(data, val);
+    data = mergeItem(data, val)!;
 
     // update & prepare all parts
     [

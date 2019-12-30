@@ -75,7 +75,7 @@ export function createChannel(config: ChannelConfigs) {
   let localMediaStreamLocallyGenerated = false;
 
   // Flag to indicate PeerConnection ready for new actions.
-  let rtcReady;
+  let rtcReady: boolean = false;
   let startTime: Date | undefined;
   let endTime: Date | undefined;
 
@@ -147,7 +147,7 @@ export function createChannel(config: ChannelConfigs) {
     connection.addEventListener('iceconnectionstatechange', () => {
       const {
         iceConnectionState: state,
-      } = connection;
+      } = connection!;
 
       if (state === 'failed') {
         events.emit('peerconnection:connectionfailed');
@@ -167,7 +167,7 @@ export function createChannel(config: ChannelConfigs) {
 
     if (type === 'offer') {
       try {
-        desc = await connection.createOffer(constraints);
+        desc = await connection!.createOffer(constraints);
       } catch (error) {
         log('createOffer failed: %o', error);
         events.emit('peerconnection:createofferfailed', error);
@@ -175,7 +175,7 @@ export function createChannel(config: ChannelConfigs) {
       }
     } else if (type === 'answer') {
       try {
-        desc = await connection.createAnswer(constraints);
+        desc = await connection!.createAnswer(constraints);
       } catch (error) {
         log('createAnswer failed: %o', error);
         events.emit('peerconnection:createanswerfailed', error);
@@ -186,7 +186,7 @@ export function createChannel(config: ChannelConfigs) {
     }
 
     try {
-      await connection.setLocalDescription(desc);
+      await connection!.setLocalDescription(desc);
     } catch (error) {
       log('setLocalDescription failed: %o', error);
       rtcReady = true;
@@ -203,21 +203,21 @@ export function createChannel(config: ChannelConfigs) {
 
       // Resolve right away if 'pc.iceGatheringState' is 'complete'.
 
-      if (connection.iceGatheringState === 'complete') {
+      if (connection!.iceGatheringState === 'complete') {
         resolve();
         return;
       }
 
       let finished = false;
-      let listener;
+      let listener: any;
 
       const ready = () => {
-        connection.removeEventListener('icecandidate', listener);
+        connection!.removeEventListener('icecandidate', listener);
         finished = true;
         resolve();
       };
 
-      connection.addEventListener('icecandidate', listener = (event) => {
+      connection!.addEventListener('icecandidate', listener = (event: RTCPeerConnectionIceEvent) => {
         const { candidate } = event;
         if (candidate) {
           events.emit('icecandidate', {
@@ -232,7 +232,7 @@ export function createChannel(config: ChannelConfigs) {
 
     rtcReady = true;
 
-    const { sdp } = connection.localDescription;
+    const { sdp } = connection!.localDescription!;
 
     desc = {
       originator : 'local',
@@ -242,7 +242,7 @@ export function createChannel(config: ChannelConfigs) {
 
     events.emit('sdp', desc);
 
-    return desc.sdp;
+    return desc.sdp!;
   }
 
   async function connect(options: ConnectOptions = {}) {
@@ -250,7 +250,7 @@ export function createChannel(config: ChannelConfigs) {
 
     throwIfNotStatus(STATUS.kNull);
 
-    if (!window.RTCPeerConnection) {
+    if (!(window as any).RTCPeerConnection) {
       throw new Error('WebRTC not supported');
     }
 
@@ -299,7 +299,7 @@ export function createChannel(config: ChannelConfigs) {
 
     if (localMediaStream) {
       localMediaStream.getTracks().forEach((track) => {
-        connection.addTrack(track, localMediaStream);
+        connection!.addTrack(track, localMediaStream!);
       });
     }
 
@@ -346,11 +346,11 @@ export function createChannel(config: ChannelConfigs) {
 
     events.emit('sdp', desc);
 
-    if (connection.signalingState === 'stable') {
+    if (connection!.signalingState === 'stable') {
       try {
-        const offer = await connection.createOffer();
+        const offer = await connection!.createOffer();
 
-        await connection.setLocalDescription(offer);
+        await connection!.setLocalDescription(offer);
       } catch (error) {
         /* eslint-disable-next-line no-use-before-define */
         onFailed('local', 'WebRTC Error');
@@ -364,7 +364,7 @@ export function createChannel(config: ChannelConfigs) {
     }
 
     try {
-      await connection.setRemoteDescription({
+      await connection!.setRemoteDescription({
         type : 'answer',
         sdp  : desc.sdp,
       });
@@ -438,7 +438,7 @@ export function createChannel(config: ChannelConfigs) {
     if (connection) {
       try {
         connection.close();
-        connection = null;
+        connection = undefined;
       } catch (error) {
         log('error closing RTCPeerConnection %o', error);
       }
@@ -448,7 +448,7 @@ export function createChannel(config: ChannelConfigs) {
       closeMediaStream(localMediaStream);
     }
 
-    localMediaStream = null;
+    localMediaStream = undefined;
     localMediaStreamLocallyGenerated = false;
 
     rtcStats.clear();
@@ -457,7 +457,7 @@ export function createChannel(config: ChannelConfigs) {
   }
 
   function toggleMuteAudio(mute: boolean) {
-    connection.getSenders().forEach((sender) => {
+    connection!.getSenders().forEach((sender) => {
       if (sender.track && sender.track.kind === 'audio') {
         sender.track.enabled = !mute;
       }
@@ -465,7 +465,7 @@ export function createChannel(config: ChannelConfigs) {
   }
 
   function toggleMuteVideo(mute: boolean) {
-    connection.getSenders().forEach((sender) => {
+    connection!.getSenders().forEach((sender) => {
       if (sender.track && sender.track.kind === 'video') {
         sender.track.enabled = !mute;
       }
@@ -509,10 +509,14 @@ export function createChannel(config: ChannelConfigs) {
       originator,
       message,
     });
+
+    startTime = new Date();
   }
 
   function onEnded(originator: Originator, message?: string) {
     log('channel ended');
+
+    endTime = new Date();
 
     close();
 
@@ -648,7 +652,7 @@ export function createChannel(config: ChannelConfigs) {
       return;
     }
 
-    const localSDP = await createLocalDescription('offer', rtcOfferConstraints);
+    const localSDP = await createLocalDescription('offer', rtcOfferConstraints!);
 
     /* eslint-disable-next-line no-use-before-define */
     const answer = await invite({ sdp: mangleOffer(localSDP) });
@@ -662,7 +666,7 @@ export function createChannel(config: ChannelConfigs) {
     events.emit('sdp', desc);
 
     try {
-      connection.setRemoteDescription({
+      connection!.setRemoteDescription({
         type : 'answer',
         sdp  : desc.sdp,
       });
@@ -682,7 +686,7 @@ export function createChannel(config: ChannelConfigs) {
 
     // Local hold.
     if (localHold && !remoteHold) {
-      for (const m of sdp.media) {
+      for (const m of sdp.media!) {
         if (holdMediaTypes.indexOf(m.type) === -1) {
           continue;
         }
@@ -696,7 +700,7 @@ export function createChannel(config: ChannelConfigs) {
       }
     // Local and remote hold.
     } else if (localHold && remoteHold) {
-      for (const m of sdp.media) {
+      for (const m of sdp.media!) {
         if (holdMediaTypes.indexOf(m.type) === -1) {
           continue;
         }
@@ -704,7 +708,7 @@ export function createChannel(config: ChannelConfigs) {
       }
     // Remote hold.
     } else if (remoteHold) {
-      for (const m of sdp.media) {
+      for (const m of sdp.media!) {
         if (holdMediaTypes.indexOf(m.type) === -1) {
           continue;
         }
@@ -726,15 +730,15 @@ export function createChannel(config: ChannelConfigs) {
 
     let stream: MediaStream | undefined;
 
-    if (connection.getReceivers) {
-      stream = new window.MediaStream();
+    if (connection!.getReceivers) {
+      stream = new (window as any).MediaStream();
 
-      connection
+      connection!
         .getReceivers()
         .forEach((receiver) => {
           const { track } = receiver;
           if (track) {
-            stream.addTrack(track);
+            stream!.addTrack(track);
           }
         });
     } else if ((connection as any).getRemoteStreams) {
@@ -749,11 +753,11 @@ export function createChannel(config: ChannelConfigs) {
 
     if (!stream) return;
 
-    if (connection.addTrack) {
+    if (connection!.addTrack) {
       stream
         .getTracks()
         .forEach((track) => {
-          connection.addTrack(track, stream);
+          connection!.addTrack(track, stream);
         });
     } else if ((connection as any).addStream) {
       (connection as any).addStream(stream);
@@ -762,17 +766,17 @@ export function createChannel(config: ChannelConfigs) {
   function removeLocalStream() {
     log('removeLocalStream()');
 
-    if (connection.getSenders && connection.removeTrack) {
-      connection.getSenders().forEach((sender) => {
+    if (connection!.getSenders && connection!.removeTrack) {
+      connection!.getSenders().forEach((sender) => {
         if (sender.track) {
           sender.track.stop();
         }
-        connection.removeTrack(sender);
+        connection!.removeTrack(sender);
       });
     } else if ((connection as any).getLocalStreams && (connection as any).removeStream) {
       (connection as any)
         .getLocalStreams()
-        .forEach((stream) => {
+        .forEach((stream: MediaStream) => {
           stream
             .getTracks()
             .forEach((track) => {
@@ -788,15 +792,15 @@ export function createChannel(config: ChannelConfigs) {
 
     let stream: MediaStream | undefined;
 
-    if (connection.getSenders) {
-      stream = new window.MediaStream();
+    if (connection!.getSenders) {
+      stream = new (window as any).MediaStream();
 
-      connection
+      connection!
         .getSenders()
         .forEach((sender) => {
           const { track } = sender;
           if (track) {
-            stream.addTrack(track);
+            stream!.addTrack(track);
           }
         });
     } else if ((connection as any).getLocalStreams) {
@@ -822,8 +826,8 @@ export function createChannel(config: ChannelConfigs) {
     let peerHasAudio = false;
     let peerHasVideo = false;
 
-    if (connection.getSenders) {
-      connection.getSenders().forEach((sender) => {
+    if (connection!.getSenders) {
+      connection!.getSenders().forEach((sender) => {
         if (!sender.track) return;
         peerHasAudio = sender.track.kind === 'audio' || peerHasAudio;
         peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
@@ -839,7 +843,7 @@ export function createChannel(config: ChannelConfigs) {
 
         queue.push(renegotiate());
       } else {
-        connection.getSenders().forEach((sender) => {
+        connection!.getSenders().forEach((sender) => {
           if (!sender.track) return;
 
           if (!sender.replaceTrack
@@ -871,53 +875,54 @@ export function createChannel(config: ChannelConfigs) {
 
     function shimReplaceTrack(sender: RTCRtpSender) {
       sender.replaceTrack = async function replaceTrack(newTrack: MediaStreamTrack) {
-        connection.removeTrack(sender);
-        connection.addTrack(newTrack, stream);
+        connection!.removeTrack(sender);
+        connection!.addTrack(newTrack, stream as any);
 
-        const offer = await connection.createOffer();
+        const offer = await connection!.createOffer();
 
-        offer.type = connection.localDescription.type;
+        offer.type = connection!.localDescription!.type;
         /* eslint-disable-next-line no-use-before-define */
-        offer.sdp = replaceSSRCs(connection.localDescription.sdp, offer.sdp);
+        offer.sdp = replaceSSRCs(connection!.localDescription!.sdp, offer.sdp!);
 
-        await connection.setLocalDescription(offer);
-        await connection.setRemoteDescription(connection.remoteDescription);
+        await connection!.setLocalDescription(offer);
+        await connection!.setRemoteDescription(connection!.remoteDescription!);
       };
     }
 
     await Promise.all(queue);
   }
 
-  function replaceSSRCs(currentDescription, newDescription) {
+  function replaceSSRCs(currentDescription: string, newDescription: string) {
     let ssrcs = currentDescription.match(/a=ssrc-group:FID (\d+) (\d+)\r\n/);
     let newssrcs = newDescription.match(/a=ssrc-group:FID (\d+) (\d+)\r\n/);
 
     if (!ssrcs) { // Firefox offers wont have FID yet
-      ssrcs = currentDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)[1]
+      ssrcs = currentDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)![1]
         .match(/a=ssrc:(\d+)/);
-      newssrcs = newDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)[1]
+      newssrcs = newDescription.match(/a=ssrc:(\d+) cname:(.*)\r\n/g)![1]
         .match(/a=ssrc:(\d+)/);
     }
-    for (let i = 1; i < ssrcs.length; i++) {
-      newDescription = newDescription.replace(new RegExp(newssrcs[i], 'g'), ssrcs[i]);
+    for (let i = 1; i < ssrcs!.length; i++) {
+      newDescription = newDescription.replace(new RegExp(newssrcs![i], 'g'), ssrcs![i]);
     }
 
     return newDescription;
   }
 
-  async function adjustBandWith({ audio, video }) {
-    log('adjustBandWith()');
+  async function adjustBandWidth(options: { audio?: number; video?: number; }) {
+    log('adjustBandWidth()');
 
+    const { audio, video } = options;
     const queue = [];
 
     if ('RTCRtpSender' in window
-    && 'setParameters' in window.RTCRtpSender.prototype) {
-      connection.getSenders().forEach((sender) => {
+    && 'setParameters' in (window as any).RTCRtpSender.prototype) {
+      connection!.getSenders().forEach((sender) => {
         if (sender.track) return;
 
         const parameters = sender.getParameters();
 
-        if (typeof audio !== 'undefined' && sender.track.kind === 'audio') {
+        if (typeof audio !== 'undefined' && sender.track!.kind === 'audio') {
           if (audio === 0) {
             delete parameters.encodings[0].maxBitrate;
           } else {
@@ -932,7 +937,7 @@ export function createChannel(config: ChannelConfigs) {
           );
         }
 
-        if (typeof video !== 'undefined' && sender.track.kind === 'video') {
+        if (typeof video !== 'undefined' && sender.track!.kind === 'video') {
           if (video === 0) {
             delete parameters.encodings[0].maxBitrate;
           } else {
@@ -951,12 +956,12 @@ export function createChannel(config: ChannelConfigs) {
       // Fallback to the SDP munging with local renegotiation way of limiting
       // the bandwidth.
       queue.push(
-        connection.createOffer()
-          .then((offer) => connection.setLocalDescription(offer))
+        connection!.createOffer()
+          .then((offer) => connection!.setLocalDescription(offer))
           .then(() => {
-            const sdp = parse(connection.remoteDescription.sdp);
+            const sdp = parse(connection!.remoteDescription!.sdp);
 
-            for (const m of sdp.media) {
+            for (const m of sdp.media!) {
               if (typeof audio !== 'undefined' && m.type === 'audio') {
                 if (audio === 0) {
                   m.bandwidth = [];
@@ -984,11 +989,11 @@ export function createChannel(config: ChannelConfigs) {
             }
 
             const desc = {
-              type : connection.remoteDescription.type,
+              type : connection!.remoteDescription!.type,
               sdp  : write(sdp),
             };
 
-            return connection.setRemoteDescription(desc);
+            return connection!.setRemoteDescription(desc);
           })
           .catch((e) => {
             log('applying bandwidth restriction to setRemoteDescription error: %o', e);
@@ -999,13 +1004,14 @@ export function createChannel(config: ChannelConfigs) {
     await Promise.all(queue);
   }
 
-  async function applyConstraints({ audio, video }) {
+  async function applyConstraints(options: { audio?: MediaTrackConstraints, video?: MediaTrackConstraints }) {
     log('applyConstraints()');
 
-    const queue = [];
+    const { audio, video } = options;
+    const queue: Promise<void>[] = [];
 
-    if (connection.getSenders && window.MediaStreamTrack.prototype.applyConstraints) {
-      connection.getSenders().forEach((sender) => {
+    if (connection!.getSenders && (window as any).MediaStreamTrack.prototype.applyConstraints) {
+      connection!.getSenders().forEach((sender) => {
         if (audio && sender.track && sender.track.kind === 'audio') {
           queue.push(
             sender.track.applyConstraints(audio)
@@ -1032,18 +1038,18 @@ export function createChannel(config: ChannelConfigs) {
   async function getStats() {
     log('getStats()');
 
-    if (connection.signalingState === 'stable') {
-      let stats;
+    if (connection!.signalingState === 'stable') {
+      let stats: RTCStatsReport;
       // use legacy getStats()
       // the new getStats() won't report 'packetsLost' in 'outbound-rtp'
       if (browser.chrome) {
         stats = await new Promise((resolve) => {
-          (connection as any).getStats((stats) => {
+          (connection as any).getStats((stats: any) => {
             resolve(stats.result());
           });
         });
       } else {
-        stats = await connection.getStats();
+        stats = await connection!.getStats();
       }
 
       rtcStats.update(stats);
@@ -1091,7 +1097,7 @@ export function createChannel(config: ChannelConfigs) {
 
     replaceLocalStream,
 
-    adjustBandWith,
+    adjustBandWidth,
     applyConstraints,
 
     getStats,

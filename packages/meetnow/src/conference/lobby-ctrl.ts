@@ -4,8 +4,8 @@ import { Api } from '../api';
 const log = debug('MN:Information:Lobby');
 
 export function createLobbyCtrl(api: Api) {
-  async function reject(entity?: string) {
-    log('reject()');
+  async function remove(entity?: string) {
+    log('remove()');
 
     const apiName = entity ? 'deleteUser' : 'rejectLobbyUserAll';
     await api
@@ -14,14 +14,19 @@ export function createLobbyCtrl(api: Api) {
       .send();
   }
 
-  async function accept(entity?: string) {
-    log('accept()');
+  async function unhold(entity?: string) {
+    log('unhold()');
 
     const apiName = entity ? 'acceptLobbyUser' : 'acceptLobbyUserAll';
     await api
       .request(apiName)
       .data({ 'user-entity': entity })
       .send();
+  }
+  async function allow(entity?: string) {
+    log('allow()');
+
+    await unhold(entity);
   }
 
   async function hold(entity?: string) {
@@ -35,8 +40,9 @@ export function createLobbyCtrl(api: Api) {
   }
 
   return {
-    reject,
-    accept,
+    remove,
+    unhold,
     hold,
+    allow,
   };
 }

@@ -1,13 +1,13 @@
 const commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
 
-export function getFirstMatch(regexp, ua) {
+export function getFirstMatch(regexp: RegExp, ua: string) {
   const match = ua.match(regexp);
-  return (match && match.length > 0 && match[1]);
+  return (match && match.length > 0 && match[1]) || '';
 }
 
-export function getSecondMatch(regexp, ua) {
+export function getSecondMatch(regexp: RegExp, ua: string) {
   const match = ua.match(regexp);
-  return (match && match.length > 1 && match[2]);
+  return (match && match.length > 1 && match[2]) || '';
 }
 
 export function browser(name: string, version: string) {
@@ -23,7 +23,7 @@ export function browser(name: string, version: string) {
 export const browsersList = [
   {
     test : [/micromessenger/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'wechat',
         getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua),
@@ -32,7 +32,7 @@ export const browsersList = [
   },
   {
     test : [/\sedg\//i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'edge',
         getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua),
@@ -41,7 +41,7 @@ export const browsersList = [
   },
   {
     test : [/edg([ea]|ios)/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'edge',
         getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua),
@@ -50,7 +50,7 @@ export const browsersList = [
   },
   {
     test : [/firefox|iceweasel|fxios/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'firefox',
         getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua),
@@ -59,7 +59,7 @@ export const browsersList = [
   },
   {
     test : [/chromium/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'chromium',
         getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua),
@@ -68,7 +68,7 @@ export const browsersList = [
   },
   {
     test : [/chrome|crios|crmo/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'chrome',
         getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua),
@@ -77,7 +77,7 @@ export const browsersList = [
   },
   {
     test : [/safari|applewebkit/i],
-    describe(ua) {
+    describe(ua: string) {
       return browser(
         'safari',
         getFirstMatch(commonVersionIdentifier, ua),
@@ -87,7 +87,7 @@ export const browsersList = [
   /* Something else */
   {
     test : [/.*/i],
-    describe(ua) {
+    describe(ua: string) {
       /* Here we try to make sure that there are explicit details about the device
        * in order to decide what regexp exactly we want to apply
        * (as there is a specific decision based on that conclusion)
