@@ -1,7 +1,7 @@
 import debug, { Debugger } from 'debug';
 import { isArray } from '../utils';
 
-const log = debug('Meetnow:Events');
+const log = debug('MN:Events');
 
 export function createEvents(scopedlog: Debugger = log) {
   let instance;

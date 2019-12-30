@@ -8,7 +8,7 @@ import { Context } from './context';
 
 export { User };
 
-const log = debug('Meetnow:Information:Users');
+const log = debug('MN:Information:Users');
 
 export interface InviteOptions {
   uid: string[];

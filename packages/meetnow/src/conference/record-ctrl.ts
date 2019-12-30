@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 
-const log = debug('Meetnow:Information:Record');
+const log = debug('MN:Information:Record');
 
 export type RecordOperationType = 'start'| 'stop'| 'pause'| 'resume';
 

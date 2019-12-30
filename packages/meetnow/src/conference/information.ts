@@ -15,7 +15,7 @@ export {
   Description, State, View, Users, User,
 };
 
-const log = debug('Meetnow:Information');
+const log = debug('MN:Information');
 
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents(log);

@@ -34,7 +34,7 @@ export interface MessageConfigs {
   onFailed?: (msg: Message) => void;
 }
 
-const log = debug('Meetnow:Message');
+const log = debug('MN:Message');
 
 export function createMessage(config: MessageConfigs) {
   const { api, onSucceeded, onFailed } = config;

@@ -32,7 +32,7 @@ function setup() {
   debug.enable(
     CONFIG.get(
       'debug',
-      'Meetnow:*,-Meetnow:Api*,-Meetnow:Information:Item,-Meetnow:Worker',
+      'MN:*,-MN:Api*,-MN:Information:Item,-MN:Worker',
     ),
   );
 }

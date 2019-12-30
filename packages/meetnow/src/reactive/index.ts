@@ -2,7 +2,7 @@ import debug from 'debug';
 import { createEvents, Events } from '../events';
 import { camelize, hasChanged, hasOwn } from '../utils';
 
-const log = debug('Meetnow:Reactive');
+const log = debug('MN:Reactive');
 
 export function createReactive(data: object = {}, events?: Events) {
   events = events || createEvents(log);

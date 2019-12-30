@@ -6,7 +6,7 @@ import { createWorker } from '../utils/worker';
 import { ApiError } from '../api/api-error';
 import { isDef } from '../utils';
 
-const log = debug('Meetnow:Polling');
+const log = debug('MN:Polling');
 
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;

@@ -2,7 +2,7 @@ import debug from 'debug';
 import { Api } from '../api';
 import { ApiDataMap } from '../api/api-configs';
 
-const log = debug('Meetnow:Information:Layout');
+const log = debug('MN:Information:Layout');
 
 export function createLayoutCtrl(api: Api) {
   async function setLayout(options: ApiDataMap['setFreeLayout']) {

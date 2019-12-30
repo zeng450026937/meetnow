@@ -3,7 +3,7 @@ import {
   hasOwn, isArray, isDef, isObject,
 } from '../utils';
 
-const log = debug('Meetnow:Information:Item');
+const log = debug('MN:Information:Item');
 
 export type ItemValue = string | number | boolean | Item | null;
 

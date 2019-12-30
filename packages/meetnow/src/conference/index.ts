@@ -14,7 +14,7 @@ import { CONFIG } from '../config';
 import { isMiniProgram } from '../browser';
 import { ApiError } from '../api/api-error';
 
-const log = debug('Meetnow:Conference');
+const log = debug('MN:Conference');
 const miniprogram = isMiniProgram();
 
 export enum STATUS {

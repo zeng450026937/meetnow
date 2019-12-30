@@ -4,7 +4,7 @@ import { ConferenceDescription } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
 
-const log = debug('Meetnow:Information:Description');
+const log = debug('MN:Information:Description');
 
 export interface LockOptions {
   admissionPolicy: ConferenceDescription['admission-policy'];

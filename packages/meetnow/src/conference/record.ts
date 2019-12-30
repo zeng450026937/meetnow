@@ -5,7 +5,7 @@ import { createReactive } from '../reactive';
 import { createRecordCtrl } from './record-ctrl';
 import { Context } from './context';
 
-const log = debug('Meetnow:Information:Record');
+const log = debug('MN:Information:Record');
 
 export function createRecord(data: ConferenceRecordUsers, context: Context) {
   const { api } = context;

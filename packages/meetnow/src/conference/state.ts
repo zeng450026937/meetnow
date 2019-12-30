@@ -4,7 +4,7 @@ import { ConferenceState } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
 
-const log = debug('Meetnow:Information:State');
+const log = debug('MN:Information:State');
 
 export function createState(data: ConferenceState, context: Context) {
   const events = createEvents(log);

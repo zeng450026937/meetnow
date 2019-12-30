@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { isFunction } from '.';
 
-const log = debug('Meetnow:Worker');
+const log = debug('MN:Worker');
 
 export interface WorkerConfig {
   work: (times: number) => Promise<void> | void;

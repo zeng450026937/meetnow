@@ -6,7 +6,7 @@ import { Request } from '../api/request';
 
 export * from './channel';
 
-const log = debug('Meetnow:MediaChannel');
+const log = debug('MN:MediaChannel');
 
 export interface MediaChannelConfigs {
   api: Api;

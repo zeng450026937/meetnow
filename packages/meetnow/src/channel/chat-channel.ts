@@ -4,7 +4,7 @@ import { Request } from '../api/request';
 import { createEvents } from '../events';
 import { createMessage, Message, MessageData } from './message';
 
-const log = debug('Meetnow:ChatChannel');
+const log = debug('MN:ChatChannel');
 
 export interface ChatChannelConfigs {
   api: Api;

@@ -6,7 +6,7 @@ import { parse, write } from '../sdp-transform';
 import { createRTCStats, RTCStats } from './rtc-stats';
 import { getBrowser } from '../browser';
 
-const log = debug('Meetnow:Channel');
+const log = debug('MN:Channel');
 const browser = getBrowser();
 
 export enum STATUS {

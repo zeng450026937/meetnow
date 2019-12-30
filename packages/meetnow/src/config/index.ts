@@ -33,6 +33,6 @@ export function setupConfig() {
   Meetnow.config = CONFIG;
 
   if (CONFIG.getBoolean('testing')) {
-    CONFIG.set('debug', 'Meetnow:*');
+    CONFIG.set('debug', 'MN:*');
   }
 }

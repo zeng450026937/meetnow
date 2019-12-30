@@ -3,7 +3,7 @@ import axios, {
 } from 'axios';
 import debug from 'debug';
 
-const log = debug('Meetnow:Api:Request');
+const log = debug('MN:Api:Request');
 
 export const { isCancel } = axios;
 

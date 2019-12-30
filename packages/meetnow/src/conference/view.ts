@@ -6,7 +6,7 @@ import { createLayoutCtrl } from './layout-ctrl';
 import { createDanmakuCtrl } from './danmaku-ctrl';
 import { Context } from './context';
 
-const log = debug('Meetnow:Information:View');
+const log = debug('MN:Information:View');
 
 export function createView(data: ConferenceView, context: Context) {
   const { api } = context;

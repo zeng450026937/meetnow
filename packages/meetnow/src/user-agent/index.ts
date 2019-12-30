@@ -5,7 +5,7 @@ import { RequestResult } from '../api/request';
 import { createWorker, Worker } from '../utils/worker';
 import { createConference } from '../conference';
 
-const log = debug('Meetnow:UA');
+const log = debug('MN:UA');
 
 export interface ConnectOptions {
   number: string;
@@ -180,7 +180,7 @@ export function createUA(config?: UAConfigs) {
     };
 
     // stop auth worker as we can only connect one conference
-    conference.once('disconnect', stop);
+    conference.once('disconnected', stop);
 
     return conference;
   }

@@ -5,7 +5,7 @@ import { createReactive } from '../reactive';
 import { createRTMPCtrl } from './rtmp-ctrl';
 import { Context } from './context';
 
-const log = debug('Meetnow:Information:RTMP');
+const log = debug('MN:Information:RTMP');
 
 export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
   const { api } = context;

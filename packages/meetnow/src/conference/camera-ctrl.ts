@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 
-const log = debug('Meetnow:Information:Camera');
+const log = debug('MN:Information:Camera');
 
 export type ActionType =
   | 'PanLeft'
