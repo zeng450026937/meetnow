@@ -19135,21 +19135,6 @@ function write(session, opts) {
   });
   return "".concat(sdp.join('\r\n'), "\r\n");
 }
-// CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/index.ts
-
-
-
-
-/* harmony default export */ var sdp_transform = ({
-  write: write,
-  parse: parse,
-  parseFmtpConfig: parseFmtpConfig,
-  parseRemoteCandidates: parseRemoteCandidates,
-  parseParams: parseParams,
-  parsePayloads: parsePayloads,
-  parseImageAttributes: parseImageAttributes,
-  parseSimulcastStreamList: parseSimulcastStreamList
-});
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.is-finite.js
 var es_number_is_finite = __webpack_require__("f00c");
 
@@ -22943,6 +22928,21 @@ function channel_createChannel(api) {
 function createMedia() {
   return {};
 }
+// CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/index.ts
+
+
+
+
+/* harmony default export */ var sdp_transform = ({
+  write: write,
+  parse: parse,
+  parseFmtpConfig: parseFmtpConfig,
+  parseRemoteCandidates: parseRemoteCandidates,
+  parseParams: parseParams,
+  parsePayloads: parsePayloads,
+  parseImageAttributes: parseImageAttributes,
+  parseSimulcastStreamList: parseSimulcastStreamList
+});
 // CONCATENATED MODULE: ./packages/meetnow/src/index.ts
 
 

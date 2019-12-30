@@ -1,1 +1,2 @@
 packages/vue-core
+packages/**/dist

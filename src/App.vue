@@ -20,7 +20,7 @@ export default Vue.extend({
     conf.join();
 
     setTimeout(() => {
-      conf.share();
+      // conf.share();
       // conf.mediaChannel && conf.mediaChannel.connect();
 
       // setTimeout(() => {

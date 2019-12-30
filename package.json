@@ -11,6 +11,7 @@
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
+  "sideEffects": false,
   "dependencies": {
     "core-js": "^3.3.2",
     "vue": "^2.6.10"
