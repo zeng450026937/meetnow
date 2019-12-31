@@ -506,6 +506,7 @@ declare namespace MeetNow {
 
     readonly uuid: string;
     readonly userId: string;
+    readonly user: User | undefined;
 
     readonly information: Information;
 
@@ -536,6 +537,10 @@ declare namespace MeetNow {
     on(event: 'user', listener: (data: User) => void): this;
     on(event: 'sharinguser', listener: (data: User) => void): this;
     on(event: 'speechuser', listener: (data: User) => void): this;
+
+    on(event: 'user:added', listener: (data: User) => void): this;
+    on(event: 'user:updated', listener: (data: User) => void): this;
+    on(event: 'user:deleted', listener: (data: User) => void): this;
 
     on(event: 'information', listener: (data: Information) => void): this;
     on(event: 'message', listener: (data: Message) => void): this;

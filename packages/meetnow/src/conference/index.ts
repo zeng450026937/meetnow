@@ -287,6 +287,10 @@ export function createConference(config: ConferenceConfigs) {
       events.emit('speechuser', users.getUser(val));
     });
 
+    users.on('user:added', (...args: any[]) => events.emit('user:added', ...args));
+    users.on('user:updated', (...args: any[]) => events.emit('user:updated', ...args));
+    users.on('user:deleted', (...args: any[]) => events.emit('user:deleted', ...args));
+
     // create keepalive worker
     keepalive = createKeepAlive({ api });
 
@@ -404,6 +408,9 @@ export function createConference(config: ConferenceConfigs) {
     // change to string type
     get userId() {
       return `${ userId }`;
+    },
+    get user() {
+      return user;
     },
 
     get information() {
