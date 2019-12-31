@@ -1,7 +1,7 @@
 {
   "name": "@meetnow/meetnow",
-  "version": "1.0.0",
-  "description": "Yealink conference sdk via webrtc.",
+  "version": "1.0.0-alpha",
+  "description": "Yealink Meeting SDK via WebRTC.",
   "main": "index.js",
   "typings": "interface.d.ts",
   "publishConfig": {
