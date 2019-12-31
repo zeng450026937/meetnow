@@ -17,7 +17,7 @@ export function createChatChannel(config: ChatChannelConfigs) {
   let request: Request | undefined;
   let ready = false;
 
-  async function connect(count?: number) {
+  async function connect(count: number = 2000) {
     log('connect()');
 
     if (ready) return;
@@ -66,6 +66,8 @@ export function createChatChannel(config: ChatChannelConfigs) {
     await message.send(msg, target);
 
     messages.push(message);
+
+    return message;
   }
 
   function incoming(data: MessageData) {

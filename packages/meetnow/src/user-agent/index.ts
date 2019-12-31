@@ -3,15 +3,11 @@ import { AxiosResponse } from 'axios';
 import { Api, createApi } from '../api';
 import { RequestResult } from '../api/request';
 import { createWorker, Worker } from '../utils/worker';
-import { createConference } from '../conference';
+import { createConference, JoinOptions } from '../conference';
 
 const log = debug('MN:UA');
 
-export interface ConnectOptions {
-  number: string;
-  password?: string;
-  displayName?: string;
-}
+export interface ConnectOptions extends JoinOptions {}
 
 export interface UAConfigs {
   language?: string;
@@ -150,6 +146,10 @@ export function createUA(config?: UAConfigs) {
           await auth();
         },
       });
+    }
+
+    if (!options.number) {
+      throw new TypeError('Invalid Number');
     }
 
     const { number } = options;

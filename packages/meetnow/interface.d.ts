@@ -7,6 +7,11 @@ declare namespace MeetNow {
   const connect: (options: ConnectOptions) => Promise<Conference>;
   const createUA: () => UserAgent;
 
+  class ApiError extends Error {
+    bizCode: number;
+    errCode: number;
+  }
+
   class EventEmitter {
     on(event: string | string[], fn: Function): this;
     off(event: string | string[], fn?: Function): this;
@@ -14,11 +19,7 @@ declare namespace MeetNow {
     emit(event: string, ...args: any[]): this;
   }
 
-  interface ConnectOptions {
-    number: string;
-    password?: string;
-    displayName?: string;
-  }
+  interface ConnectOptions extends JoinOptions {}
 
   class UserAgent {
     stop(): void;
@@ -149,13 +150,50 @@ declare namespace MeetNow {
     /* eslint-enable no-dupe-class-members */
   }
 
+  enum MessageStatus {
+    kNull,
+    kSending,
+    kSuccess,
+    kFailed,
+  }
+
+  type MessageDirection = 'incoming' | 'outgoing';
+
+  interface MessageSender {
+    'entity': string;
+    'subjectId': string;
+    'displayText': string;
+  }
+
+  class Message extends EventEmitter {
+    readonly status: MessageStatus;
+    readonly direction: MessageDirection;
+    readonly content: string;
+    readonly timestamp: number;
+    readonly version: number;
+    readonly sender: MessageSender;
+    readonly reciver: string[] | undefined;
+    readonly private: number;
+
+    send: (message: string, target?: string[] | undefined) => Promise<void>;
+    retry: () => Promise<void>;
+    cancel: () => void;
+  }
+
   class ChatChannel extends EventEmitter {
     readonly ready: boolean;
 
-    connect(): Promise<void>;
+    connect(count?: number): Promise<void>;
     terminate(): Promise<void>;
 
-    sendMessage: (msg: string, target?: string[]) => Promise<void>;
+    sendMessage: (msg: string, target?: string[]) => Promise<Message>;
+
+    /* eslint-disable no-dupe-class-members */
+    on(event: 'ready', listener: () => void): this;
+    on(event: 'connected', listener: () => void): this;
+    on(event: 'disconnected', listener: () => void): this;
+    on(event: 'message', listener: (data: { originator: ChannelOriginator; message: Message; }) => void): this;
+    /* eslint-enable no-dupe-class-members */
   }
 
   class Information extends EventEmitter {
@@ -210,7 +248,6 @@ declare namespace MeetNow {
     on(event: 'updated', listener: (data: State) => void): this;
     on(event: 'activeChanged', listener: (data: boolean) => void): this;
     on(event: 'lockedChanged', listener: (data: boolean) => void): this;
-    on(event: 'activeChanged', listener: (data: boolean) => void): this;
     on(event: 'sharingUserEntityChanged', listener: (data: string) => void): this;
     on(event: 'speechUserEntityChanged', listener: (data: string) => void): this;
     /* eslint-enable no-dupe-class-members */
@@ -265,11 +302,7 @@ declare namespace MeetNow {
 
     /* eslint-disable no-dupe-class-members */
     on(event: 'updated', listener: (data: View) => void): this;
-    on(event: 'activeChanged', listener: (data: boolean) => void): this;
-    on(event: 'lockedChanged', listener: (data: boolean) => void): this;
-    on(event: 'activeChanged', listener: (data: boolean) => void): this;
-    on(event: 'sharingUserEntityChanged', listener: (data: string) => void): this;
-    on(event: 'speechUserEntityChanged', listener: (data: string) => void): this;
+    on(event: 'focusUserEntityChanged', listener: (data: string) => void): this;
     /* eslint-enable no-dupe-class-members */
   }
 
@@ -463,9 +496,9 @@ declare namespace MeetNow {
 
   interface JoinOptions {
     url?: string;
-    number?: string;
-    password: string;
-    displayName: string;
+    number: string;
+    password?: string;
+    displayName?: string;
   }
 
   class Conference extends EventEmitter {
@@ -492,6 +525,21 @@ declare namespace MeetNow {
     end(): Promise<this>;
 
     share(): Promise<this>;
+
+    /* eslint-disable no-dupe-class-members */
+    on(event: 'connecting', listener: () => void): this;
+    on(event: 'connected', listener: () => void): this;
+    on(event: 'disconnecting', listener: () => void): this;
+    on(event: 'disconnected', listener: (data: any) => void): this;
+    on(event: 'error', listener: (data: ApiError) => void): this;
+
+    on(event: 'user', listener: (data: User) => void): this;
+    on(event: 'sharinguser', listener: (data: User) => void): this;
+    on(event: 'speechuser', listener: (data: User) => void): this;
+
+    on(event: 'information', listener: (data: Information) => void): this;
+    on(event: 'message', listener: (data: Message) => void): this;
+    /* eslint-enable no-dupe-class-members */
   }
 
 

@@ -27,9 +27,9 @@ export enum STATUS {
 
 export interface JoinOptions {
   url?: string;
-  number?: string;
-  password: string;
-  displayName: string;
+  number: string;
+  password?: string;
+  displayName?: string;
 }
 
 export interface ConferenceConfigs {
@@ -119,16 +119,16 @@ export function createConference(config: ConferenceConfigs) {
     if (!chatChannel) return;
     if (chatChannel.ready) return;
 
-    await chatChannel.connect(2000).catch();
+    await chatChannel.connect().catch();
   }
 
-  async function join(options: Partial<JoinOptions>) {
+  async function join(options: Partial<JoinOptions> = {}) {
     log('join()');
 
     throwIfNotStatus(STATUS.kNull);
 
     if (!options.url && !options.number) {
-      throw new TypeError('URL or Number is required');
+      throw new TypeError('Invalid Number');
     }
 
     status = STATUS.kConnecting;

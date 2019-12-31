@@ -14270,9 +14270,58 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
+// EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
+var runtime = __webpack_require__("96cf");
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/promise.js
+var promise = __webpack_require__("62fc");
+var promise_default = /*#__PURE__*/__webpack_require__.n(promise);
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs3/helpers/esm/asyncToGenerator.js
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    promise_default.a.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new promise_default.a(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
 // EXTERNAL MODULE: ./packages/meetnow/node_modules/debug/src/browser.js
 var browser = __webpack_require__("3ded");
 var browser_default = /*#__PURE__*/__webpack_require__.n(browser);
+
+// EXTERNAL MODULE: ./node_modules/axios/index.js
+var axios = __webpack_require__("bc3a");
+var axios_default = /*#__PURE__*/__webpack_require__.n(axios);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.js
 var es_symbol = __webpack_require__("a4d3");
@@ -14614,55 +14663,6 @@ var es_array_concat = __webpack_require__("99af");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.join.js
 var es_array_join = __webpack_require__("a15b");
-
-// EXTERNAL MODULE: ./node_modules/regenerator-runtime/runtime.js
-var runtime = __webpack_require__("96cf");
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/promise.js
-var promise = __webpack_require__("62fc");
-var promise_default = /*#__PURE__*/__webpack_require__.n(promise);
-
-// CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs3/helpers/esm/asyncToGenerator.js
-
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    promise_default.a.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new promise_default.a(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-// EXTERNAL MODULE: ./node_modules/axios/index.js
-var axios = __webpack_require__("bc3a");
-var axios_default = /*#__PURE__*/__webpack_require__.n(axios);
 
 // CONCATENATED MODULE: ./packages/meetnow/src/api/request-method.ts
 var RequestMethod = {
@@ -19623,9 +19623,6 @@ function isMiniProgram() {
 
 
 
-
-
-
 function channel_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function channel_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { channel_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { channel_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -21859,7 +21856,6 @@ function createMessage(config) {
 
 
 
-
 function chat_channel_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function chat_channel_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { chat_channel_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { chat_channel_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -21875,36 +21871,40 @@ function createChatChannel(config) {
   var request;
   var ready = false;
 
-  function connect(_x) {
+  function connect() {
     return _connect.apply(this, arguments);
   }
 
   function _connect() {
     _connect = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee(count) {
-      var response, data;
+    regeneratorRuntime.mark(function _callee() {
+      var count,
+          response,
+          data,
+          _args = arguments;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
+              count = _args.length > 0 && _args[0] !== undefined ? _args[0] : 2000;
               chat_channel_log('connect()');
 
               if (!ready) {
-                _context.next = 3;
+                _context.next = 4;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 3:
+            case 4:
               request = api.request('pullMessage').data({
                 count: count
               });
-              _context.next = 6;
+              _context.next = 7;
               return request.send();
 
-            case 6:
+            case 7:
               response = _context.sent;
               data = response.data.data;
               messages = data.imInfos.map(function (msg) {
@@ -21916,7 +21916,7 @@ function createChatChannel(config) {
               events.emit('ready');
               events.emit('connected');
 
-            case 12:
+            case 13:
             case "end":
               return _context.stop();
           }
@@ -21959,7 +21959,7 @@ function createChatChannel(config) {
     return _terminate.apply(this, arguments);
   }
 
-  function sendMessage(_x2, _x3) {
+  function sendMessage(_x, _x2) {
     return _sendMessage.apply(this, arguments);
   }
 
@@ -21985,8 +21985,9 @@ function createChatChannel(config) {
 
             case 5:
               messages.push(message);
+              return _context3.abrupt("return", message);
 
-            case 6:
+            case 7:
             case "end":
               return _context3.stop();
           }
@@ -22021,8 +22022,6 @@ function createChatChannel(config) {
   });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/index.ts
-
-
 
 
 
@@ -22167,7 +22166,7 @@ function createConference(config) {
 
             case 4:
               _context.next = 6;
-              return chatChannel.connect(2000).catch();
+              return chatChannel.connect().catch();
 
             case 6:
             case "end":
@@ -22179,53 +22178,65 @@ function createConference(config) {
     return _maybeChat.apply(this, arguments);
   }
 
-  function join(_x) {
+  function join() {
     return _join.apply(this, arguments);
   }
 
   function _join() {
     _join = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee2(options) {
-      var response, data, hasMedia, _response, apiName, _response2, _data$data, _response3, info, context;
+    regeneratorRuntime.mark(function _callee2() {
+      var options,
+          response,
+          data,
+          hasMedia,
+          _response,
+          apiName,
+          _response2,
+          _data$data,
+          _response3,
+          info,
+          context,
+          _args2 = arguments;
 
       return regeneratorRuntime.wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
+              options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
               conference_log('join()');
               throwIfNotStatus(conference_STATUS.kNull);
 
               if (!(!options.url && !options.number)) {
-                _context2.next = 4;
+                _context2.next = 5;
                 break;
               }
 
-              throw new TypeError('URL or Number is required');
+              throw new TypeError('Invalid Number');
 
-            case 4:
+            case 5:
               status = conference_STATUS.kConnecting;
               onConnecting();
               hasMedia = true;
 
               if (!(!options.url && options.number)) {
-                _context2.next = 15;
+                _context2.next = 16;
                 break;
               }
 
               request = api.request('getURL').data({
                 'long-number': options.number
               });
-              _context2.next = 11;
+              _context2.next = 12;
               return request.send();
 
-            case 11:
+            case 12:
               response = _context2.sent;
               _response = response;
               data = _response.data;
               options.url = data.data.url;
 
-            case 15:
+            case 16:
               // join focus
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -22249,10 +22260,10 @@ function createConference(config) {
                   'frame-rate': 15
                 }
               });
-              _context2.next = 19;
+              _context2.next = 20;
               return request.send();
 
-            case 19:
+            case 20:
               response = _context2.sent;
               _response2 = response;
               data = _response2.data;
@@ -22261,14 +22272,14 @@ function createConference(config) {
               uuid = _data$data['conference-uuid'];
 
               if (!(!userId || !uuid)) {
-                _context2.next = 28;
+                _context2.next = 29;
                 break;
               }
 
               conference_log('internal error');
               throw new Error('Internal Error');
 
-            case 28:
+            case 29:
               url = options.url;
               // setup request interceptor for ctrl api
               interceptor = api.interceptors.request.use(function (config) {
@@ -22283,10 +22294,10 @@ function createConference(config) {
               }); // get full info
 
               request = api.request('getFullInfo');
-              _context2.next = 33;
+              _context2.next = 34;
               return request.send();
 
-            case 33:
+            case 34:
               response = _context2.sent;
               _response3 = response;
               data = _response3.data;
@@ -22298,7 +22309,7 @@ function createConference(config) {
               onConnected();
               return _context2.abrupt("return", conference);
 
-            case 41:
+            case 42:
             case "end":
               return _context2.stop();
           }
@@ -22622,8 +22633,6 @@ function createConference(config) {
 
 
 
-
-
 function user_agent_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function user_agent_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { user_agent_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { user_agent_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -22864,14 +22873,22 @@ function createUA(config) {
                 });
               }
 
+              if (options.number) {
+                _context4.next = 5;
+                break;
+              }
+
+              throw new TypeError('Invalid Number');
+
+            case 5:
               number = options.number; // get conference url
 
-              _context4.next = 6;
+              _context4.next = 8;
               return api.request('getURL').data({
                 'long-number': number
               }).send();
 
-            case 6:
+            case 8:
               response = _context4.sent;
               data = response.data;
               /* eslint-disable-next-line prefer-const */
@@ -22879,10 +22896,10 @@ function createUA(config) {
               _data$data2 = data.data;
               partyId = _data$data2['party-id'];
               url = _data$data2.url;
-              _context4.next = 13;
+              _context4.next = 15;
               return worker.start();
 
-            case 13:
+            case 15:
               conference = createConference({
                 api: createUserApi()
               }); // hack join method
@@ -22899,7 +22916,7 @@ function createUA(config) {
               conference.once('disconnected', stop);
               return _context4.abrupt("return", conference);
 
-            case 18:
+            case 20:
             case "end":
               return _context4.stop();
           }
@@ -22955,6 +22972,9 @@ function createMedia() {
 
 
 
+
+
+
 var src_version = "1.0.0-alpha"; // global setup
 
 function src_setup() {
@@ -22962,8 +22982,35 @@ function src_setup() {
   browser_default.a.enable(CONFIG.get('debug', 'MN:*,-MN:Api*,-MN:Information:Item,-MN:Worker'));
 }
 
-function src_connect(options) {
-  var ua = createUA();
+function src_connect(_x) {
+  return meetnow_src_connect.apply(this, arguments);
+}
+
+function meetnow_src_connect() {
+  meetnow_src_connect = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(options) {
+    var ua, conference;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            ua = createUA();
+            _context.next = 3;
+            return ua.connect(options);
+
+          case 3:
+            conference = _context.sent;
+            return _context.abrupt("return", conference);
+
+          case 5:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return meetnow_src_connect.apply(this, arguments);
 }
 
 /* harmony default export */ var src = ({
@@ -22974,6 +23021,7 @@ function src_connect(options) {
 });
 // CONCATENATED MODULE: ./node_modules/@vue/cli-service/lib/commands/build/entry-lib.js
 /* concated harmony reexport debug */__webpack_require__.d(__webpack_exports__, "debug", function() { return browser_default.a; });
+/* concated harmony reexport axios */__webpack_require__.d(__webpack_exports__, "axios", function() { return axios_default.a; });
 /* concated harmony reexport urlToNumber */__webpack_require__.d(__webpack_exports__, "urlToNumber", function() { return urlToNumber; });
 /* concated harmony reexport createUA */__webpack_require__.d(__webpack_exports__, "createUA", function() { return createUA; });
 /* concated harmony reexport STATUS */__webpack_require__.d(__webpack_exports__, "STATUS", function() { return conference_STATUS; });

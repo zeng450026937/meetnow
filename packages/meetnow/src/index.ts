@@ -1,8 +1,9 @@
 import debug from 'debug';
+import axios from 'axios';
 import { CONFIG, setupConfig } from './config';
-import { createUA } from './user-agent';
+import { ConnectOptions, createUA } from './user-agent';
 
-export { debug };
+export { debug, axios };
 export * from './user-agent';
 export * from './conference';
 export * from './channel';
@@ -12,18 +13,6 @@ export * from './reactive';
 export * from './sdp-transform';
 
 const version = process.env.VUE_APP_VERSION;
-
-export interface ConnectOptions {
-  authorization?: {
-    username: string;
-    password: string;
-  };
-  displayName?: string;
-  conference: {
-    number: string;
-    password?: string;
-  };
-}
 
 // global setup
 function setup() {
@@ -37,8 +26,10 @@ function setup() {
   );
 }
 
-function connect(options: ConnectOptions) {
+async function connect(options: ConnectOptions) {
   const ua = createUA();
+  const conference = await ua.connect(options);
+  return conference;
 }
 
 export default {
