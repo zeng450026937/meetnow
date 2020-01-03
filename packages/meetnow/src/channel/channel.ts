@@ -95,7 +95,7 @@ export function createChannel(config: ChannelConfigs) {
     throw new Error(message || 'Invalid State');
   }
   function throwIfTerminated() {
-    const message = 'terminated';
+    const message = 'Terminated';
     if (canceled) throw new Error(message);
     throwIfStatus(STATUS.kTerminated, message);
   }
@@ -145,6 +145,8 @@ export function createChannel(config: ChannelConfigs) {
     connection = new RTCPeerConnection(rtcConstraints);
 
     connection.addEventListener('iceconnectionstatechange', () => {
+      if (!connection) return;
+
       const {
         iceConnectionState: state,
       } = connection!;
@@ -330,9 +332,9 @@ export function createChannel(config: ChannelConfigs) {
       throw error;
     }
 
-    status = STATUS.kAnswered;
-
     throwIfTerminated();
+
+    status = STATUS.kAnswered;
 
     const {
       sdp: remoteSDP,
@@ -399,10 +401,11 @@ export function createChannel(config: ChannelConfigs) {
   }
 
   async function terminate(reason?: string) {
-    throwIfStatus(STATUS.kTerminated);
+    log('terminate()');
 
     switch (status) {
       case STATUS.kNull:
+      case STATUS.kTerminated:
         // nothing to do
         break;
       case STATUS.kProgress:

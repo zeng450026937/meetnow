@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["meetnow"] = factory();
+		exports["MeetNow"] = factory();
 	else
-		root["meetnow"] = factory();
+		root["MeetNow"] = factory();
 })((typeof self !== 'undefined' ? self : this), function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -480,30 +480,6 @@ module.exports = !DESCRIPTORS && !fails(function () {
 
 /***/ }),
 
-/***/ "0d03":
-/***/ (function(module, exports, __webpack_require__) {
-
-var redefine = __webpack_require__("6eeb");
-
-var DatePrototype = Date.prototype;
-var INVALID_DATE = 'Invalid Date';
-var TO_STRING = 'toString';
-var nativeDateToString = DatePrototype[TO_STRING];
-var getTime = DatePrototype.getTime;
-
-// `Date.prototype.toString` method
-// https://tc39.github.io/ecma262/#sec-date.prototype.tostring
-if (new Date(NaN) + '' != INVALID_DATE) {
-  redefine(DatePrototype, TO_STRING, function toString() {
-    var value = getTime.call(this);
-    // eslint-disable-next-line no-self-compare
-    return value === value ? nativeDateToString.call(this) : INVALID_DATE;
-  });
-}
-
-
-/***/ }),
-
 /***/ "0df6":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -710,26 +686,6 @@ module.exports = Object.is || function is(x, y) {
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__("9cd3");
-
-/***/ }),
-
-/***/ "13d5":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__("23e7");
-var $reduce = __webpack_require__("d58f").left;
-var sloppyArrayMethod = __webpack_require__("b301");
-
-// `Array.prototype.reduce` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-$({ target: 'Array', proto: true, forced: sloppyArrayMethod('reduce') }, {
-  reduce: function reduce(callbackfn /* , initialValue */) {
-    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
-
 
 /***/ }),
 
@@ -2756,23 +2712,6 @@ module.exports = function of() {
 
 /***/ }),
 
-/***/ "4160":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__("23e7");
-var forEach = __webpack_require__("17c2");
-
-// `Array.prototype.forEach` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-$({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
-  forEach: forEach
-});
-
-
-/***/ }),
-
 /***/ "4180":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3050,26 +2989,6 @@ module.exports = function (index, length) {
   var integer = toInteger(index);
   return integer < 0 ? max(integer + length, 0) : min(integer, length);
 };
-
-
-/***/ }),
-
-/***/ "45fc":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__("23e7");
-var $some = __webpack_require__("b727").some;
-var sloppyArrayMethod = __webpack_require__("b301");
-
-// `Array.prototype.some` method
-// https://tc39.github.io/ecma262/#sec-array.prototype.some
-$({ target: 'Array', proto: true, forced: sloppyArrayMethod('some') }, {
-  some: function some(callbackfn /* , thisArg */) {
-    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-  }
-});
 
 
 /***/ }),
@@ -5557,27 +5476,6 @@ module.exports = function (it) {
     throw TypeError(String(it) + ' is not an object');
   } return it;
 };
-
-
-/***/ }),
-
-/***/ "6fe5":
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__("da84");
-var trim = __webpack_require__("58a8").trim;
-var whitespaces = __webpack_require__("5899");
-
-var nativeParseFloat = global.parseFloat;
-var FORCED = 1 / nativeParseFloat(whitespaces + '-0') !== -Infinity;
-
-// `parseFloat` method
-// https://tc39.github.io/ecma262/#sec-parsefloat-string
-module.exports = FORCED ? function parseFloat(string) {
-  var trimmedString = trim(String(string));
-  var result = nativeParseFloat(trimmedString);
-  return result === 0 && trimmedString.charAt(0) == '-' ? -0 : result;
-} : nativeParseFloat;
 
 
 /***/ }),
@@ -9949,21 +9847,6 @@ module.exports = path.Object.getPrototypeOf;
 
 /***/ }),
 
-/***/ "ac1f":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var $ = __webpack_require__("23e7");
-var exec = __webpack_require__("9263");
-
-$({ target: 'RegExp', proto: true, forced: /./.exec !== exec }, {
-  exec: exec
-});
-
-
-/***/ }),
-
 /***/ "aca0":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9974,21 +9857,6 @@ module.exports = IS_PURE ? getIterator : function (it) {
   // eslint-disable-next-line no-undef
   return Map.prototype.entries.call(it);
 };
-
-
-/***/ }),
-
-/***/ "acd8":
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__("23e7");
-var parseFloatImplementation = __webpack_require__("6fe5");
-
-// `parseFloat` method
-// https://tc39.github.io/ecma262/#sec-parsefloat-string
-$({ global: true, forced: parseFloat != parseFloatImplementation }, {
-  parseFloat: parseFloatImplementation
-});
 
 
 /***/ }),
@@ -12057,53 +11925,6 @@ $({ target: 'Map', proto: true, real: true, forced: IS_PURE }, {
 
 /***/ }),
 
-/***/ "d58f":
-/***/ (function(module, exports, __webpack_require__) {
-
-var aFunction = __webpack_require__("1c0b");
-var toObject = __webpack_require__("7b0b");
-var IndexedObject = __webpack_require__("44ad");
-var toLength = __webpack_require__("50c4");
-
-// `Array.prototype.{ reduce, reduceRight }` methods implementation
-var createMethod = function (IS_RIGHT) {
-  return function (that, callbackfn, argumentsLength, memo) {
-    aFunction(callbackfn);
-    var O = toObject(that);
-    var self = IndexedObject(O);
-    var length = toLength(O.length);
-    var index = IS_RIGHT ? length - 1 : 0;
-    var i = IS_RIGHT ? -1 : 1;
-    if (argumentsLength < 2) while (true) {
-      if (index in self) {
-        memo = self[index];
-        index += i;
-        break;
-      }
-      index += i;
-      if (IS_RIGHT ? index < 0 : length <= index) {
-        throw TypeError('Reduce of empty array with no initial value');
-      }
-    }
-    for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-      memo = callbackfn(memo, self[index], index, O);
-    }
-    return memo;
-  };
-};
-
-module.exports = {
-  // `Array.prototype.reduce` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-  left: createMethod(false),
-  // `Array.prototype.reduceRight` method
-  // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
-  right: createMethod(true)
-};
-
-
-/***/ }),
-
 /***/ "d659":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12954,21 +12775,6 @@ module.exports = !fails(function () {
 
 /***/ }),
 
-/***/ "e25e":
-/***/ (function(module, exports, __webpack_require__) {
-
-var $ = __webpack_require__("23e7");
-var parseIntImplementation = __webpack_require__("e583");
-
-// `parseInt` method
-// https://tc39.github.io/ecma262/#sec-parseint-string-radix
-$({ global: true, forced: parseInt != parseIntImplementation }, {
-  parseInt: parseIntImplementation
-});
-
-
-/***/ }),
-
 /***/ "e260":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13105,27 +12911,6 @@ var isArray = __webpack_require__("6220");
 $({ target: 'Array', stat: true }, {
   isArray: isArray
 });
-
-
-/***/ }),
-
-/***/ "e583":
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__("da84");
-var trim = __webpack_require__("58a8").trim;
-var whitespaces = __webpack_require__("5899");
-
-var nativeParseInt = global.parseInt;
-var hex = /^[+-]?0[Xx]/;
-var FORCED = nativeParseInt(whitespaces + '08') !== 8 || nativeParseInt(whitespaces + '0x16') !== 22;
-
-// `parseInt` method
-// https://tc39.github.io/ecma262/#sec-parseint-string-radix
-module.exports = FORCED ? function parseInt(string, radix) {
-  var S = trim(String(string));
-  return nativeParseInt(S, (radix >>> 0) || (hex.test(S) ? 16 : 10));
-} : nativeParseInt;
 
 
 /***/ }),
@@ -14329,9 +14114,6 @@ var es_symbol = __webpack_require__("a4d3");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.filter.js
 var es_array_filter = __webpack_require__("4de4");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.for-each.js
-var es_array_for_each = __webpack_require__("4160");
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
 var es_object_get_own_property_descriptor = __webpack_require__("e439");
 
@@ -14387,12 +14169,6 @@ var es_object_entries = __webpack_require__("4fad");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__("d3b7");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.parse-float.js
-var es_parse_float = __webpack_require__("acd8");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.exec.js
-var es_regexp_exec = __webpack_require__("ac1f");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.iterator.js
 var es_string_iterator = __webpack_require__("3ca3");
@@ -14492,9 +14268,6 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/config/config.ts
-
-
-
 
 
 
@@ -14626,7 +14399,6 @@ var config_configFromURL = function configFromURL(win) {
 
 
 
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -14636,12 +14408,12 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function setupConfig() {
   var win = window;
-  var Meetnow = win.Meetnow = win.Meetnow || {}; // create the Ionic.config from raw config object (if it exists)
+  var MeetNow = win.MeetNow = win.MeetNow || {}; // create the Ionic.config from raw config object (if it exists)
   // and convert Ionic.config into a ConfigApi that has a get() fn
 
   var configObj = _objectSpread({}, configFromSession(win), {
     persistent: false
-  }, Meetnow.config, {}, config_configFromURL(win));
+  }, MeetNow.config, {}, config_configFromURL(win));
 
   CONFIG.reset(configObj);
 
@@ -14652,7 +14424,7 @@ function setupConfig() {
   // otherwise get the mode via config settings, and fallback to md
 
 
-  Meetnow.config = CONFIG;
+  MeetNow.config = CONFIG;
 
   if (CONFIG.getBoolean('testing')) {
     CONFIG.set('debug', 'MN:*');
@@ -15152,7 +14924,6 @@ function createRequest(config) {
 
 
 
-
 function api_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function api_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { api_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { api_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -15178,7 +14949,10 @@ function createApi() {
         bizCode = _response$data.bizCode,
         error = _response$data.error,
         data = _response$data.data;
-    if (ret < 0) throw new api_error_ApiError(bizCode, error);
+    if (ret < 0) throw new api_error_ApiError(bizCode, error); // should not go here
+    // server impl error
+
+    if (ret === 0 && error) throw new api_error_ApiError(bizCode, error);
     api_log('request success: %o', data); // TBD
     // replace response data with actual data. eg. response.data = data;
     // TODO
@@ -15187,6 +14961,7 @@ function createApi() {
     return response;
   }, function (error) {
     api_log('request error: %o', error);
+    throw error;
   });
 
   function request(apiName) {
@@ -15202,9 +14977,6 @@ function createApi() {
     request: request
   };
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.date.to-string.js
-var es_date_to_string = __webpack_require__("0d03");
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.to-string.js
 var es_regexp_to_string = __webpack_require__("25f0");
 
@@ -15212,8 +14984,6 @@ var es_regexp_to_string = __webpack_require__("25f0");
 var es_string_replace = __webpack_require__("5319");
 
 // CONCATENATED MODULE: ./packages/meetnow/src/utils/index.ts
-
-
 
 
 
@@ -15462,7 +15232,6 @@ var es_array_splice = __webpack_require__("a434");
 
 
 
-
 var events_log = browser_default()('MN:Events');
 function createEvents() {
   var scopedlog = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : events_log;
@@ -15602,7 +15371,6 @@ function createEvents() {
 
 
 
-
 function keepalive_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function keepalive_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { keepalive_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { keepalive_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -15695,23 +15463,18 @@ function createKeepAlive(config) {
               config.onError && config.onError(error, attempts);
 
             case 19:
-              if (!response) {
-                attempts++;
-                _interval = computeNextTimeout(attempts);
-              }
-
               if (attempts > MAX_ATTEMPTS) {
                 config.onError && config.onError(new Error('Max Attempts'), attempts);
               }
 
-              if (!(error || !response)) {
-                _context.next = 23;
+              if (!error) {
+                _context.next = 22;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 23:
+            case 22:
               _response$data = response.data, bizCode = _response$data.bizCode, _response$data$data = _response$data.data, data = _response$data$data === void 0 ? {
                 interval: _interval
               } : _response$data$data;
@@ -15720,7 +15483,7 @@ function createKeepAlive(config) {
 
               _interval = Math.min(expectedInterval * 1000, _interval);
 
-            case 26:
+            case 25:
             case "end":
               return _context.stop();
           }
@@ -15749,7 +15512,6 @@ function createKeepAlive(config) {
 var es_array_includes = __webpack_require__("caad");
 
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/polling.ts
-
 
 
 
@@ -15903,23 +15665,18 @@ function createPolling(config) {
               config.onError && config.onError(error, attempts);
 
             case 23:
-              if (!response) {
-                attempts++;
-                _interval = polling_computeNextTimeout(attempts);
-              }
-
               if (attempts > polling_MAX_ATTEMPTS) {
                 config.onError && config.onError(new Error('Max Attempts'), attempts);
               }
 
-              if (!(error || !response)) {
-                _context.next = 27;
+              if (!error) {
+                _context.next = 26;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 27:
+            case 26:
               _response$data = response.data, bizCode = _response$data.bizCode, data = _response$data.data; // TODO
               // check bizCode
 
@@ -15931,7 +15688,7 @@ function createPolling(config) {
 
               attempts = 0;
 
-            case 30:
+            case 29:
             case "end":
               return _context.stop();
           }
@@ -15989,7 +15746,6 @@ function createReactive() {
   });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/description.ts
-
 
 
 
@@ -16156,7 +15912,6 @@ function createDescription(data, context) {
   });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/state.ts
-
 
 
 
@@ -16444,7 +16199,6 @@ function createLayoutCtrl(api) {
 
 
 
-
 function danmaku_ctrl_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function danmaku_ctrl_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { danmaku_ctrl_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { danmaku_ctrl_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -16552,7 +16306,6 @@ function createDanmakuCtrl(api) {
 
 
 
-
 function view_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function view_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { view_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { view_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -16621,9 +16374,6 @@ function createView(data, context) {
     getDanmaku: getDanmaku
   });
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.reduce.js
-var es_array_reduce = __webpack_require__("13d5");
-
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/camera-ctrl.ts
 
 
@@ -16725,8 +16475,6 @@ function createCameraCtrl(api, entity) {
   };
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/user.ts
-
-
 
 
 
@@ -17499,7 +17247,6 @@ function createLobbyCtrl(api) {
 
 
 
-
 function users_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function users_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { users_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { users_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -17896,7 +17643,6 @@ function createRTMPCtrl(api) {
 
 
 
-
 function rtmp_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function rtmp_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { rtmp_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { rtmp_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -18045,7 +17791,6 @@ function createRecordCtrl(api) {
   };
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/record.ts
-
 
 
 
@@ -18283,7 +18028,6 @@ function mergeItem(rhys, item) {
 
 
 
-
 function information_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function information_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { information_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { information_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -18438,7 +18182,6 @@ var es_string_match = __webpack_require__("466d");
 // CONCATENATED MODULE: ./packages/meetnow/src/media/close-media-stream.ts
 
 
-
 function closeMediaStream(stream) {
   if (!stream) return; // Latest spec states that MediaStream has no stop() method and instead must
   // call stop() on every MediaStreamTrack.
@@ -18465,7 +18208,6 @@ function closeMediaStream(stream) {
   }
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/media/stream-utils.ts
-
 
 
 function stream_utils_setup(stream) {
@@ -18547,8 +18289,6 @@ function _getUserMedia() {
   return _getUserMedia.apply(this, arguments);
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/grammar.ts
-
-
 
 
 
@@ -18881,9 +18621,6 @@ Object.keys(grammar).forEach(function (key) {
 
 
 
-
-
-
 /* eslint-disable no-useless-escape */
 
 /* eslint-disable no-div-regex */
@@ -19020,8 +18757,6 @@ function parseSimulcastStreamList(str) {
 
 
 
-
-
  // customized util.format - discards excess arguments and can void middle ones
 
 var formatRegExp = /%[sdv%]/g;
@@ -19139,8 +18874,6 @@ function write(session, opts) {
 var es_number_is_finite = __webpack_require__("f00c");
 
 // CONCATENATED MODULE: ./packages/meetnow/src/channel/rtc-stats.ts
-
-
 
 
 
@@ -19480,11 +19213,7 @@ function createRTCStats() {
     clear: clear
   };
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.some.js
-var es_array_some = __webpack_require__("45fc");
-
 // CONCATENATED MODULE: ./packages/meetnow/src/browser/browser-list.ts
-
 
 
 var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
@@ -19557,7 +19286,6 @@ var browsersList = [{
   }
 }];
 // CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
-
 
 
 
@@ -19694,7 +19422,7 @@ function createChannel(config) {
   }
 
   function throwIfTerminated() {
-    var message = 'terminated';
+    var message = 'Terminated';
     if (canceled) throw new Error(message);
     throwIfStatus(STATUS.kTerminated, message);
   }
@@ -19746,6 +19474,7 @@ function createChannel(config) {
 
     connection = new RTCPeerConnection(rtcConstraints);
     connection.addEventListener('iceconnectionstatechange', function () {
+      if (!connection) return;
       var _connection = connection,
           state = _connection.iceConnectionState;
 
@@ -20034,8 +19763,8 @@ function createChannel(config) {
               throw _context2.t0;
 
             case 42:
-              status = STATUS.kAnswered;
               throwIfTerminated();
+              status = STATUS.kAnswered;
               _answer = answer, remoteSDP = _answer.sdp;
               desc = {
                 originator: 'remote',
@@ -20148,9 +19877,9 @@ function createChannel(config) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
-              throwIfStatus(STATUS.kTerminated);
+              channel_log('terminate()');
               _context3.t0 = status;
-              _context3.next = _context3.t0 === STATUS.kNull ? 4 : _context3.t0 === STATUS.kProgress ? 5 : _context3.t0 === STATUS.kOffered ? 5 : _context3.t0 === STATUS.kAnswered ? 15 : _context3.t0 === STATUS.kAccepted ? 15 : 19;
+              _context3.next = _context3.t0 === STATUS.kNull ? 4 : _context3.t0 === STATUS.kTerminated ? 4 : _context3.t0 === STATUS.kProgress ? 5 : _context3.t0 === STATUS.kOffered ? 5 : _context3.t0 === STATUS.kAnswered ? 15 : _context3.t0 === STATUS.kAccepted ? 15 : 19;
               break;
 
             case 4:
@@ -21133,9 +20862,6 @@ var es_array_from = __webpack_require__("a630");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.sort.js
 var es_array_sort = __webpack_require__("4e82");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.parse-int.js
-var es_parse_int = __webpack_require__("e25e");
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.set.js
 var es_set = __webpack_require__("6062");
 
@@ -21143,9 +20869,6 @@ var es_set = __webpack_require__("6062");
 var es_string_includes = __webpack_require__("2532");
 
 // CONCATENATED MODULE: ./packages/meetnow/src/channel/sdp-modifier.ts
-
-
-
 
 
 
@@ -21231,7 +20954,7 @@ function createModifier() {
               var _loop2 = function _loop2() {
                 var r = _step2.value;
                 var codec = r.codec.toUpperCase();
-                var fmtp = null;
+                var fmtp = void 0;
 
                 switch (codec) {
                   case 'VP8':
@@ -21502,7 +21225,6 @@ function createModifier() {
   };
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/channel/media-channel.ts
-
 
 
 
@@ -22166,7 +21888,7 @@ function createConference(config) {
 
             case 4:
               _context.next = 6;
-              return chatChannel.connect().catch();
+              return chatChannel.connect().catch(function () {});
 
             case 6:
             case "end":
@@ -22260,11 +21982,22 @@ function createConference(config) {
                   'frame-rate': 15
                 }
               });
-              _context2.next = 20;
+              _context2.prev = 18;
+              _context2.next = 21;
               return request.send();
 
-            case 20:
+            case 21:
               response = _context2.sent;
+              _context2.next = 28;
+              break;
+
+            case 24:
+              _context2.prev = 24;
+              _context2.t0 = _context2["catch"](18);
+              events.emit('failed', _context2.t0);
+              throw _context2.t0;
+
+            case 28:
               _response2 = response;
               data = _response2.data;
               _data$data = data.data;
@@ -22272,14 +22005,14 @@ function createConference(config) {
               uuid = _data$data['conference-uuid'];
 
               if (!(!userId || !uuid)) {
-                _context2.next = 29;
+                _context2.next = 36;
                 break;
               }
 
               conference_log('internal error');
               throw new Error('Internal Error');
 
-            case 29:
+            case 36:
               url = options.url;
               // setup request interceptor for ctrl api
               interceptor = api.interceptors.request.use(function (config) {
@@ -22294,11 +22027,22 @@ function createConference(config) {
               }); // get full info
 
               request = api.request('getFullInfo');
-              _context2.next = 34;
+              _context2.prev = 39;
+              _context2.next = 42;
               return request.send();
 
-            case 34:
+            case 42:
               response = _context2.sent;
+              _context2.next = 49;
+              break;
+
+            case 45:
+              _context2.prev = 45;
+              _context2.t1 = _context2["catch"](39);
+              events.emit('failed', _context2.t1);
+              throw _context2.t1;
+
+            case 49:
               _response3 = response;
               data = _response3.data;
               info = data.data; // create context
@@ -22309,12 +22053,12 @@ function createConference(config) {
               onConnected();
               return _context2.abrupt("return", conference);
 
-            case 42:
+            case 56:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2);
+      }, _callee2, null, [[18, 24], [39, 45]]);
     }));
     return _join.apply(this, arguments);
   }
@@ -22334,15 +22078,15 @@ function createConference(config) {
               throwIfStatus(conference_STATUS.kDisconnecting);
               throwIfStatus(conference_STATUS.kDisconnected);
               _context3.t0 = status;
-              _context3.next = _context3.t0 === conference_STATUS.kNull ? 5 : _context3.t0 === conference_STATUS.kConnecting ? 6 : _context3.t0 === conference_STATUS.kConnected ? 6 : _context3.t0 === conference_STATUS.kDisconnecting ? 14 : _context3.t0 === conference_STATUS.kDisconnected ? 14 : 14;
+              _context3.next = _context3.t0 === conference_STATUS.kNull ? 5 : _context3.t0 === conference_STATUS.kConnecting ? 6 : _context3.t0 === conference_STATUS.kConnected ? 6 : _context3.t0 === conference_STATUS.kDisconnecting ? 15 : _context3.t0 === conference_STATUS.kDisconnected ? 15 : 15;
               break;
 
             case 5:
-              return _context3.abrupt("break", 15);
+              return _context3.abrupt("break", 16);
 
             case 6:
               if (!(status === conference_STATUS.kConnected)) {
-                _context3.next = 12;
+                _context3.next = 13;
                 break;
               }
 
@@ -22351,25 +22095,26 @@ function createConference(config) {
               return api.request('leave').send();
 
             case 10:
-              _context3.next = 13;
+              onDisconnected();
+              _context3.next = 14;
               break;
 
-            case 12:
+            case 13:
               if (request) {
                 request.cancel();
                 onDisconnected();
               }
 
-            case 13:
-              return _context3.abrupt("break", 15);
-
             case 14:
-              return _context3.abrupt("break", 15);
+              return _context3.abrupt("break", 16);
 
             case 15:
-              return _context3.abrupt("return", conference);
+              return _context3.abrupt("break", 16);
 
             case 16:
+              return _context3.abrupt("return", conference);
+
+            case 17:
             case "end":
               return _context3.stop();
           }
@@ -22424,6 +22169,27 @@ function createConference(config) {
     });
     state.on('speechUserEntityChanged', function (val) {
       events.emit('speechuser', users.getUser(val));
+    });
+    users.on('user:added', function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return events.emit.apply(events, ['user:added'].concat(args));
+    });
+    users.on('user:updated', function () {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return events.emit.apply(events, ['user:updated'].concat(args));
+    });
+    users.on('user:deleted', function () {
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+
+      return events.emit.apply(events, ['user:deleted'].concat(args));
     }); // create keepalive worker
 
     keepalive = createKeepAlive({
@@ -22453,7 +22219,7 @@ function createConference(config) {
         onDisconnected(data);
       },
       onError: function onError(data) {
-        conference_log('polling error, about to leave... %o', data);
+        conference_log('polling error, about to leave...');
         events.emit('error', data); // there are some problems with polling
         // leave conference
         //
@@ -22477,8 +22243,8 @@ function createConference(config) {
       api: api
     });
     chatChannel.on('message', function () {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
       return events.emit.apply(events, ['message'].concat(args));
@@ -22571,6 +22337,10 @@ function createConference(config) {
     // change to string type
     get userId() {
       return "".concat(userId);
+    },
+
+    get user() {
+      return user;
     },
 
     get information() {

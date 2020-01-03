@@ -119,7 +119,7 @@ export function createConference(config: ConferenceConfigs) {
     if (!chatChannel) return;
     if (chatChannel.ready) return;
 
-    await chatChannel.connect().catch();
+    await chatChannel.connect().catch(() => {});
   }
 
   async function join(options: Partial<JoinOptions> = {}) {
@@ -134,8 +134,8 @@ export function createConference(config: ConferenceConfigs) {
     status = STATUS.kConnecting;
     onConnecting();
 
-    let response: AxiosResponse<RequestResult>;
-    let data: RequestResult;
+    let response: AxiosResponse<RequestResult> | undefined;
+    let data: RequestResult | undefined;
 
     const hasMedia = true;
 
@@ -178,7 +178,12 @@ export function createConference(config: ConferenceConfigs) {
         } as any,
       });
 
-    response = await request.send();
+    try {
+      response = await request.send();
+    } catch (error) {
+      events.emit('failed', error);
+      throw error;
+    }
 
     ({ data } = response);
 
@@ -215,15 +220,21 @@ export function createConference(config: ConferenceConfigs) {
     request = api
       .request('getFullInfo');
 
-    response = await request.send();
+    try {
+      response = await request.send();
+    } catch (error) {
+      events.emit('failed', error);
+      throw error;
+    }
 
     ({ data } = response);
 
     const info = data.data as ConferenceInformation;
-
     // create context
+
     const context = createContext(conference);
     // create information
+
     information = createInformation(info, context);
 
     onConnected();
@@ -247,6 +258,8 @@ export function createConference(config: ConferenceConfigs) {
           await api
             .request('leave')
             .send();
+
+          onDisconnected();
         } else if (request) {
           request.cancel();
 
@@ -329,7 +342,7 @@ export function createConference(config: ConferenceConfigs) {
       },
 
       onError : (data: ApiError) => {
-        log('polling error, about to leave... %o', data);
+        log('polling error, about to leave...');
 
         events.emit('error', data);
 

@@ -30,6 +30,9 @@ export function createApi(config: AxiosRequestConfig = {}) {
       } = response.data;
 
       if (ret < 0) throw new ApiError(bizCode, error);
+      // should not go here
+      // server impl error
+      if (ret === 0 && error) throw new ApiError(bizCode, error);
 
       log('request success: %o', data);
 
@@ -42,6 +45,7 @@ export function createApi(config: AxiosRequestConfig = {}) {
     },
     (error) => {
       log('request error: %o', error);
+      throw error;
     },
   );
 
