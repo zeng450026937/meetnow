@@ -1,5 +1,7 @@
 import debug from 'debug';
 import axios from 'axios';
+import adapter from './adapter';
+import { isMiniProgram } from './browser';
 import { CONFIG, setupConfig } from './config';
 import { ConnectOptions, createUA } from './user-agent';
 
@@ -17,6 +19,10 @@ const version = process.env.VUE_APP_VERSION;
 // global setup
 function setup() {
   setupConfig();
+
+  if (isMiniProgram()) {
+    axios.defaults.adapter = adapter;
+  }
 
   debug.enable(
     CONFIG.get(

@@ -11,8 +11,8 @@ import { createInformation, Information, User } from './information';
 import { createMediaChannel, MediaChannel } from '../channel/media-channel';
 import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
-import { isMiniProgram } from '../browser';
 import { ApiError } from '../api/api-error';
+import { isMiniProgram } from '../browser';
 
 const log = debug('MN:Conference');
 const miniprogram = isMiniProgram();

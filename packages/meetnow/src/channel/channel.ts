@@ -1,10 +1,10 @@
 import debug from 'debug';
+import { getBrowser } from '../browser';
+import { parse, write } from '../sdp-transform';
 import { createEvents } from '../events';
 import { getUserMedia } from '../media/get-user-media';
 import { closeMediaStream } from '../media/close-media-stream';
-import { parse, write } from '../sdp-transform';
 import { createRTCStats, RTCStats } from './rtc-stats';
-import { getBrowser } from '../browser';
 
 const log = debug('MN:Channel');
 const browser = getBrowser();

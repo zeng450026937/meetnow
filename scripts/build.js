@@ -32,9 +32,45 @@ module.exports = (api, options) => {
       await api.service.run('build', args);
     },
   );
+
+  api.registerCommand(
+    'build:sdp',
+    {
+      description : 'build sdp',
+      usage       : 'vue-cli-service build:sdp',
+      details     : 'TBD',
+    },
+    async (args, rawArgs) => {
+      args.name = 'SDPTransform';
+      args.filename = 'sdp-transform';
+      args.target = 'lib';
+      args.entry = './packages/sdp-transform/src/index.ts';
+      args.dest = './packages/sdp-transform/dist';
+      await api.service.run('build', args);
+    },
+  );
+
+  api.registerCommand(
+    'build:browser',
+    {
+      description : 'build browser',
+      usage       : 'vue-cli-service build:browser',
+      details     : 'TBD',
+    },
+    async (args, rawArgs) => {
+      args.name = 'Browser';
+      args.filename = 'browser';
+      args.target = 'lib';
+      args.entry = './packages/browser/src/index.ts';
+      args.dest = './packages/browser/dist';
+      await api.service.run('build', args);
+    },
+  );
 };
 
 module.exports.defaultModes = {
   'build:meetnow' : 'production',
   'build:adapter' : 'production',
+  'build:sdp'     : 'production',
+  'build:browser' : 'production',
 };

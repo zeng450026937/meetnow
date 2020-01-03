@@ -59,3 +59,5 @@ if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是
 export function isMiniProgram() {
   return /miniprogram/i.test(navigator.userAgent) || (window && window.__wxjs_environment === 'miniprogram');
 }
+
+export const MINIPROGRAM = isMiniProgram();
