@@ -14108,72 +14108,11 @@ var browser_default = /*#__PURE__*/__webpack_require__.n(browser);
 var axios = __webpack_require__("bc3a");
 var axios_default = /*#__PURE__*/__webpack_require__.n(axios);
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
-var es_array_concat = __webpack_require__("99af");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
-var es_object_to_string = __webpack_require__("d3b7");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.promise.js
-var es_promise = __webpack_require__("e6cf");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.for-each.js
-var web_dom_collections_for_each = __webpack_require__("159b");
-
-// EXTERNAL MODULE: ./node_modules/axios/lib/utils.js
-var utils = __webpack_require__("c532");
-var utils_default = /*#__PURE__*/__webpack_require__.n(utils);
-
-// EXTERNAL MODULE: ./node_modules/axios/lib/core/settle.js
-var settle = __webpack_require__("467f");
-var settle_default = /*#__PURE__*/__webpack_require__.n(settle);
-
-// EXTERNAL MODULE: ./node_modules/axios/lib/helpers/buildURL.js
-var buildURL = __webpack_require__("30b5");
-var buildURL_default = /*#__PURE__*/__webpack_require__.n(buildURL);
-
-// CONCATENATED MODULE: ./packages/meetnow/src/adapter/btoa.ts
-var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='; // btoa
-
-function btoa(input) {
-  var str = String(input); // initialize result and counter
-
-  var block;
-  var charCode;
-  var idx = 0;
-  var map = chars;
-  var output = '';
-  /* eslint-disable no-cond-assign, no-bitwise, no-mixed-operators */
-
-  for (; // if the next str index does not exist:
-  //   change the mapping table to "="
-  //   check if d has no fractional digits
-  str.charAt(idx | 0) || (map = '=', idx % 1); // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-  output += map.charAt(63 & block >> 8 - idx % 1 * 8)) {
-    charCode = str.charCodeAt(idx += 3 / 4);
-
-    if (charCode > 0xFF) {
-      throw new Error('"btoa" failed: The string to be encoded contains characters outside of the Latin1 range.');
-    }
-
-    block = block << 8 | charCode;
-  }
-
-  return output;
-}
-
-/* harmony default export */ var adapter_btoa = (btoa);
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.js
 var es_symbol = __webpack_require__("a4d3");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.filter.js
 var es_array_filter = __webpack_require__("4de4");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.includes.js
-var es_array_includes = __webpack_require__("caad");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.index-of.js
-var es_array_index_of = __webpack_require__("c975");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
 var es_object_get_own_property_descriptor = __webpack_require__("e439");
@@ -14183,6 +14122,9 @@ var es_object_get_own_property_descriptors = __webpack_require__("dbb4");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.keys.js
 var es_object_keys = __webpack_require__("b64b");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.for-each.js
+var web_dom_collections_for_each = __webpack_require__("159b");
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/object/define-property.js
 var define_property = __webpack_require__("85d3");
@@ -14204,403 +14146,6 @@ function _defineProperty(obj, key, value) {
 
   return obj;
 }
-// EXTERNAL MODULE: ./node_modules/axios/lib/core/createError.js
-var createError = __webpack_require__("2d83");
-var createError_default = /*#__PURE__*/__webpack_require__.n(createError);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/symbol/iterator.js
-var iterator = __webpack_require__("6271");
-var iterator_default = /*#__PURE__*/__webpack_require__.n(iterator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/symbol.js
-var symbol = __webpack_require__("ab88");
-var symbol_default = /*#__PURE__*/__webpack_require__.n(symbol);
-
-// CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs3/helpers/esm/typeof.js
-
-
-
-function typeof_typeof2(obj) { if (typeof symbol_default.a === "function" && typeof iterator_default.a === "symbol") { typeof_typeof2 = function _typeof2(obj) { return typeof obj; }; } else { typeof_typeof2 = function _typeof2(obj) { return obj && typeof symbol_default.a === "function" && obj.constructor === symbol_default.a && obj !== symbol_default.a.prototype ? "symbol" : typeof obj; }; } return typeof_typeof2(obj); }
-
-function typeof_typeof(obj) {
-  if (typeof symbol_default.a === "function" && typeof_typeof2(iterator_default.a) === "symbol") {
-    typeof_typeof = function _typeof(obj) {
-      return typeof_typeof2(obj);
-    };
-  } else {
-    typeof_typeof = function _typeof(obj) {
-      return obj && typeof symbol_default.a === "function" && obj.constructor === symbol_default.a && obj !== symbol_default.a.prototype ? "symbol" : typeof_typeof2(obj);
-    };
-  }
-
-  return typeof_typeof(obj);
-}
-// CONCATENATED MODULE: ./packages/meetnow/src/adapter/request-delegate.ts
-
-var request_delegate_isObject = function isObject(val) {
-  return val !== null && typeof_typeof(val) === 'object';
-};
-var PLATFORM;
-
-(function (PLATFORM) {
-  PLATFORM[PLATFORM["kUnknown"] = 0] = "kUnknown";
-  PLATFORM[PLATFORM["kWechat"] = 1] = "kWechat";
-  PLATFORM[PLATFORM["kAlipay"] = 2] = "kAlipay";
-  PLATFORM[PLATFORM["kBaidu"] = 3] = "kBaidu";
-})(PLATFORM || (PLATFORM = {}));
-
-var platform = request_delegate_isObject(wx) ? PLATFORM.kWechat : request_delegate_isObject(my) ? PLATFORM.kAlipay : request_delegate_isObject(swan) ? PLATFORM.kBaidu : PLATFORM.kUnknown;
-var request_delegate_delegate = platform === PLATFORM.kWechat ? wx.request.bind(wx) : platform === PLATFORM.kAlipay ? (my.request || my.httpRequest).bind(my) : platform === PLATFORM.kBaidu ? swan.request.bind(swan) : undefined;
-function createRequestDelegate() {
-  var task;
-  return {
-    send: function send(options) {
-      if (!request_delegate_delegate) return;
-      task = request_delegate_delegate(options);
-    },
-    abort: function abort() {
-      task && task.abort();
-    }
-  };
-}
-// CONCATENATED MODULE: ./packages/meetnow/src/adapter/request.ts
-
-
-
-
-
-
-
-
-
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-
-
-function createRequest(config) {
-  var timer;
-  var timeout;
-  var onabort;
-  var onerror;
-  var ontimeout;
-  var onsuccess;
-  var delegate = createRequestDelegate();
-  return {
-    send: function send(options) {
-      delegate.send(_objectSpread({}, options, {
-        success: function success(response) {
-          // normalize data
-          var headers = response.header || response.headers;
-          var status = response.statusCode || response.status || 200;
-          var statusText = status === 200 ? 'OK' : status === 400 ? 'Bad Request' : '';
-          onsuccess && onsuccess({
-            data: response.data,
-            status: status,
-            statusText: statusText,
-            headers: headers,
-            config: config,
-            request: options
-          });
-        },
-        fail: function fail(data) {
-          var isAbort = false;
-          var isTimeout = false; // error or timeout
-
-          switch (platform) {
-            case PLATFORM.kWechat:
-              if (data.errMsg.indexOf('request:fail abort') !== -1) {
-                isAbort = true;
-              } else if (data.errMsg.indexOf('timeout') !== -1) {
-                isTimeout = true;
-              }
-
-              break;
-
-            case PLATFORM.kAlipay:
-              // https://docs.alipay.com/mini/api/network
-              if ([14, 19].includes(data.error)) {
-                isAbort = true;
-              } else if ([13].includes(data.error)) {
-                isTimeout = true;
-              }
-
-              break;
-
-            default:
-              break;
-          }
-
-          var error = isAbort ? createError_default()('Request aborted', config, 'ECONNABORTED', '') : isTimeout ? createError_default()('Request Timeout', config, 'ECONNABORTED', '') : createError_default()('Network Error', config, null, '');
-
-          if (isAbort) {
-            onabort && onabort(error);
-          }
-
-          if (isTimeout) {
-            ontimeout && ontimeout(error);
-          }
-
-          onerror && onerror(error);
-        },
-        complete: function complete() {
-          if (timer) {
-            clearTimeout(timer);
-            timer = undefined;
-          }
-        }
-      }));
-
-      if (timeout) {
-        timer = setTimeout(function () {
-          ontimeout && ontimeout(createError_default()("timeout of ".concat(config.timeout || 0, "ms exceeded"), config, 'ECONNABORTED', ''));
-          timer = undefined;
-        }, timeout);
-      }
-    },
-    abort: function abort() {
-      delegate.abort();
-    },
-
-    set timeout(val) {
-      timeout = val;
-    },
-
-    set onabort(val) {
-      onabort = val;
-    },
-
-    set onerror(val) {
-      onerror = val;
-    },
-
-    set ontimeout(val) {
-      ontimeout = val;
-    },
-
-    set onsuccess(val) {
-      onsuccess = val;
-    }
-
-  };
-}
-// CONCATENATED MODULE: ./packages/meetnow/src/adapter/index.ts
-
-
-
-
-
-
-
-
-
-var isString = function isString(val) {
-  return typeof val === 'string';
-};
-function mpAdapter(config) {
-  /* eslint-disable-next-line prefer-arrow-callback */
-  return new Promise(function dispatchMpRequest(resolve, reject) {
-    var url = config.url,
-        data = config.data,
-        headers = config.headers,
-        method = config.method,
-        params = config.params,
-        paramsSerializer = config.paramsSerializer,
-        responseType = config.responseType,
-        timeout = config.timeout,
-        cancelToken = config.cancelToken; // HTTP basic authentication
-
-    if (config.auth) {
-      var _ref = [config.auth.username || '', config.auth.password || ''],
-          username = _ref[0],
-          password = _ref[1];
-      headers.Authorization = "Basic ".concat(adapter_btoa("".concat(username, ":").concat(password)));
-    } // Add headers to the request
-
-
-    utils_default.a.forEach(headers, function (val, key) {
-      var header = key.toLowerCase();
-
-      if (typeof data === 'undefined' && header === 'content-type' || header === 'referer') {
-        delete headers[key];
-      }
-    });
-    var request = createRequest(config);
-    var options = {
-      url: buildURL_default()(url, params, paramsSerializer),
-      headers: headers,
-      method: method && method.toUpperCase(),
-      data: isString(data) ? JSON.parse(data) : data,
-      responseType: responseType
-    };
-
-    if (cancelToken) {
-      // Handle cancellation
-      cancelToken.promise.then(function (cancel) {
-        if (!request) return;
-        request.abort();
-        reject(cancel);
-        request = null;
-      });
-    }
-
-    request.timeout = timeout;
-
-    request.onsuccess = function handleLoad(response) {
-      settle_default()(resolve, reject, response);
-      request = null;
-    };
-
-    request.onabort = function handleAbort(error) {
-      if (!request) return;
-      reject(error);
-      request = null;
-    };
-
-    request.onerror = function handleError(error) {
-      if (!request) return;
-      reject(error);
-      request = null;
-    };
-
-    request.ontimeout = function handleTimeout(error) {
-      reject(error);
-      request = null;
-    };
-
-    request.send(options);
-  });
-}
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
-var es_array_find = __webpack_require__("7db0");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__("b0c0");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
-var es_string_match = __webpack_require__("466d");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
-var es_string_search = __webpack_require__("841c");
-
-// CONCATENATED MODULE: ./packages/meetnow/src/browser/browser-list.ts
-
-
-var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
-function getFirstMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 0 && match[1] || '';
-}
-function getSecondMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 1 && match[2] || '';
-}
-function browser_list_browser(name, version) {
-  return {
-    name: name,
-    version: version,
-    firefox: name === 'firefox',
-    chrome: name === 'chrome' || name === 'chromium',
-    wechet: name === 'wechat'
-  };
-}
-var browsersList = [{
-  test: [/micromessenger/i],
-  describe: function describe(ua) {
-    return browser_list_browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/\sedg\//i],
-  describe: function describe(ua) {
-    return browser_list_browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/edg([ea]|ios)/i],
-  describe: function describe(ua) {
-    return browser_list_browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/firefox|iceweasel|fxios/i],
-  describe: function describe(ua) {
-    return browser_list_browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/chromium/i],
-  describe: function describe(ua) {
-    return browser_list_browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/chrome|crios|crmo/i],
-  describe: function describe(ua) {
-    return browser_list_browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/safari|applewebkit/i],
-  describe: function describe(ua) {
-    return browser_list_browser('safari', getFirstMatch(commonVersionIdentifier, ua));
-  }
-},
-/* Something else */
-{
-  test: [/.*/i],
-  describe: function describe(ua) {
-    /* Here we try to make sure that there are explicit details about the device
-     * in order to decide what regexp exactly we want to apply
-     * (as there is a specific decision based on that conclusion)
-     */
-    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
-    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
-    var hasDeviceSpec = ua.search('\\(') !== -1;
-    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
-    return browser_list_browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
-  }
-}];
-// CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
-
-
-
-var parsed = {};
-function parseBrowser(ua) {
-  if (!parsed.browser) {
-    ua = ua || navigator.userAgent;
-    var descriptor = browsersList.find(function (browser) {
-      return browser.test.some(function (condition) {
-        return condition.test(ua);
-      });
-    });
-
-    if (descriptor) {
-      parsed.browser = descriptor.describe(ua);
-    }
-  }
-
-  return parsed.browser;
-}
-function getBrowser() {
-  return parseBrowser();
-}
-var BROWSER = parseBrowser();
-function isBrowser(name) {
-  return parseBrowser().name === name;
-}
-/*
-if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
-  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
-    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
-      console.log('在小程序');
-    } else {
-      console.log('在微信');
-    }
-  }, false);
-}
-*/
-
-function isMiniProgram() {
-  return /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
-}
-var MINIPROGRAM = isMiniProgram();
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.iterator.js
 var es_array_iterator = __webpack_require__("e260");
 
@@ -14622,8 +14167,14 @@ var es_number_is_nan = __webpack_require__("9129");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.entries.js
 var es_object_entries = __webpack_require__("4fad");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
+var es_object_to_string = __webpack_require__("d3b7");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.iterator.js
 var es_string_iterator = __webpack_require__("3ca3");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
+var es_string_search = __webpack_require__("841c");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.split.js
 var es_string_split = __webpack_require__("1276");
@@ -14848,21 +14399,21 @@ var config_configFromURL = function configFromURL(win) {
 
 
 
-function config_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function config_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { config_ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { config_ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
  // export config
 
 
 function setupConfig() {
   var win = window;
-  var Meetnow = win.Meetnow = win.Meetnow || {}; // create the Ionic.config from raw config object (if it exists)
+  var MeetNow = win.MeetNow = win.MeetNow || {}; // create the Ionic.config from raw config object (if it exists)
   // and convert Ionic.config into a ConfigApi that has a get() fn
 
-  var configObj = config_objectSpread({}, configFromSession(win), {
+  var configObj = _objectSpread({}, configFromSession(win), {
     persistent: false
-  }, Meetnow.config, {}, config_configFromURL(win));
+  }, MeetNow.config, {}, config_configFromURL(win));
 
   CONFIG.reset(configObj);
 
@@ -14873,12 +14424,15 @@ function setupConfig() {
   // otherwise get the mode via config settings, and fallback to md
 
 
-  Meetnow.config = CONFIG;
+  MeetNow.config = CONFIG;
 
   if (CONFIG.getBoolean('testing')) {
     CONFIG.set('debug', 'MN:*');
   }
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
+var es_array_concat = __webpack_require__("99af");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.join.js
 var es_array_join = __webpack_require__("a15b");
 
@@ -15084,6 +14638,36 @@ var configs = {
   }
 };
 var CONFIGS = configs;
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
+var es_function_name = __webpack_require__("b0c0");
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/symbol/iterator.js
+var iterator = __webpack_require__("6271");
+var iterator_default = /*#__PURE__*/__webpack_require__.n(iterator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime-corejs3/core-js/symbol.js
+var symbol = __webpack_require__("ab88");
+var symbol_default = /*#__PURE__*/__webpack_require__.n(symbol);
+
+// CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs3/helpers/esm/typeof.js
+
+
+
+function typeof_typeof2(obj) { if (typeof symbol_default.a === "function" && typeof iterator_default.a === "symbol") { typeof_typeof2 = function _typeof2(obj) { return typeof obj; }; } else { typeof_typeof2 = function _typeof2(obj) { return obj && typeof symbol_default.a === "function" && obj.constructor === symbol_default.a && obj !== symbol_default.a.prototype ? "symbol" : typeof obj; }; } return typeof_typeof2(obj); }
+
+function typeof_typeof(obj) {
+  if (typeof symbol_default.a === "function" && typeof_typeof2(iterator_default.a) === "symbol") {
+    typeof_typeof = function _typeof(obj) {
+      return typeof_typeof2(obj);
+    };
+  } else {
+    typeof_typeof = function _typeof(obj) {
+      return obj && typeof symbol_default.a === "function" && obj.constructor === symbol_default.a && obj !== symbol_default.a.prototype ? "symbol" : typeof_typeof2(obj);
+    };
+  }
+
+  return typeof_typeof(obj);
+}
 // CONCATENATED MODULE: ./node_modules/@babel/runtime-corejs3/helpers/esm/assertThisInitialized.js
 function _assertThisInitialized(self) {
   if (self === void 0) {
@@ -15289,7 +14873,7 @@ function (_Error) {
 var log = browser_default()('MN:Api:Request');
 var isCancel = axios_default.a.isCancel;
 
-function request_createRequest(config) {
+function createRequest(config) {
   var delegate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : axios_default.a;
   var source;
   var request;
@@ -15365,7 +14949,10 @@ function createApi() {
         bizCode = _response$data.bizCode,
         error = _response$data.error,
         data = _response$data.data;
-    if (ret < 0) throw new api_error_ApiError(bizCode, error);
+    if (ret < 0) throw new api_error_ApiError(bizCode, error); // should not go here
+    // server impl error
+
+    if (ret === 0 && error) throw new api_error_ApiError(bizCode, error);
     api_log('request success: %o', data); // TBD
     // replace response data with actual data. eg. response.data = data;
     // TODO
@@ -15374,11 +14961,12 @@ function createApi() {
     return response;
   }, function (error) {
     api_log('request error: %o', error);
+    throw error;
   });
 
   function request(apiName) {
     api_log("request() \"".concat(apiName, "\""));
-    return request_createRequest(api_objectSpread({}, CONFIGS[apiName]), delegate);
+    return createRequest(api_objectSpread({}, CONFIGS[apiName]), delegate);
   }
 
   return {
@@ -15435,7 +15023,7 @@ var isArray = Array.isArray;
 var isFunction = function isFunction(val) {
   return typeof val === 'function';
 };
-var utils_isString = function isString(val) {
+var isString = function isString(val) {
   return typeof val === 'string';
 };
 var utils_isSymbol = function isSymbol(val) {
@@ -15875,23 +15463,18 @@ function createKeepAlive(config) {
               config.onError && config.onError(error, attempts);
 
             case 19:
-              if (!response) {
-                attempts++;
-                _interval = computeNextTimeout(attempts);
-              }
-
               if (attempts > MAX_ATTEMPTS) {
                 config.onError && config.onError(new Error('Max Attempts'), attempts);
               }
 
-              if (!(error || !response)) {
-                _context.next = 23;
+              if (!error) {
+                _context.next = 22;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 23:
+            case 22:
               _response$data = response.data, bizCode = _response$data.bizCode, _response$data$data = _response$data.data, data = _response$data$data === void 0 ? {
                 interval: _interval
               } : _response$data$data;
@@ -15900,7 +15483,7 @@ function createKeepAlive(config) {
 
               _interval = Math.min(expectedInterval * 1000, _interval);
 
-            case 26:
+            case 25:
             case "end":
               return _context.stop();
           }
@@ -15925,6 +15508,9 @@ function createKeepAlive(config) {
     keepalive: keepalive
   });
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.includes.js
+var es_array_includes = __webpack_require__("caad");
+
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/polling.ts
 
 
@@ -16079,23 +15665,18 @@ function createPolling(config) {
               config.onError && config.onError(error, attempts);
 
             case 23:
-              if (!response) {
-                attempts++;
-                _interval = polling_computeNextTimeout(attempts);
-              }
-
               if (attempts > polling_MAX_ATTEMPTS) {
                 config.onError && config.onError(new Error('Max Attempts'), attempts);
               }
 
-              if (!(error || !response)) {
-                _context.next = 27;
+              if (!error) {
+                _context.next = 26;
                 break;
               }
 
               return _context.abrupt("return");
 
-            case 27:
+            case 26:
               _response$data = response.data, bizCode = _response$data.bizCode, data = _response$data.data; // TODO
               // check bizCode
 
@@ -16107,7 +15688,7 @@ function createPolling(config) {
 
               attempts = 0;
 
-            case 30:
+            case 29:
             case "end":
               return _context.stop();
           }
@@ -16387,6 +15968,9 @@ function createState(data, context) {
     update: update
   });
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
+var es_array_find = __webpack_require__("7db0");
+
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/layout-ctrl.ts
 
 
@@ -18583,9 +18167,127 @@ function createInformation(data, context) {
     update: update
   });
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.index-of.js
+var es_array_index_of = __webpack_require__("c975");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.promise.js
+var es_promise = __webpack_require__("e6cf");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.constructor.js
 var es_regexp_constructor = __webpack_require__("4d63");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
+var es_string_match = __webpack_require__("466d");
+
+// CONCATENATED MODULE: ./packages/meetnow/src/media/close-media-stream.ts
+
+
+function closeMediaStream(stream) {
+  if (!stream) return; // Latest spec states that MediaStream has no stop() method and instead must
+  // call stop() on every MediaStreamTrack.
+
+  try {
+    if (stream.getTracks) {
+      stream.getTracks().forEach(function (track) {
+        return track.stop();
+      });
+    } else {
+      stream.getAudioTracks().forEach(function (track) {
+        return track.stop();
+      });
+      stream.getVideoTracks().forEach(function (track) {
+        return track.stop();
+      });
+    }
+  } catch (error) {
+    // Deprecated by the spec, but still in use.
+    // NOTE: In Temasys IE plugin stream.stop is a callable 'object'.
+    if (typeof stream.stop === 'function' || typeof_typeof(stream.stop) === 'object') {
+      stream.stop();
+    }
+  }
+}
+// CONCATENATED MODULE: ./packages/meetnow/src/media/stream-utils.ts
+
+
+function stream_utils_setup(stream) {
+  stream.close = stream.stop = function close() {
+    closeMediaStream(this);
+  };
+
+  stream.pause = function pause() {
+    this.getTracks().forEach(function (track) {
+      return track.enabled = false;
+    });
+  };
+
+  stream.play = function play() {
+    this.getTracks().forEach(function (track) {
+      return track.enabled = true;
+    });
+  };
+
+  stream.muteAudio = function muteAudio() {
+    var mute = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    this.getAudioTracks().forEach(function (track) {
+      return track.enabled = !mute;
+    });
+  };
+
+  stream.muteVideo = function muteVideo() {
+    var mute = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    this.getVideoTracks().forEach(function (track) {
+      return track.enabled = !mute;
+    });
+  };
+
+  return stream;
+}
+// CONCATENATED MODULE: ./packages/meetnow/src/media/get-user-media.ts
+
+
+
+function getUserMedia(_x) {
+  return _getUserMedia.apply(this, arguments);
+}
+
+function _getUserMedia() {
+  _getUserMedia = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(constraints) {
+    var stream;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!navigator.mediaDevices.getUserMedia) {
+              _context.next = 6;
+              break;
+            }
+
+            _context.next = 3;
+            return navigator.mediaDevices.getUserMedia(constraints);
+
+          case 3:
+            stream = _context.sent;
+            _context.next = 7;
+            break;
+
+          case 6:
+            throw new Error('Not Supported');
+
+          case 7:
+            return _context.abrupt("return", stream_utils_setup(stream));
+
+          case 8:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _getUserMedia.apply(this, arguments);
+}
 // CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/grammar.ts
 
 
@@ -19168,115 +18870,6 @@ function write(session, opts) {
   });
   return "".concat(sdp.join('\r\n'), "\r\n");
 }
-// CONCATENATED MODULE: ./packages/meetnow/src/media/close-media-stream.ts
-
-
-function closeMediaStream(stream) {
-  if (!stream) return; // Latest spec states that MediaStream has no stop() method and instead must
-  // call stop() on every MediaStreamTrack.
-
-  try {
-    if (stream.getTracks) {
-      stream.getTracks().forEach(function (track) {
-        return track.stop();
-      });
-    } else {
-      stream.getAudioTracks().forEach(function (track) {
-        return track.stop();
-      });
-      stream.getVideoTracks().forEach(function (track) {
-        return track.stop();
-      });
-    }
-  } catch (error) {
-    // Deprecated by the spec, but still in use.
-    // NOTE: In Temasys IE plugin stream.stop is a callable 'object'.
-    if (typeof stream.stop === 'function' || typeof_typeof(stream.stop) === 'object') {
-      stream.stop();
-    }
-  }
-}
-// CONCATENATED MODULE: ./packages/meetnow/src/media/stream-utils.ts
-
-
-function stream_utils_setup(stream) {
-  stream.close = stream.stop = function close() {
-    closeMediaStream(this);
-  };
-
-  stream.pause = function pause() {
-    this.getTracks().forEach(function (track) {
-      return track.enabled = false;
-    });
-  };
-
-  stream.play = function play() {
-    this.getTracks().forEach(function (track) {
-      return track.enabled = true;
-    });
-  };
-
-  stream.muteAudio = function muteAudio() {
-    var mute = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-    this.getAudioTracks().forEach(function (track) {
-      return track.enabled = !mute;
-    });
-  };
-
-  stream.muteVideo = function muteVideo() {
-    var mute = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-    this.getVideoTracks().forEach(function (track) {
-      return track.enabled = !mute;
-    });
-  };
-
-  return stream;
-}
-// CONCATENATED MODULE: ./packages/meetnow/src/media/get-user-media.ts
-
-
-
-function getUserMedia(_x) {
-  return _getUserMedia.apply(this, arguments);
-}
-
-function _getUserMedia() {
-  _getUserMedia = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(constraints) {
-    var stream;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            if (!navigator.mediaDevices.getUserMedia) {
-              _context.next = 6;
-              break;
-            }
-
-            _context.next = 3;
-            return navigator.mediaDevices.getUserMedia(constraints);
-
-          case 3:
-            stream = _context.sent;
-            _context.next = 7;
-            break;
-
-          case 6:
-            throw new Error('Not Supported');
-
-          case 7:
-            return _context.abrupt("return", stream_utils_setup(stream));
-
-          case 8:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _getUserMedia.apply(this, arguments);
-}
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.is-finite.js
 var es_number_is_finite = __webpack_require__("f00c");
 
@@ -19620,6 +19213,121 @@ function createRTCStats() {
     clear: clear
   };
 }
+// CONCATENATED MODULE: ./packages/meetnow/src/browser/browser-list.ts
+
+
+var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
+function getFirstMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 0 && match[1] || '';
+}
+function getSecondMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 1 && match[2] || '';
+}
+function browser_list_browser(name, version) {
+  return {
+    name: name,
+    version: version,
+    firefox: name === 'firefox',
+    chrome: name === 'chrome' || name === 'chromium',
+    wechet: name === 'wechat'
+  };
+}
+var browsersList = [{
+  test: [/micromessenger/i],
+  describe: function describe(ua) {
+    return browser_list_browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/\sedg\//i],
+  describe: function describe(ua) {
+    return browser_list_browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/edg([ea]|ios)/i],
+  describe: function describe(ua) {
+    return browser_list_browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/firefox|iceweasel|fxios/i],
+  describe: function describe(ua) {
+    return browser_list_browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/chromium/i],
+  describe: function describe(ua) {
+    return browser_list_browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/chrome|crios|crmo/i],
+  describe: function describe(ua) {
+    return browser_list_browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/safari|applewebkit/i],
+  describe: function describe(ua) {
+    return browser_list_browser('safari', getFirstMatch(commonVersionIdentifier, ua));
+  }
+},
+/* Something else */
+{
+  test: [/.*/i],
+  describe: function describe(ua) {
+    /* Here we try to make sure that there are explicit details about the device
+     * in order to decide what regexp exactly we want to apply
+     * (as there is a specific decision based on that conclusion)
+     */
+    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
+    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
+    var hasDeviceSpec = ua.search('\\(') !== -1;
+    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
+    return browser_list_browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
+  }
+}];
+// CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
+
+
+
+var parsed = {};
+function parseBrowser(ua) {
+  if (!parsed.browser) {
+    ua = ua || navigator.userAgent;
+    var descriptor = browsersList.find(function (browser) {
+      return browser.test.some(function (condition) {
+        return condition.test(ua);
+      });
+    });
+
+    if (descriptor) {
+      parsed.browser = descriptor.describe(ua);
+    }
+  }
+
+  return parsed.browser;
+}
+function getBrowser() {
+  return parseBrowser();
+}
+var BROWSER = parseBrowser();
+function isBrowser(name) {
+  return parseBrowser().name === name;
+}
+/*
+if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
+  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
+    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
+      console.log('在小程序');
+    } else {
+      console.log('在微信');
+    }
+  }, false);
+}
+*/
+
+function isMiniProgram() {
+  return /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
+}
 // CONCATENATED MODULE: ./packages/meetnow/src/channel/channel.ts
 
 
@@ -19714,7 +19422,7 @@ function createChannel(config) {
   }
 
   function throwIfTerminated() {
-    var message = 'terminated';
+    var message = 'Terminated';
     if (canceled) throw new Error(message);
     throwIfStatus(STATUS.kTerminated, message);
   }
@@ -19766,6 +19474,7 @@ function createChannel(config) {
 
     connection = new RTCPeerConnection(rtcConstraints);
     connection.addEventListener('iceconnectionstatechange', function () {
+      if (!connection) return;
       var _connection = connection,
           state = _connection.iceConnectionState;
 
@@ -20054,8 +19763,8 @@ function createChannel(config) {
               throw _context2.t0;
 
             case 42:
-              status = STATUS.kAnswered;
               throwIfTerminated();
+              status = STATUS.kAnswered;
               _answer = answer, remoteSDP = _answer.sdp;
               desc = {
                 originator: 'remote',
@@ -20168,9 +19877,9 @@ function createChannel(config) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
-              throwIfStatus(STATUS.kTerminated);
+              channel_log('terminate()');
               _context3.t0 = status;
-              _context3.next = _context3.t0 === STATUS.kNull ? 4 : _context3.t0 === STATUS.kProgress ? 5 : _context3.t0 === STATUS.kOffered ? 5 : _context3.t0 === STATUS.kAnswered ? 15 : _context3.t0 === STATUS.kAccepted ? 15 : 19;
+              _context3.next = _context3.t0 === STATUS.kNull ? 4 : _context3.t0 === STATUS.kTerminated ? 4 : _context3.t0 === STATUS.kProgress ? 5 : _context3.t0 === STATUS.kOffered ? 5 : _context3.t0 === STATUS.kAnswered ? 15 : _context3.t0 === STATUS.kAccepted ? 15 : 19;
               break;
 
             case 4:
@@ -22179,7 +21888,7 @@ function createConference(config) {
 
             case 4:
               _context.next = 6;
-              return chatChannel.connect().catch();
+              return chatChannel.connect().catch(function () {});
 
             case 6:
             case "end":
@@ -22273,11 +21982,22 @@ function createConference(config) {
                   'frame-rate': 15
                 }
               });
-              _context2.next = 20;
+              _context2.prev = 18;
+              _context2.next = 21;
               return request.send();
 
-            case 20:
+            case 21:
               response = _context2.sent;
+              _context2.next = 28;
+              break;
+
+            case 24:
+              _context2.prev = 24;
+              _context2.t0 = _context2["catch"](18);
+              events.emit('failed', _context2.t0);
+              throw _context2.t0;
+
+            case 28:
               _response2 = response;
               data = _response2.data;
               _data$data = data.data;
@@ -22285,14 +22005,14 @@ function createConference(config) {
               uuid = _data$data['conference-uuid'];
 
               if (!(!userId || !uuid)) {
-                _context2.next = 29;
+                _context2.next = 36;
                 break;
               }
 
               conference_log('internal error');
               throw new Error('Internal Error');
 
-            case 29:
+            case 36:
               url = options.url;
               // setup request interceptor for ctrl api
               interceptor = api.interceptors.request.use(function (config) {
@@ -22307,11 +22027,22 @@ function createConference(config) {
               }); // get full info
 
               request = api.request('getFullInfo');
-              _context2.next = 34;
+              _context2.prev = 39;
+              _context2.next = 42;
               return request.send();
 
-            case 34:
+            case 42:
               response = _context2.sent;
+              _context2.next = 49;
+              break;
+
+            case 45:
+              _context2.prev = 45;
+              _context2.t1 = _context2["catch"](39);
+              events.emit('failed', _context2.t1);
+              throw _context2.t1;
+
+            case 49:
               _response3 = response;
               data = _response3.data;
               info = data.data; // create context
@@ -22322,12 +22053,12 @@ function createConference(config) {
               onConnected();
               return _context2.abrupt("return", conference);
 
-            case 42:
+            case 56:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2);
+      }, _callee2, null, [[18, 24], [39, 45]]);
     }));
     return _join.apply(this, arguments);
   }
@@ -22347,15 +22078,15 @@ function createConference(config) {
               throwIfStatus(conference_STATUS.kDisconnecting);
               throwIfStatus(conference_STATUS.kDisconnected);
               _context3.t0 = status;
-              _context3.next = _context3.t0 === conference_STATUS.kNull ? 5 : _context3.t0 === conference_STATUS.kConnecting ? 6 : _context3.t0 === conference_STATUS.kConnected ? 6 : _context3.t0 === conference_STATUS.kDisconnecting ? 14 : _context3.t0 === conference_STATUS.kDisconnected ? 14 : 14;
+              _context3.next = _context3.t0 === conference_STATUS.kNull ? 5 : _context3.t0 === conference_STATUS.kConnecting ? 6 : _context3.t0 === conference_STATUS.kConnected ? 6 : _context3.t0 === conference_STATUS.kDisconnecting ? 15 : _context3.t0 === conference_STATUS.kDisconnected ? 15 : 15;
               break;
 
             case 5:
-              return _context3.abrupt("break", 15);
+              return _context3.abrupt("break", 16);
 
             case 6:
               if (!(status === conference_STATUS.kConnected)) {
-                _context3.next = 12;
+                _context3.next = 13;
                 break;
               }
 
@@ -22364,25 +22095,26 @@ function createConference(config) {
               return api.request('leave').send();
 
             case 10:
-              _context3.next = 13;
+              onDisconnected();
+              _context3.next = 14;
               break;
 
-            case 12:
+            case 13:
               if (request) {
                 request.cancel();
                 onDisconnected();
               }
 
-            case 13:
-              return _context3.abrupt("break", 15);
-
             case 14:
-              return _context3.abrupt("break", 15);
+              return _context3.abrupt("break", 16);
 
             case 15:
-              return _context3.abrupt("return", conference);
+              return _context3.abrupt("break", 16);
 
             case 16:
+              return _context3.abrupt("return", conference);
+
+            case 17:
             case "end":
               return _context3.stop();
           }
@@ -22487,7 +22219,7 @@ function createConference(config) {
         onDisconnected(data);
       },
       onError: function onError(data) {
-        conference_log('polling error, about to leave... %o', data);
+        conference_log('polling error, about to leave...');
         events.emit('error', data); // there are some problems with polling
         // leave conference
         //
@@ -23013,17 +22745,10 @@ function createMedia() {
 
 
 
-
-
 var src_version = "1.0.0-alpha"; // global setup
 
 function src_setup() {
   setupConfig();
-
-  if (isMiniProgram()) {
-    axios_default.a.defaults.adapter = mpAdapter;
-  }
-
   browser_default.a.enable(CONFIG.get('debug', 'MN:*,-MN:Api*,-MN:Information:Item,-MN:Worker'));
 }
 

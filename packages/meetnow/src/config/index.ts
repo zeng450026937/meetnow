@@ -10,14 +10,14 @@ export * from './config';
 
 export function setupConfig() {
   const win = window;
-  const Meetnow = (win as any).Meetnow = (win as any).Meetnow || {};
+  const MeetNow = (win as any).MeetNow = (win as any).MeetNow || {};
 
   // create the Ionic.config from raw config object (if it exists)
   // and convert Ionic.config into a ConfigApi that has a get() fn
   const configObj = {
     ...configFromSession(win),
     persistent : false,
-    ...Meetnow.config,
+    ...MeetNow.config,
     ...configFromURL(win),
   };
 
@@ -30,7 +30,7 @@ export function setupConfig() {
   // first see if the mode was set as an attribute on <html>
   // which could have been set by the user, or by pre-rendering
   // otherwise get the mode via config settings, and fallback to md
-  Meetnow.config = CONFIG;
+  MeetNow.config = CONFIG;
 
   if (CONFIG.getBoolean('testing')) {
     CONFIG.set('debug', 'MN:*');

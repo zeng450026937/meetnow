@@ -70,23 +70,18 @@ export function createKeepAlive(config: KeepAliveConfigs) {
       config.onError && config.onError(error, attempts);
     }
 
-    if (!response) {
-      attempts++;
-      interval = computeNextTimeout(attempts);
-    }
-
     if (attempts > MAX_ATTEMPTS) {
       config.onError && config.onError(new Error('Max Attempts'), attempts);
     }
 
-    if (error || !response) return;
+    if (error) return;
 
     const {
       bizCode,
       data = {
         interval,
       },
-    } = response.data;
+    } = response!.data;
 
     const {
       interval: expectedInterval, // in seconds

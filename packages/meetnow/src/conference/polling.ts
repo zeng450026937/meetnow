@@ -117,18 +117,13 @@ export function createPolling(config: PollingConfigs) {
       config.onError && config.onError(error, attempts);
     }
 
-    if (!response) {
-      attempts++;
-      interval = computeNextTimeout(attempts);
-    }
-
     if (attempts > MAX_ATTEMPTS) {
       config.onError && config.onError(new Error('Max Attempts'), attempts);
     }
 
-    if (error || !response) return;
+    if (error) return;
 
-    const { bizCode, data } = response.data;
+    const { bizCode, data } = response!.data;
 
     // TODO
     // check bizCode
