@@ -131,7 +131,7 @@ export function createPolling(config: PollingConfigs) {
     try {
       analyze(data);
     } catch (error) {
-      log('failed to process data.');
+      log('process data failed. %o', error);
     }
 
     attempts = 0;

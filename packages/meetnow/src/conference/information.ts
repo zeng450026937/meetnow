@@ -65,6 +65,12 @@ export function createInformation(data: ConferenceInformation, context: Context)
       log('can not delete root information.');
       return;
     }
+    if (newState === 'full') {
+      // hack item state
+      // as we want to keep 'data' reference to the same object
+      // otherwise we need to recreate all information parts
+      val.state = 'partial';
+    }
 
     data = mergeItem(data, val)!;
 

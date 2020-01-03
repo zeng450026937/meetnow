@@ -30,6 +30,7 @@ interface MiniPrograme {
   httpRequest?(options: RequestOptions): RequestTask;
 }
 
+declare const global: any;
 declare const wx: MiniPrograme;
 declare const swan: MiniPrograme;
 declare const my: MiniPrograme;
@@ -43,11 +44,11 @@ export enum PLATFORM {
   kBaidu,
 }
 
-export const platform: PLATFORM = isObject(wx)
+export const platform: PLATFORM = isObject(global.wx)
   ? PLATFORM.kWechat
-  : isObject(my)
+  : isObject(global.my)
     ? PLATFORM.kAlipay
-    : isObject(swan)
+    : isObject(global.swan)
       ? PLATFORM.kBaidu
       : PLATFORM.kUnknown;
 

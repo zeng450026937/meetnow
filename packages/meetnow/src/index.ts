@@ -14,6 +14,8 @@ export * from './events';
 export * from './reactive';
 export * from './sdp-transform';
 
+const log = debug('MN');
+
 const version = process.env.VUE_APP_VERSION;
 
 // global setup
@@ -27,9 +29,11 @@ function setup() {
   debug.enable(
     CONFIG.get(
       'debug',
-      'MN:*,-MN:Api*,-MN:Information:Item,-MN:Worker',
+      'MN*,-MN:Api*,-MN:Information:Item,-MN:Worker',
     ),
   );
+
+  log('setup() [version]: %s', version);
 }
 
 async function connect(options: ConnectOptions) {

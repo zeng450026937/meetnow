@@ -12,10 +12,12 @@ import { createMediaChannel, MediaChannel } from '../channel/media-channel';
 import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
 import { ApiError } from '../api/api-error';
-import { isMiniProgram } from '../browser';
+import { getBrowser, isMiniProgram } from '../browser';
 
 const log = debug('MN:Conference');
+
 const miniprogram = isMiniProgram();
+const browser = getBrowser();
 
 export enum STATUS {
   kNull = 0,
@@ -151,6 +153,9 @@ export function createConference(config: ConferenceConfigs) {
       ({ url: options.url } = data.data);
     }
 
+    const useragent = CONFIG.get('useragent', `Yealink ${ miniprogram ? 'WECHAT' : 'WEB-APP' } ${ process.env.VUE_APP_VERSION }`);
+    const clientinfo = CONFIG.get('clientinfo', `${ miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC' } ${ process.env.VUE_APP_VERSION }`);
+
     // join focus
     const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 
@@ -161,11 +166,11 @@ export function createConference(config: ConferenceConfigs) {
       // 'conference-user-id'  : null,
         'conference-url'      : options.url!,
         'conference-pwd'      : options.password,
-        'user-agent'          : CONFIG.get('useragent', `Yealink WEB-APP ${ process.env.VUE_APP_VERSION }`),
+        'user-agent'          : useragent,
         'client-url'          : options.url!.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
-        'client-display-text' : options.displayName || 'Yealink WEB-APP',
+        'client-display-text' : options.displayName || `${ browser }`,
         'client-type'         : 'http',
-        'client-info'         : CONFIG.get('clientinfo', miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'),
+        'client-info'         : clientinfo,
         'pure-ctrl-channel'   : !hasMedia,
         // if join with media
         'is-webrtc'           : !miniprogram && hasMedia,

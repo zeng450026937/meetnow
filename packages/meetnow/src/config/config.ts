@@ -1,4 +1,5 @@
 export interface MeetnowConfig {
+  baseurl?: string;
   useragent?: string;
   clientinfo?: string;
   debug?: string;

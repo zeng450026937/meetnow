@@ -4,6 +4,7 @@ import { Api, createApi } from '../api';
 import { RequestResult } from '../api/request';
 import { createWorker, Worker } from '../utils/worker';
 import { createConference, JoinOptions } from '../conference';
+import { CONFIG } from '../config';
 
 const log = debug('MN:UA');
 
@@ -28,7 +29,7 @@ export function createUA(config?: UAConfigs) {
   let url: string | undefined;
 
   function createUserApi() {
-    const api = createApi({ baseURL: '/webapp/' });
+    const api = createApi({ baseURL: CONFIG.get('baseurl', process.env.VUE_APP_BASEURL) });
 
     api.interceptors.request.use((config) => {
       if (token) {
