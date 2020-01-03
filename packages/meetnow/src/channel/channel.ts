@@ -820,7 +820,7 @@ export function createChannel(config: ChannelConfigs) {
     const audioTrack = stream ? stream.getAudioTracks()[0] : null;
     const videoTrack = stream ? stream.getVideoTracks()[0] : null;
 
-    const queue = [];
+    const queue: Promise<any>[] = [];
 
     let renegotiationNeeded = false;
     let peerHasAudio = false;
@@ -913,7 +913,7 @@ export function createChannel(config: ChannelConfigs) {
     log('adjustBandWidth()');
 
     const { audio, video } = options;
-    const queue = [];
+    const queue: Promise<any>[] = [];
 
     if ('RTCRtpSender' in window
     && 'setParameters' in (window as any).RTCRtpSender.prototype) {

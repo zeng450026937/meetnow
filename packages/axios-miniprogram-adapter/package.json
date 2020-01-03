@@ -1,0 +1,14 @@
+{
+  "name": "@meetnow/axios-miniprogram-adapter",
+  "version": "1.0.0",
+  "description": "Axios adapter for miniprogram",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "dependencies": {
+    "axios": "^0.19.0"
+  }
+}

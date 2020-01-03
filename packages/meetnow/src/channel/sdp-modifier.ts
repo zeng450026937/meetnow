@@ -71,7 +71,7 @@ export function createModifier() {
           // find codec payload
           for (const r of m.rtp!) {
             const codec = r.codec.toUpperCase();
-            let fmtp = null;
+            let fmtp: any;
 
             switch (codec) {
               case 'VP8':

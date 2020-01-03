@@ -1,2 +1,3 @@
 packages/vue-core
 packages/**/dist
+packages/**/index.js

@@ -1,16 +1,14 @@
 {
-  "name": "@meetnow/meetnow",
-  "version": "1.0.0-alpha",
-  "description": "Yealink Meeting via WebRTC.",
+  "name": "@meetnow/sdp-transform",
+  "version": "1.0.0",
+  "description": "SDP Transform for meetnow",
   "main": "index.js",
-  "typings": "interface.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "license": "MIT",
   "sideEffects": false,
   "dependencies": {
-    "axios": "^0.19.0",
     "debug": "^4.1.1",
     "webrtc-adapter": "^7.3.0"
   }
