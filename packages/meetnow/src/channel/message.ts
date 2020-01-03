@@ -46,7 +46,7 @@ export function createMessage(config: MessageConfigs) {
   let version: number | undefined;
   /* eslint-disable-next-line prefer-destructuring */
   let sender: MessageSender | undefined = config.sender;
-  let reciver: string[] | undefined;
+  let receiver: string[] | undefined;
   let isPrivate: boolean | undefined;
 
   let message: any;
@@ -81,7 +81,7 @@ export function createMessage(config: MessageConfigs) {
     const { data } = response;
 
     content = message;
-    reciver = target;
+    receiver = target;
     ({
       'im-version': version,
       'im-timestamp': timestamp,
@@ -97,7 +97,7 @@ export function createMessage(config: MessageConfigs) {
 
     if (!content) throw new Error('Invalid Message');
 
-    await send(content, reciver);
+    await send(content, receiver);
   }
 
   function cancel() {
@@ -145,11 +145,11 @@ export function createMessage(config: MessageConfigs) {
     get sender() {
       return sender;
     },
-    get reciver() {
-      return reciver;
+    get receiver() {
+      return receiver;
     },
     get private() {
-      return (reciver && reciver.length > 0) || isPrivate;
+      return (receiver && receiver.length > 0) || isPrivate;
     },
 
     send,

@@ -172,7 +172,7 @@ declare namespace MeetNow {
     readonly timestamp: number;
     readonly version: number;
     readonly sender: MessageSender;
-    readonly reciver: string[] | undefined;
+    readonly receiver: string[] | undefined;
     readonly private: number;
 
     send: (message: string, target?: string[] | undefined) => Promise<void>;
@@ -525,7 +525,8 @@ declare namespace MeetNow {
     leave(): Promise<this>;
     end(): Promise<this>;
 
-    share(): Promise<this>;
+    share(): Promise<void>;
+    sendMessage(msg: string, target?: string[]): Promise<void>;
 
     /* eslint-disable no-dupe-class-members */
     on(event: 'connecting', listener: () => void): this;
@@ -533,6 +534,8 @@ declare namespace MeetNow {
     on(event: 'disconnecting', listener: () => void): this;
     on(event: 'disconnected', listener: (data: any) => void): this;
     on(event: 'error', listener: (data: ApiError) => void): this;
+
+    on(event: 'chatready', listener: () => void): this;
 
     on(event: 'user', listener: (data: User) => void): this;
     on(event: 'sharinguser', listener: (data: User) => void): this;

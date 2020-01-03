@@ -363,6 +363,7 @@ export function createConference(config: ConferenceConfigs) {
     chatChannel = createChatChannel({ api });
 
     chatChannel.on('message', (...args: any[]) => events.emit('message', ...args));
+    chatChannel.on('ready', (...args: any[]) => events.emit('chatready', ...args));
 
     maybeChat();
   }
@@ -400,6 +401,14 @@ export function createConference(config: ConferenceConfigs) {
       .request('switchShare')
       .data({ share: true })
       .send();
+  }
+
+  async function sendMessage(msg: string, target?: string[]) {
+    throwIfNotStatus(STATUS.kConnected);
+
+    if (!chatChannel || !chatChannel.ready) throw new Error('Not Ready');
+
+    await chatChannel.sendMessage(msg, target);
   }
 
   return conference = {
@@ -464,6 +473,7 @@ export function createConference(config: ConferenceConfigs) {
     end,
 
     share,
+    sendMessage,
   };
 }
 

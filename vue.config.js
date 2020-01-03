@@ -29,7 +29,7 @@ module.exports = {
   devServer : {
     proxy : {
       '^/webapp' : {
-        target       : 'https://meetings.pre.onyealink.com/', // 'https://meetings.ylyun.com/',
+        target       : 'https://meetings.pre.onyealink.com/', // 'https://meetings.ylyun.com/', // http://meeting.10.200.112.39.xip.io/
         ws           : true,
         changeOrigin : true,
       },
