@@ -30,10 +30,11 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
 
   for (const item of items) {
     if (!isPartialableItem(item)) {
-      return items;
+      log('we don not know how to process a non-partialable item in a list, because it is undocumented');
+      log('treat it as full state item');
     }
 
-    const { id, entity, state = 'partial' } = item;
+    const { id, entity, state = 'full' } = item as PartialableItem;
     const key = entity || id;
 
     if (!key) {
@@ -49,7 +50,7 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     // not find
     if (index === -1) {
       if (state === 'deleted') {
-        log('can not delete item not exsit.');
+        log('can not delete item not exist.');
         continue;
       }
       log('item added');
@@ -58,6 +59,12 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
     }
 
     // finded
+    // this is weird as we don't know whether the item list is partial or not
+    if (state === 'full') {
+      rhys.splice(index, 1, item);
+      break;
+    }
+
     // wanna delete
     if (state === 'deleted') {
       log('item deleted');
@@ -67,7 +74,7 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
 
     // wanna update
     /* eslint-disable-next-line no-use-before-define */
-    mergeItem(rhys[index] as PartialableItem, item);
+    mergeItem(rhys[index] as PartialableItem, item as PartialableItem);
   }
 
   return rhys;

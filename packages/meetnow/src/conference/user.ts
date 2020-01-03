@@ -6,6 +6,7 @@ import {
 import { createReactive } from '../reactive';
 import { Context } from './context';
 import { createCameraCtrl } from './camera-ctrl';
+import { ChatChannel } from '../channel/chat-channel';
 
 const log = debug('MN:Information:User');
 
@@ -270,9 +271,14 @@ export function createUser(data: ConferenceUser, context: Context) {
     await setAudioFilter(false);
   }
 
-  function sendMessage(msg: string) {
+  async function sendMessage(msg: string) {
     log('sendMessage()');
-    log('TBD');
+
+    const { chatChannel } = context;
+
+    if (chatChannel && (chatChannel as ChatChannel).ready) {
+      await (chatChannel as ChatChannel).sendMessage(msg, [entity]);
+    }
   }
 
   return user = {
