@@ -8,7 +8,7 @@ import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
 import { createInformation, Information, User } from './information';
-import { createMediaChannel, MediaChannel } from '../channel/media-channel';
+import { ConnectOptions, createMediaChannel, MediaChannel } from '../channel/media-channel';
 import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
 import { ApiError } from '../api/api-error';
@@ -396,11 +396,11 @@ export function createConference(config: ConferenceConfigs) {
     request = undefined;
   }
 
-  async function share() {
+  async function share(options?: ConnectOptions) {
     throwIfNotStatus(STATUS.kConnected);
 
     if (!shareChannel!.isInProgress() && !shareChannel!.isEstablished()) {
-      await shareChannel!.connect();
+      await shareChannel!.connect(options);
     }
     await api
       .request('switchShare')
