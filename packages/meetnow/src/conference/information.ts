@@ -22,6 +22,7 @@ const log = debug('MN:Information');
 
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents(log);
+  const { api } = context;
   const {
     'conference-description': descriptiondata,
     'conference-state': statedata,
@@ -57,8 +58,13 @@ export function createInformation(data: ConferenceInformation, context: Context)
     }
     if (newVersion - version > 1) {
       log('information version jumped.');
-      // TODO
-      // get full information
+
+      api
+        .request('getFullInfo')
+        .send()
+        .then((response) => update(response.data.data as ConferenceInformation))
+        .catch((error) => log('get full information failed: %o', error));
+
       return;
     }
     if (newState === 'deleted') {
@@ -68,11 +74,11 @@ export function createInformation(data: ConferenceInformation, context: Context)
     if (newState === 'full') {
       // hack item state
       // as we want to keep 'data' reference to the same object
-      // otherwise we need to recreate all information parts
-      val.state = 'partial';
+      // otherwise we need to re-create all information parts
+      Object.assign(data, val);
+    } else {
+      mergeItem(data, val)!;
     }
-
-    data = mergeItem(data, val)!;
 
     // update & prepare all parts
     [
