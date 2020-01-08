@@ -1,10 +1,21 @@
 
 declare namespace MeetNow {
-// declare module '@meetnow/meetnow' {
+  /**
+   * 版本号
+   */
   const version: string;
 
+  /**
+   * 初始化
+   */
   const setup: () => void;
+  /**
+   * 连接会议
+   */
   const connect: (options: ConnectOptions) => Promise<Conference>;
+  /**
+   * 创建用户
+   */
   const createUA: () => UserAgent;
 
   class ApiError extends Error {
@@ -22,14 +33,29 @@ declare namespace MeetNow {
   interface ConnectOptions extends JoinOptions {}
 
   class UserAgent {
+    /**
+     * 停止保活并清除用户鉴权
+     *
+     * @memberof UserAgent
+     */
     stop(): void;
 
+    /**
+     * 获取会议信息
+     *
+     * @memberof UserAgent
+     */
     fetch: (number: string, url?: string | undefined) => Promise<{
       partyId: string;
       number: string;
       url: string;
       info: ConferenceInformation;
     }>
+    /**
+     * 连接会议
+     *
+     * @memberof UserAgent
+     */
     connect: (options: ConnectOptions) => Promise<Conference>;
   }
 
