@@ -4,6 +4,8 @@ import path from 'path';
 import ts from 'rollup-plugin-typescript2';
 import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
+import noderesolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 if (!process.env.TARGET) {
   throw new Error('TARGET package must be specified via --environment flag.');
@@ -19,7 +21,7 @@ const pkg = require(resolve('package.json'));
 const packageOptions = pkg.buildOptions || {};
 
 const knownExternals = fs.readdirSync(packagesDir).filter(p => {
-  return p !== '@vue/shared';
+  return p !== '@meetnow/shared';
 });
 
 // ensure TS checks only once for each build
@@ -30,7 +32,7 @@ const outputConfigs = {
     file   : resolve(`dist/${ name }.esm-bundler.js`),
     format : 'es',
   },
-  // main "vue" package only
+  // main "meetnow" package only
   'esm-bundler-runtime' : {
     file   : resolve(`dist/${ name }.runtime.esm-bundler.js`),
     format : 'es',
@@ -81,7 +83,7 @@ function createConfig(format, output, plugins = []) {
   const isGlobalBuild = format === 'global';
   const isRawESMBuild = format === 'esm';
   const isBundlerESMBuild = /esm-bundler/.test(format);
-  const isRuntimeCompileBuild = /vue\./.test(output.file);
+  const isRuntimeCompileBuild = /meetnow\./.test(output.file);
 
   if (isGlobalBuild) {
     output.name = packageOptions.name;
@@ -119,6 +121,10 @@ function createConfig(format, output, plugins = []) {
         ? []
         : knownExternals.concat(Object.keys(pkg.dependencies || [])),
     plugins : [
+      noderesolve({
+        browser : true,
+      }),
+      commonjs({}),
       json({
         namedExports : false,
       }),

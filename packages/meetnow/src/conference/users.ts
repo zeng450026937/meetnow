@@ -20,11 +20,13 @@ export function createUsers(data: ConferenceUsers, context: Context) {
   const { api } = context;
   const events = createEvents(log);
   const userMap = new Map<string, User>();
+
+  let userList: User[];
+  let users: any;
+
   /* eslint-disable-next-line no-use-before-define */
   const reactive = createReactive(watch({}), events);
   const lobby = createLobbyCtrl(api);
-  let userList: User[];
-  let users: any;
 
   function watch(target: any) {
     /* eslint-disable no-use-before-define */

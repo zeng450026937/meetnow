@@ -1,5 +1,6 @@
 import debug from 'debug';
 import { AxiosResponse } from 'axios';
+import { getBrowser, isMiniProgram } from '@meetnow/browser';
 import { Api } from '../api';
 import { Request, RequestResult } from '../api/request';
 import { createContext } from './context';
@@ -12,7 +13,6 @@ import { ConnectOptions, createMediaChannel, MediaChannel } from '../channel/med
 import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
 import { ApiError } from '../api/api-error';
-import { getBrowser, isMiniProgram } from '../browser';
 
 const log = debug('MN:Conference');
 

@@ -3,13 +3,29 @@
   "version": "1.0.0",
   "description": "Axios adapter for miniprogram",
   "main": "index.js",
-  "private": true,
+  "module": "dist/axios-miniprogram-adapter.esm-bundler.js",
+  "types": "dist/axios-miniprogram-adapter.d.ts",
+  "unpkg": "dist/axios-miniprogram-adapter.global.js",
+  "files": [
+    "index.js",
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
+  "author": "Yealink Inc",
   "license": "MIT",
   "sideEffects": false,
   "dependencies": {
     "axios": "^0.19.0"
+  },
+  "buildOptions": {
+    "name": "AxiosMiniprogramAdapter",
+    "formats": [
+      "esm-bundler",
+      "cjs",
+      "global",
+      "esm"
+    ]
   }
 }

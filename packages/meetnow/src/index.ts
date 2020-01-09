@@ -1,18 +1,18 @@
 import debug from 'debug';
 import axios from 'axios';
-// import adapter from './adapter';
-import { isMiniProgram } from './browser';
+import adapter from '@meetnow/axios-miniprogram-adapter';
+import { isMiniProgram } from '@meetnow/browser';
 import { CONFIG, setupConfig } from './config';
 import { ConnectOptions, createUA } from './user-agent';
 
-export { debug, axios };
+export { debug, axios, adapter };
 export * from './user-agent';
 export * from './conference';
 export * from './channel';
 export * from './media';
 export * from './events';
 export * from './reactive';
-export * from './sdp-transform';
+export * from '@meetnow/sdp-transform';
 
 const log = debug('MN');
 
@@ -23,7 +23,7 @@ function setup() {
   setupConfig();
 
   if (isMiniProgram()) {
-    // axios.defaults.adapter = adapter;
+    axios.defaults.adapter = adapter;
   }
 
   debug.enable(

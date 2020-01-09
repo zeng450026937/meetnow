@@ -3,9 +3,9 @@
   </div>
 </template>
 
-<script lang="js">
+<script lang="ts">
 import Vue from 'vue';
-import meetnow from '@meetnow/meetnow/src/index';
+import meetnow from '@meetnow/meetnow';
 
 console.log(meetnow);
 
