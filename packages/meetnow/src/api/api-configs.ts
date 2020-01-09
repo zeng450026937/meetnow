@@ -15,7 +15,7 @@ export interface ApiConfig extends AxiosRequestConfig {
   responseType?: ResponseType | any;
 }
 
-interface CtrlApiData {
+export interface CtrlApiData {
   'conference-uuid'?: string;
   'conference-user-id'?: number;
   [key: string]: any;

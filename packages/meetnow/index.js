@@ -1,7 +1,7 @@
 'use strict';
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./dist/meetnow.umd.min.js');
+  module.exports = require('./dist/meetnow.cjs.prod.js');
 } else {
-  module.exports = require('./dist/meetnow.umd.js');
+  module.exports = require('./dist/meetnow.cjs.js');
 }

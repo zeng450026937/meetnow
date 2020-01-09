@@ -1,3 +1,4 @@
 packages/vue-core
+packages/global.d.ts
 packages/**/dist
 packages/**/index.js

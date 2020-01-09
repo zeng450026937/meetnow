@@ -36,8 +36,8 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "packages/*/src",
-    "packages/meetnow/interface.d.ts"
+    "packages/global.d.ts",
+    "packages/*/src"
   ],
   "exclude": [
     "node_modules",

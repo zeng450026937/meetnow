@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require, no-use-before-define, operator-linebreak */
 import fs from 'fs';
 import path from 'path';
 import ts from 'rollup-plugin-typescript2';

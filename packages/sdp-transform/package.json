@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "SDP Transform for meetnow",
   "main": "index.js",
+  "private": true,
   "publishConfig": {
     "access": "public"
   },

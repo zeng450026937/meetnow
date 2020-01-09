@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "eslint config of meetnow.",
   "main": "index.js",
+  "private": true,
   "publishConfig": {
     "access": "public"
   },

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Media Channel for meetnow",
   "main": "index.js",
+  "private": true,
   "publishConfig": {
     "access": "public"
   },

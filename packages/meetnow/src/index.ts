@@ -1,6 +1,6 @@
 import debug from 'debug';
 import axios from 'axios';
-import adapter from './adapter';
+// import adapter from './adapter';
 import { isMiniProgram } from './browser';
 import { CONFIG, setupConfig } from './config';
 import { ConnectOptions, createUA } from './user-agent';
@@ -23,7 +23,7 @@ function setup() {
   setupConfig();
 
   if (isMiniProgram()) {
-    axios.defaults.adapter = adapter;
+    // axios.defaults.adapter = adapter;
   }
 
   debug.enable(
