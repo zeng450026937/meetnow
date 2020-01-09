@@ -3417,16 +3417,27 @@ function createEvents(scopedlog = log$3) {
         wrapper.fn = fn;
         on(event, wrapper);
     }
+    function toArray(list, start) {
+        start = start || 0;
+        let i = list.length - start;
+        const ret = new Array(i);
+        while (i--) {
+            ret[i] = list[i + start];
+        }
+        return ret;
+    }
     function emit(event, ...args) {
         scopedlog(`emit() "${event}"`);
-        const callbacks = events[event];
+        let callbacks = events[event];
         if (!callbacks)
             return;
+        callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
         for (const callback of callbacks) {
             try {
                 callback(...args);
             }
             catch (error) {
+                scopedlog(`invoke "${event}" callback failed: %o`, error);
             }
         }
     }
@@ -3655,6 +3666,9 @@ function createDescription(data, context) {
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', description);
@@ -3719,19 +3733,30 @@ function createState(data, context) {
     const reactive = createReactive(watch({}), events);
     let description;
     function watch(target) {
-        const { active, locked, applicationsharer, 'speech-user-entity': speechUserEntity, } = data;
+        const { active, locked, } = data;
         /* eslint-disable no-use-before-define */
         target.active = active;
         target.locked = locked;
-        target.sharingUserEntity = applicationsharer.user && applicationsharer.user.entity;
-        target.speechUserEntity = speechUserEntity;
+        target.sharingUserEntity = getSharingUserEntity();
+        target.speechUserEntity = getSpeechUserEntity();
         /* eslint-enable no-use-before-define */
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', description);
+    }
+    function getSharingUserEntity() {
+        const { applicationsharer } = data;
+        return applicationsharer.user && applicationsharer.user.entity;
+    }
+    function getSpeechUserEntity() {
+        const { 'speech-user-entity': speechUserEntity } = data;
+        return speechUserEntity;
     }
     return description = {
         ...events,
@@ -3742,6 +3767,8 @@ function createState(data, context) {
             return data[key];
         },
         update,
+        getSharingUserEntity,
+        getSpeechUserEntity,
     };
 }
 
@@ -3871,6 +3898,9 @@ function createView(data, context) {
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', view);
@@ -3997,6 +4027,9 @@ function createUser(data, context) {
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', user);
@@ -4317,8 +4350,9 @@ function createUsers(data, context) {
         const updated = [];
         const deleted = [];
         if (diff) {
+            const { user, state } = diff;
             /* eslint-disable no-use-before-define */
-            diff.user.forEach((userdata) => {
+            user.forEach((userdata) => {
                 const { entity, state } = userdata;
                 hasUser(entity)
                     ? state === 'deleted'
@@ -4327,6 +4361,9 @@ function createUsers(data, context) {
                     : added.push(userdata);
             });
             /* eslint-enable no-use-before-define */
+            if (state === 'full' || !data) {
+                data = diff;
+            }
         }
         // fire status change events
         watch(reactive);
@@ -4367,7 +4404,7 @@ function createUsers(data, context) {
         return userList.find((user) => user.isCurrent());
     }
     function getAttendee() {
-        return userList.filter((user) => user.isAttendee());
+        return userList.filter((user) => user.isAttendee() && !user.isOnHold());
     }
     function getPresenter() {
         return userList.filter((user) => user.isPresenter());
@@ -4515,12 +4552,15 @@ function createRTMP(data, context) {
     let rtmp;
     function watch(target) {
         /* eslint-disable no-use-before-define */
-        target.enable = data['rtmp-enable'];
+        target.enable = getEnable();
         target.status = getStatus();
         /* eslint-enable no-use-before-define */
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', rtmp);
@@ -4530,14 +4570,21 @@ function createRTMP(data, context) {
             ? data.users.find((userdata) => userdata.entity === entity)
             : data.users.find((userdata) => userdata.default) || data.users[0];
     }
+    function getEnable() {
+        return data['rtmp-enable'];
+    }
     function getStatus(entity) {
-        return getUser(entity)['rtmp-status'];
+        const userdata = getUser(entity);
+        return userdata && userdata['rtmp-status'];
     }
     function getReason(entity) {
-        return getUser(entity).reason;
+        const userdata = getUser(entity);
+        return userdata && userdata.reason;
     }
     function getDetail(entity) {
         const userdata = getUser(entity);
+        if (!userdata)
+            return undefined;
         const { 'rtmp-status': status, 'rtmp-last-start-time': lastStartTime, 'rtmp-last-stop-duration': lastStopDuration, reason, } = userdata;
         return {
             reason,
@@ -4555,6 +4602,7 @@ function createRTMP(data, context) {
             return data[key];
         },
         update,
+        getEnable,
         getStatus,
         getReason,
         getDetail,
@@ -4618,6 +4666,9 @@ function createRecord(data, context) {
         return target;
     }
     function update(diff) {
+        if (diff && (diff.state === 'full' || !data)) {
+            data = diff;
+        }
         // fire status change events
         watch(reactive);
         events.emit('updated', record);
@@ -6950,7 +7001,7 @@ function createMediaChannel(config) {
         pc.addEventListener('removestream', (event) => {
             log$o('peerconnection:removestream: %o', event);
             remotestream = channel.getRemoteStream();
-            channel.emit('remotestream', remotestream);
+            channel.emit('removestream', remotestream);
         });
     });
     channel.on('icecandidate', (data) => {
@@ -7398,6 +7449,8 @@ function createConference(config) {
             },
             onQuit: (data) => {
                 log$r('receive quit: %o', data);
+                if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected)
+                    return;
                 // bizCode = 901314 ended by presenter
                 // bizCode = 901320 kicked by presenter
                 onDisconnected(data);

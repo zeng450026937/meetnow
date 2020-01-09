@@ -51,18 +51,32 @@ export function createEvents(scopedlog: Debugger = log) {
     on(event, wrapper);
   }
 
+  function toArray(list: any[], start?: number) {
+    start = start || 0;
+    let i = list.length - start;
+    const ret = new Array(i);
+
+    while (i--) {
+      ret[i] = list[i + start];
+    }
+
+    return ret;
+  }
+
   function emit(event: string, ...args: any[]) {
     scopedlog(`emit() "${ event }"`);
 
-    const callbacks = events[event];
+    let callbacks = events[event];
 
     if (!callbacks) return;
+
+    callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
 
     for (const callback of callbacks) {
       try {
         callback(...args);
       } catch (error) {
-        error;
+        scopedlog(`invoke "${ event }" callback failed: %o`, error);
       }
     }
   }

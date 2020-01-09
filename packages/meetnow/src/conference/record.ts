@@ -23,6 +23,9 @@ export function createRecord(data: ConferenceRecordUsers, context: Context) {
   }
 
   function update(diff?: ConferenceRecordUsers) {
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    }
     // fire status change events
     watch(reactive);
     events.emit('updated', record as Record);

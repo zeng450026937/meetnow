@@ -341,6 +341,7 @@ export function createConference(config: ConferenceConfigs) {
       onQuit : (data: any) => {
         log('receive quit: %o', data);
 
+        if (status === STATUS.kDisconnecting || status === STATUS.kDisconnected) return;
         // bizCode = 901314 ended by presenter
         // bizCode = 901320 kicked by presenter
         onDisconnected(data);

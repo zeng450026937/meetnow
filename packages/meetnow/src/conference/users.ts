@@ -53,8 +53,9 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     const deleted: ConferenceUser[] = [];
 
     if (diff) {
+      const { user, state } = diff;
       /* eslint-disable no-use-before-define */
-      diff.user.forEach((userdata) => {
+      user.forEach((userdata) => {
         const { entity, state } = userdata;
         hasUser(entity)
           ? state === 'deleted'
@@ -63,6 +64,9 @@ export function createUsers(data: ConferenceUsers, context: Context) {
           : added.push(userdata);
       });
       /* eslint-enable no-use-before-define */
+      if (state === 'full' || !data) {
+        data = diff;
+      }
     }
     // fire status change events
     watch(reactive);
@@ -108,7 +112,7 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     return userList.find((user) => user.isCurrent());
   }
   function getAttendee() {
-    return userList.filter((user) => user.isAttendee());
+    return userList.filter((user) => user.isAttendee() && !user.isOnHold());
   }
   function getPresenter() {
     return userList.filter((user) => user.isPresenter());

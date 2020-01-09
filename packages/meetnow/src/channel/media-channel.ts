@@ -121,7 +121,7 @@ export function createMediaChannel(config: MediaChannelConfigs) {
       log('peerconnection:removestream: %o', event);
       remotestream = channel.getRemoteStream();
 
-      channel.emit('remotestream', remotestream);
+      channel.emit('removestream', remotestream);
     });
   });
 

@@ -44,6 +44,9 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   function update(diff?: ConferenceUser) {
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    }
     // fire status change events
     watch(reactive);
     events.emit('updated', user as User);

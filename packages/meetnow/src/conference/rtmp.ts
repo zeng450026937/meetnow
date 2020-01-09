@@ -17,13 +17,16 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
 
   function watch(target: any) {
     /* eslint-disable no-use-before-define */
-    target.enable = data['rtmp-enable'];
+    target.enable = getEnable();
     target.status = getStatus();
     /* eslint-enable no-use-before-define */
     return target;
   }
 
   function update(diff?: ConferenceRTMPUsers) {
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    }
     // fire status change events
     watch(reactive);
     events.emit('updated', rtmp as RTMP);
@@ -35,14 +38,20 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
       : data.users.find((userdata) => userdata.default) || data.users[0];
   }
 
+  function getEnable() {
+    return data['rtmp-enable'];
+  }
   function getStatus(entity?: string) {
-    return getUser(entity)!['rtmp-status'];
+    const userdata = getUser(entity);
+    return userdata && userdata['rtmp-status'];
   }
   function getReason(entity?: string) {
-    return getUser(entity)!.reason;
+    const userdata = getUser(entity);
+    return userdata && userdata.reason;
   }
   function getDetail(entity?: string) {
-    const userdata = getUser(entity)!;
+    const userdata = getUser(entity);
+    if (!userdata) return undefined;
     const {
       'rtmp-status': status,
       'rtmp-last-start-time': lastStartTime,
@@ -70,6 +79,7 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
 
     update,
 
+    getEnable,
     getStatus,
     getReason,
     getDetail,

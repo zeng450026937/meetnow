@@ -4239,6 +4239,8 @@ export declare function createConference(config: ConferenceConfigs): {
             data: import("./conference-info").ConferenceState;
             get(key: string | number): any;
             update: (diff?: import("./conference-info").ConferenceState | undefined) => void;
+            getSharingUserEntity: () => string;
+            getSpeechUserEntity: () => string | undefined;
             on(event: string | string[], fn: Function): {
                 on(event: string | string[], fn: Function): any;
                 off(event: string | string[], fn?: Function | undefined): any;
@@ -5803,14 +5805,15 @@ export declare function createConference(config: ConferenceConfigs): {
             data: import("./conference-info").ConferenceRTMPUsers;
             get(key: string | number): any;
             update: (diff?: import("./conference-info").ConferenceRTMPUsers | undefined) => void;
-            getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-            getReason: (entity?: string | undefined) => import("./conference-info").StateReason;
+            getEnable: () => boolean;
+            getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
+            getReason: (entity?: string | undefined) => import("./conference-info").StateReason | undefined;
             getDetail: (entity?: string | undefined) => {
                 reason: import("./conference-info").StateReason;
                 status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
                 lastStartTime: number;
                 lastStopDuration: number;
-            };
+            } | undefined;
             on(event: string | string[], fn: Function): {
                 on(event: string | string[], fn: Function): any;
                 off(event: string | string[], fn?: Function | undefined): any;
@@ -5943,6 +5946,8 @@ export declare function createConference(config: ConferenceConfigs): {
         data: import("./conference-info").ConferenceState;
         get(key: string | number): any;
         update: (diff?: import("./conference-info").ConferenceState | undefined) => void;
+        getSharingUserEntity: () => string;
+        getSpeechUserEntity: () => string | undefined;
         on(event: string | string[], fn: Function): {
             on(event: string | string[], fn: Function): any;
             off(event: string | string[], fn?: Function | undefined): any;
@@ -7507,14 +7512,15 @@ export declare function createConference(config: ConferenceConfigs): {
         data: import("./conference-info").ConferenceRTMPUsers;
         get(key: string | number): any;
         update: (diff?: import("./conference-info").ConferenceRTMPUsers | undefined) => void;
-        getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-        getReason: (entity?: string | undefined) => import("./conference-info").StateReason;
+        getEnable: () => boolean;
+        getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
+        getReason: (entity?: string | undefined) => import("./conference-info").StateReason | undefined;
         getDetail: (entity?: string | undefined) => {
             reason: import("./conference-info").StateReason;
             status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
             lastStartTime: number;
             lastStopDuration: number;
-        };
+        } | undefined;
         on(event: string | string[], fn: Function): {
             on(event: string | string[], fn: Function): any;
             off(event: string | string[], fn?: Function | undefined): any;

@@ -16,22 +16,32 @@ export function createState(data: ConferenceState, context: Context) {
     const {
       active,
       locked,
-      applicationsharer,
-      'speech-user-entity': speechUserEntity,
     } = data;
     /* eslint-disable no-use-before-define */
     target.active = active;
     target.locked = locked;
-    target.sharingUserEntity = applicationsharer.user && applicationsharer.user.entity;
-    target.speechUserEntity = speechUserEntity;
+    target.sharingUserEntity = getSharingUserEntity();
+    target.speechUserEntity = getSpeechUserEntity();
     /* eslint-enable no-use-before-define */
     return target;
   }
 
   function update(diff?: ConferenceState) {
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    }
     // fire status change events
     watch(reactive);
     events.emit('updated', description as State);
+  }
+
+  function getSharingUserEntity() {
+    const { applicationsharer } = data;
+    return applicationsharer.user && applicationsharer.user.entity;
+  }
+  function getSpeechUserEntity() {
+    const { 'speech-user-entity': speechUserEntity } = data;
+    return speechUserEntity;
   }
 
   return description = {
@@ -46,6 +56,9 @@ export function createState(data: ConferenceState, context: Context) {
     },
 
     update,
+
+    getSharingUserEntity,
+    getSpeechUserEntity,
   };
 }
 
