@@ -17,6 +17,9 @@ export function browser(name: string, version: string) {
     firefox : name === 'firefox',
     chrome  : name === 'chrome' || name === 'chromium',
     wechet  : name === 'wechat',
+    toString() {
+      return `${ name.toUpperCase() } ${ version }`;
+    },
   };
 }
 

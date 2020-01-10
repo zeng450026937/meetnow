@@ -6,9 +6,839 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var debug = _interopDefault(require('debug'));
 var axios = _interopDefault(require('axios'));
-var adapter = _interopDefault(require('@meetnow/axios-miniprogram-adapter'));
-var browser$3 = require('@meetnow/browser');
-var sdpTransform = require('@meetnow/sdp-transform');
+var browser$4 = require('@meetnow/browser');
+
+var bind = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+var isBuffer = function isBuffer (obj) {
+  return obj != null && obj.constructor != null &&
+    typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+};
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Function equal to merge with the difference being that no reference
+ * to original objects is kept.
+ *
+ * @see merge
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function deepMerge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = deepMerge(result[key], val);
+    } else if (typeof val === 'object') {
+      result[key] = deepMerge({}, val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+var utils = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
+};
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+var enhanceError = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+var createError = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+var settle = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+var buildURL = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+// btoa
+function btoa(input) {
+    const str = String(input);
+    // initialize result and counter
+    let block;
+    let charCode;
+    let idx = 0;
+    let map = chars;
+    let output = '';
+    /* eslint-disable no-cond-assign, no-bitwise, no-mixed-operators */
+    for (; 
+    // if the next str index does not exist:
+    //   change the mapping table to "="
+    //   check if d has no fractional digits
+    str.charAt(idx | 0) || (map = '=', idx % 1); 
+    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+    output += map.charAt(63 & block >> 8 - idx % 1 * 8)) {
+        charCode = str.charCodeAt(idx += 3 / 4);
+        if (charCode > 0xFF) {
+            throw new Error('"btoa" failed: The string to be encoded contains characters outside of the Latin1 range.');
+        }
+        block = block << 8 | charCode;
+    }
+    return output;
+}
+
+const isObject$1 = (val) => val !== null && typeof val === 'object';
+var PLATFORM;
+(function (PLATFORM) {
+    PLATFORM[PLATFORM["kUnknown"] = 0] = "kUnknown";
+    PLATFORM[PLATFORM["kWechat"] = 1] = "kWechat";
+    PLATFORM[PLATFORM["kAlipay"] = 2] = "kAlipay";
+    PLATFORM[PLATFORM["kBaidu"] = 3] = "kBaidu";
+})(PLATFORM || (PLATFORM = {}));
+const platform = isObject$1(global.wx)
+    ? PLATFORM.kWechat
+    : isObject$1(global.my)
+        ? PLATFORM.kAlipay
+        : isObject$1(global.swan)
+            ? PLATFORM.kBaidu
+            : PLATFORM.kUnknown;
+const delegate = platform === PLATFORM.kWechat
+    ? wx.request.bind(wx)
+    : platform === PLATFORM.kAlipay
+        ? (my.request || my.httpRequest).bind(my)
+        : platform === PLATFORM.kBaidu
+            ? swan.request.bind(swan)
+            : undefined;
+function createRequestDelegate() {
+    let task;
+    return {
+        send(options) {
+            if (!delegate)
+                return;
+            task = delegate(options);
+        },
+        abort() {
+            task && task.abort();
+        },
+    };
+}
+
+function createRequest(config) {
+    let timer;
+    let timeout;
+    let onabort;
+    let onerror;
+    let ontimeout;
+    let onsuccess;
+    const delegate = createRequestDelegate();
+    return {
+        send(options) {
+            delegate.send({
+                ...options,
+                success: (response) => {
+                    // normalize data
+                    const headers = response.header || response.headers;
+                    const status = response.statusCode || response.status || 200;
+                    const statusText = status === 200 ? 'OK' : status === 400 ? 'Bad Request' : '';
+                    onsuccess && onsuccess({
+                        data: response.data,
+                        status,
+                        statusText,
+                        headers,
+                        config,
+                        request: options,
+                    });
+                },
+                fail: (data) => {
+                    let isAbort = false;
+                    let isTimeout = false;
+                    // error or timeout
+                    switch (platform) {
+                        case PLATFORM.kWechat:
+                            if (data.errMsg.indexOf('request:fail abort') !== -1) {
+                                isAbort = true;
+                            }
+                            else if (data.errMsg.indexOf('timeout') !== -1) {
+                                isTimeout = true;
+                            }
+                            break;
+                        case PLATFORM.kAlipay:
+                            // https://docs.alipay.com/mini/api/network
+                            if ([14, 19].includes(data.error)) {
+                                isAbort = true;
+                            }
+                            else if ([13].includes(data.error)) {
+                                isTimeout = true;
+                            }
+                            break;
+                    }
+                    const error = isAbort
+                        ? createError('Request aborted', config, 'ECONNABORTED', '')
+                        : isTimeout
+                            ? createError('Request Timeout', config, 'ECONNABORTED', '')
+                            : createError('Network Error', config, null, '');
+                    if (isAbort) {
+                        onabort && onabort(error);
+                    }
+                    if (isTimeout) {
+                        ontimeout && ontimeout(error);
+                    }
+                    onerror && onerror(error);
+                },
+                complete: () => {
+                    if (timer) {
+                        clearTimeout(timer);
+                        timer = undefined;
+                    }
+                },
+            });
+            if (timeout) {
+                timer = setTimeout(() => {
+                    ontimeout && ontimeout(createError(`timeout of ${config.timeout || 0}ms exceeded`, config, 'ECONNABORTED', ''));
+                    timer = undefined;
+                }, timeout);
+            }
+        },
+        abort() {
+            delegate.abort();
+        },
+        set timeout(val) {
+            timeout = val;
+        },
+        set onabort(val) {
+            onabort = val;
+        },
+        set onerror(val) {
+            onerror = val;
+        },
+        set ontimeout(val) {
+            ontimeout = val;
+        },
+        set onsuccess(val) {
+            onsuccess = val;
+        },
+    };
+}
+
+const isString$1 = (val) => typeof val === 'string';
+function mpAdapter(config) {
+    /* eslint-disable-next-line prefer-arrow-callback */
+    return new Promise(function dispatchMpRequest(resolve, reject) {
+        const { url, data, headers, method, params, paramsSerializer, responseType, timeout, cancelToken, } = config;
+        // HTTP basic authentication
+        if (config.auth) {
+            const [username, password] = [config.auth.username || '', config.auth.password || ''];
+            headers.Authorization = `Basic ${btoa(`${username}:${password}`)}`;
+        }
+        // Add headers to the request
+        utils.forEach(headers, (val, key) => {
+            const header = key.toLowerCase();
+            if ((typeof data === 'undefined' && header === 'content-type') || header === 'referer') {
+                delete headers[key];
+            }
+        });
+        let request = createRequest(config);
+        const options = {
+            url: buildURL(url, params, paramsSerializer),
+            headers,
+            method: method && method.toUpperCase(),
+            data: isString$1(data) ? JSON.parse(data) : data,
+            responseType,
+        };
+        if (cancelToken) {
+            // Handle cancellation
+            cancelToken.promise.then((cancel) => {
+                if (!request)
+                    return;
+                request.abort();
+                reject(cancel);
+                request = null;
+            });
+        }
+        request.timeout = timeout;
+        request.onsuccess = function handleLoad(response) {
+            settle(resolve, reject, response);
+            request = null;
+        };
+        request.onabort = function handleAbort(error) {
+            if (!request)
+                return;
+            reject(error);
+            request = null;
+        };
+        request.onerror = function handleError(error) {
+            if (!request)
+                return;
+            reject(error);
+            request = null;
+        };
+        request.ontimeout = function handleTimeout(error) {
+            reject(error);
+            request = null;
+        };
+        request.send(options);
+    });
+}
+
+const commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
+function getFirstMatch(regexp, ua) {
+    const match = ua.match(regexp);
+    return (match && match.length > 0 && match[1]) || '';
+}
+function getSecondMatch(regexp, ua) {
+    const match = ua.match(regexp);
+    return (match && match.length > 1 && match[2]) || '';
+}
+function browser(name, version) {
+    return {
+        name,
+        version,
+        firefox: name === 'firefox',
+        chrome: name === 'chrome' || name === 'chromium',
+        wechet: name === 'wechat',
+        toString() {
+            return `${name.toUpperCase()} ${version}`;
+        },
+    };
+}
+const browsersList = [
+    {
+        test: [/micromessenger/i],
+        describe(ua) {
+            return browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+        },
+    },
+    {
+        test: [/\sedg\//i],
+        describe(ua) {
+            return browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/edg([ea]|ios)/i],
+        describe(ua) {
+            return browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/firefox|iceweasel|fxios/i],
+        describe(ua) {
+            return browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/chromium/i],
+        describe(ua) {
+            return browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+        },
+    },
+    {
+        test: [/chrome|crios|crmo/i],
+        describe(ua) {
+            return browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/safari|applewebkit/i],
+        describe(ua) {
+            return browser('safari', getFirstMatch(commonVersionIdentifier, ua));
+        },
+    },
+    /* Something else */
+    {
+        test: [/.*/i],
+        describe(ua) {
+            /* Here we try to make sure that there are explicit details about the device
+             * in order to decide what regexp exactly we want to apply
+             * (as there is a specific decision based on that conclusion)
+             */
+            const regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
+            const regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
+            const hasDeviceSpec = ua.search('\\(') !== -1;
+            const regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
+            return browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
+        },
+    },
+];
+
+const parsed = {};
+function parseBrowser(ua) {
+    if (!parsed.browser) {
+        ua = ua || navigator.userAgent;
+        const descriptor = browsersList.find((browser) => {
+            return browser.test.some(condition => condition.test(ua));
+        });
+        if (descriptor) {
+            parsed.browser = descriptor.describe(ua);
+        }
+    }
+    return parsed.browser;
+}
+function getBrowser() {
+    return parseBrowser();
+}
+const BROWSER = parseBrowser();
+/*
+if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
+  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
+    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
+      console.log('在小程序');
+    } else {
+      console.log('在微信');
+    }
+  }, false);
+}
+*/
+function isMiniProgram() {
+    return /miniprogram/i.test(navigator.userAgent) || (window && window.__wxjs_environment === 'miniprogram');
+}
+const MINIPROGRAM = isMiniProgram();
 
 const startsWith = (input, search) => {
     return input.substr(0, search.length) === search;
@@ -320,7 +1150,7 @@ class ApiError extends Error {
 
 const log = debug('MN:Api:Request');
 const { isCancel } = axios;
-function createRequest(config, delegate = axios) {
+function createRequest$1(config, delegate = axios) {
     let source;
     let request;
     function header(header) {
@@ -386,7 +1216,7 @@ function createApi(config = {}) {
     });
     function request(apiName) {
         log$1(`request() "${apiName}"`);
-        return createRequest({ ...CONFIGS[apiName] }, delegate);
+        return createRequest$1({ ...CONFIGS[apiName] }, delegate);
     }
     return {
         get interceptors() {
@@ -399,9 +1229,9 @@ function createApi(config = {}) {
 const isDef = (value) => {
     return value !== undefined && value !== null;
 };
-const { isArray } = Array;
-const isFunction = (val) => typeof val === 'function';
-const isObject = (val) => val !== null && typeof val === 'object';
+const { isArray: isArray$1 } = Array;
+const isFunction$1 = (val) => typeof val === 'function';
+const isObject$2 = (val) => val !== null && typeof val === 'object';
 const { hasOwnProperty } = Object.prototype;
 const hasOwn = (val, key) => hasOwnProperty.call(val, key);
 const camelizeRE = /-(\w)/g;
@@ -430,7 +1260,7 @@ function createWorker(config) {
         }
         if (!running)
             return;
-        interval = isFunction(nextInterval) ? nextInterval() : nextInterval;
+        interval = isFunction$1(nextInterval) ? nextInterval() : nextInterval;
         // schedule next
         timeout = setTimeout(job, interval);
     }
@@ -477,14 +1307,14 @@ function createEvents(scopedlog = log$3) {
     let instance;
     const events = {};
     function on(event, fn) {
-        if (isArray(event)) {
+        if (isArray$1(event)) {
             event.forEach((ev) => on(ev, fn));
             return;
         }
         (events[event] || (events[event] = [])).push(fn);
     }
     function off(event, fn) {
-        if (isArray(event)) {
+        if (isArray$1(event)) {
             event.forEach((e) => off(e, fn));
             return;
         }
@@ -1807,7 +2637,7 @@ function createRecord(data, context) {
 
 const log$k = debug('MN:Information:Item');
 function isItem(item) {
-    return isDef(item) && isObject(item) && !isArray(item);
+    return isDef(item) && isObject$2(item) && !isArray$1(item);
 }
 function isPartialableItem(item) {
     return isItem(item) && hasOwn(item, 'state');
@@ -1880,7 +2710,7 @@ function mergeItem(rhys, item) {
             const value = item[key];
             const current = rhys[key];
             log$k('item key: %s value: %o -> %o', key, current, value);
-            rhys[key] = isArray(value)
+            rhys[key] = isArray$1(value)
                 ? mergeItemList(current, value)
                 : isItem(value)
                     ? mergeItem(current, value)
@@ -2002,6 +2832,574 @@ function createInformation(data, context) {
         },
         update,
     };
+}
+
+/* eslint-disable no-useless-escape */
+/* eslint-disable max-len */
+const grammar = {
+    v: [{
+            name: 'version',
+            reg: /^(\d*)$/,
+        }],
+    o: [{
+            // NB: sessionId will be a String in most cases because it is huge
+            name: 'origin',
+            reg: /^(\S*) (\d*) (\d*) (\S*) IP(\d) (\S*)/,
+            names: ['username', 'sessionId', 'sessionVersion', 'netType', 'ipVer', 'address'],
+            format: '%s %s %d %s IP%d %s',
+        }],
+    // default parsing of these only (though some of these feel outdated)
+    s: [{ name: 'name' }],
+    i: [{ name: 'description' }],
+    u: [{ name: 'uri' }],
+    e: [{ name: 'email' }],
+    p: [{ name: 'phone' }],
+    z: [{ name: 'timezones' }],
+    r: [{ name: 'repeats' }],
+    // k: [{}], // outdated thing ignored
+    t: [{
+            name: 'timing',
+            reg: /^(\d*) (\d*)/,
+            names: ['start', 'stop'],
+            format: '%d %d',
+        }],
+    c: [{
+            name: 'connection',
+            reg: /^IN IP(\d) (\S*)/,
+            names: ['version', 'ip'],
+            format: 'IN IP%d %s',
+        }],
+    b: [{
+            push: 'bandwidth',
+            reg: /^(TIAS|AS|CT|RR|RS):(\d*)/,
+            names: ['type', 'limit'],
+            format: '%s:%s',
+        }],
+    m: [{
+            // NB: special - pushes to session
+            // TODO: rtp/fmtp should be filtered by the payloads found here?
+            reg: /^(\w*) (\d*) ([\w\/]*)(?: (.*))?/,
+            names: ['type', 'port', 'protocol', 'payloads'],
+            format: '%s %d %s %s',
+        }],
+    a: [
+        {
+            push: 'rtp',
+            reg: /^rtpmap:(\d*) ([\w\-\.]*)(?:\s*\/(\d*)(?:\s*\/(\S*))?)?/,
+            names: ['payload', 'codec', 'rate', 'encoding'],
+            format(o) {
+                return (o.encoding)
+                    ? 'rtpmap:%d %s/%s/%s'
+                    : o.rate
+                        ? 'rtpmap:%d %s/%s'
+                        : 'rtpmap:%d %s';
+            },
+        },
+        {
+            // a=fmtp:111 minptime=10; useinbandfec=1
+            push: 'fmtp',
+            reg: /^fmtp:(\d*) ([\S| ]*)/,
+            names: ['payload', 'config'],
+            format: 'fmtp:%d %s',
+        },
+        {
+            name: 'control',
+            reg: /^control:(.*)/,
+            format: 'control:%s',
+        },
+        {
+            name: 'rtcp',
+            reg: /^rtcp:(\d*)(?: (\S*) IP(\d) (\S*))?/,
+            names: ['port', 'netType', 'ipVer', 'address'],
+            format(o) {
+                return (o.address != null)
+                    ? 'rtcp:%d %s IP%d %s'
+                    : 'rtcp:%d';
+            },
+        },
+        {
+            push: 'rtcpFbTrrInt',
+            reg: /^rtcp-fb:(\*|\d*) trr-int (\d*)/,
+            names: ['payload', 'value'],
+            format: 'rtcp-fb:%d trr-int %d',
+        },
+        {
+            push: 'rtcpFb',
+            reg: /^rtcp-fb:(\*|\d*) ([\w-_]*)(?: ([\w-_]*))?/,
+            names: ['payload', 'type', 'subtype'],
+            format(o) {
+                return (o.subtype != null)
+                    ? 'rtcp-fb:%s %s %s'
+                    : 'rtcp-fb:%s %s';
+            },
+        },
+        {
+            // a=extmap:1/recvonly URI-gps-string
+            push: 'ext',
+            reg: /^extmap:(\d+)(?:\/(\w+))? (\S*)(?: (\S*))?/,
+            names: ['value', 'direction', 'uri', 'config'],
+            format(o) {
+                return `extmap:%d${o.direction ? '/%s' : '%v'} %s${o.config ? ' %s' : ''}`;
+            },
+        },
+        {
+            push: 'crypto',
+            reg: /^crypto:(\d*) ([\w_]*) (\S*)(?: (\S*))?/,
+            names: ['id', 'suite', 'config', 'sessionConfig'],
+            format(o) {
+                return (o.sessionConfig != null)
+                    ? 'crypto:%d %s %s %s'
+                    : 'crypto:%d %s %s';
+            },
+        },
+        {
+            name: 'setup',
+            reg: /^setup:(\w*)/,
+            format: 'setup:%s',
+        },
+        {
+            name: 'mid',
+            reg: /^mid:([^\s]*)/,
+            format: 'mid:%s',
+        },
+        {
+            name: 'msid',
+            reg: /^msid:(.*)/,
+            format: 'msid:%s',
+        },
+        {
+            name: 'ptime',
+            reg: /^ptime:(\d*)/,
+            format: 'ptime:%d',
+        },
+        {
+            name: 'maxptime',
+            reg: /^maxptime:(\d*)/,
+            format: 'maxptime:%d',
+        },
+        {
+            name: 'direction',
+            reg: /^(sendrecv|recvonly|sendonly|inactive)/,
+        },
+        {
+            name: 'icelite',
+            reg: /^(ice-lite)/,
+        },
+        {
+            name: 'iceUfrag',
+            reg: /^ice-ufrag:(\S*)/,
+            format: 'ice-ufrag:%s',
+        },
+        {
+            name: 'icePwd',
+            reg: /^ice-pwd:(\S*)/,
+            format: 'ice-pwd:%s',
+        },
+        {
+            name: 'fingerprint',
+            reg: /^fingerprint:(\S*) (\S*)/,
+            names: ['type', 'hash'],
+            format: 'fingerprint:%s %s',
+        },
+        {
+            // a=candidate:1162875081 1 udp 2113937151 192.168.34.75 60017 typ host generation 0 network-id 3 network-cost 10
+            // a=candidate:3289912957 2 udp 1845501695 193.84.77.194 60017 typ srflx raddr 192.168.34.75 rport 60017 generation 0 network-id 3 network-cost 10
+            // a=candidate:229815620 1 tcp 1518280447 192.168.150.19 60017 typ host tcptype active generation 0 network-id 3 network-cost 10
+            // a=candidate:3289912957 2 tcp 1845501695 193.84.77.194 60017 typ srflx raddr 192.168.34.75 rport 60017 tcptype passive generation 0 network-id 3 network-cost 10
+            push: 'candidates',
+            reg: /^candidate:(\S*) (\d*) (\S*) (\d*) (\S*) (\d*) typ (\S*)(?: raddr (\S*) rport (\d*))?(?: tcptype (\S*))?(?: generation (\d*))?(?: network-id (\d*))?(?: network-cost (\d*))?/,
+            names: ['foundation', 'component', 'transport', 'priority', 'ip', 'port', 'type', 'raddr', 'rport', 'tcptype', 'generation', 'network-id', 'network-cost'],
+            format(o) {
+                let str = 'candidate:%s %d %s %d %s %d typ %s';
+                str += (o.raddr != null) ? ' raddr %s rport %d' : '%v%v';
+                // NB: candidate has three optional chunks, so %void middles one if it's missing
+                str += (o.tcptype != null) ? ' tcptype %s' : '%v';
+                if (o.generation != null) {
+                    str += ' generation %d';
+                }
+                str += (o['network-id'] != null) ? ' network-id %d' : '%v';
+                str += (o['network-cost'] != null) ? ' network-cost %d' : '%v';
+                return str;
+            },
+        },
+        {
+            name: 'endOfCandidates',
+            reg: /^(end-of-candidates)/,
+        },
+        {
+            name: 'remoteCandidates',
+            reg: /^remote-candidates:(.*)/,
+            format: 'remote-candidates:%s',
+        },
+        {
+            name: 'iceOptions',
+            reg: /^ice-options:(\S*)/,
+            format: 'ice-options:%s',
+        },
+        {
+            push: 'ssrcs',
+            reg: /^ssrc:(\d*) ([\w_-]*)(?::(.*))?/,
+            names: ['id', 'attribute', 'value'],
+            format(o) {
+                let str = 'ssrc:%d';
+                if (o.attribute != null) {
+                    str += ' %s';
+                    if (o.value != null) {
+                        str += ':%s';
+                    }
+                }
+                return str;
+            },
+        },
+        {
+            // a=ssrc-group:FEC-FR 3004364195 1080772241
+            push: 'ssrcGroups',
+            // token-char = %x21 / %x23-27 / %x2A-2B / %x2D-2E / %x30-39 / %x41-5A / %x5E-7E
+            reg: /^ssrc-group:([\x21\x23\x24\x25\x26\x27\x2A\x2B\x2D\x2E\w]*) (.*)/,
+            names: ['semantics', 'ssrcs'],
+            format: 'ssrc-group:%s %s',
+        },
+        {
+            name: 'msidSemantic',
+            reg: /^msid-semantic:\s?(\w*) (\S*)/,
+            names: ['semantic', 'token'],
+            format: 'msid-semantic: %s %s',
+        },
+        {
+            push: 'groups',
+            reg: /^group:(\w*) (.*)/,
+            names: ['type', 'mids'],
+            format: 'group:%s %s',
+        },
+        {
+            name: 'rtcpMux',
+            reg: /^(rtcp-mux)/,
+        },
+        {
+            name: 'rtcpRsize',
+            reg: /^(rtcp-rsize)/,
+        },
+        {
+            name: 'sctpmap',
+            reg: /^sctpmap:([\w_\/]*) (\S*)(?: (\S*))?/,
+            names: ['sctpmapNumber', 'app', 'maxMessageSize'],
+            format(o) {
+                return (o.maxMessageSize != null)
+                    ? 'sctpmap:%s %s %s'
+                    : 'sctpmap:%s %s';
+            },
+        },
+        {
+            name: 'xGoogleFlag',
+            reg: /^x-google-flag:([^\s]*)/,
+            format: 'x-google-flag:%s',
+        },
+        {
+            name: 'content',
+            reg: /^content:([^\s]*)/,
+            format: 'content:%s',
+        },
+        {
+            name: 'label',
+            reg: /^label:([\d]*)/,
+            format: 'label:%d',
+        },
+        {
+            push: 'rids',
+            reg: /^rid:([\d\w]+) (\w+)(?: ([\S| ]*))?/,
+            names: ['id', 'direction', 'params'],
+            format(o) {
+                return (o.params) ? 'rid:%s %s %s' : 'rid:%s %s';
+            },
+        },
+        {
+            // a=imageattr:* send [x=800,y=640] recv *
+            // a=imageattr:100 recv [x=320,y=240]
+            push: 'imageattrs',
+            reg: new RegExp(
+            // a=imageattr:97
+            '^imageattr:(\\d+|\\*)'
+                // send [x=800,y=640,sar=1.1,q=0.6] [x=480,y=320]
+                + '[\\s\\t]+(send|recv)[\\s\\t]+(\\*|\\[\\S+\\](?:[\\s\\t]+\\[\\S+\\])*)'
+                // recv [x=330,y=250]
+                + '(?:[\\s\\t]+(recv|send)[\\s\\t]+(\\*|\\[\\S+\\](?:[\\s\\t]+\\[\\S+\\])*))?'),
+            names: ['pt', 'dir1', 'attrs1', 'dir2', 'attrs2'],
+            format(o) {
+                return `imageattr:%s %s %s${o.dir2 ? ' %s %s' : ''}`;
+            },
+        },
+        {
+            // a=simulcast:recv 1;4,5 send 6;7
+            name: 'simulcast',
+            reg: new RegExp(
+            // a=simulcast:
+            '^simulcast:'
+                // send 1,2,3;~4,~5
+                + '(send|recv) ([a-zA-Z0-9\\-_~;,]+)'
+                // space + recv 6;~7,~8
+                + '(?:\\s?(send|recv) ([a-zA-Z0-9\\-_~;,]+))?'
+                // end
+                + '$'),
+            names: ['dir1', 'list1', 'dir2', 'list2'],
+            format(o) {
+                return `simulcast:%s %s${o.dir2 ? ' %s %s' : ''}`;
+            },
+        },
+        {
+            //  https://tools.ietf.org/html/draft-ietf-mmusic-sdp-simulcast-03
+            // a=simulcast: recv pt=97;98 send pt=97
+            // a=simulcast: send rid=5;6;7 paused=6,7
+            name: 'simulcast_03',
+            reg: /^simulcast:[\s\t]+([\S+\s\t]+)$/,
+            names: ['value'],
+            format: 'simulcast: %s',
+        },
+        {
+            // a=framerate:25
+            // a=framerate:29.97
+            name: 'framerate',
+            reg: /^framerate:(\d+(?:$|\.\d+))/,
+            format: 'framerate:%s',
+        },
+        {
+            // a=source-filter: incl IN IP4 239.5.2.31 10.1.15.5
+            name: 'sourceFilter',
+            reg: /^source-filter: *(excl|incl) (\S*) (IP4|IP6|\*) (\S*) (.*)/,
+            names: ['filterMode', 'netType', 'addressTypes', 'destAddress', 'srcList'],
+            format: 'source-filter: %s %s %s %s %s',
+        },
+        {
+            push: 'invalid',
+            names: ['value'],
+        },
+    ],
+};
+// set sensible defaults to avoid polluting the grammar with boring details
+Object.keys(grammar).forEach((key) => {
+    const objs = grammar[key];
+    objs.forEach((obj) => {
+        if (!obj.reg) {
+            obj.reg = /(.*)/;
+        }
+        if (!obj.format) {
+            obj.format = '%s';
+        }
+    });
+});
+
+/* eslint-disable no-useless-escape */
+function toIntIfInt(v) {
+    return String(Number(v)) === v ? Number(v) : v;
+}
+function attachProperties(match, location, names, rawName) {
+    if (rawName && !names) {
+        location[rawName] = toIntIfInt(match[1]);
+    }
+    else {
+        for (let i = 0; i < names.length; i += 1) {
+            if (match[i + 1] != null) {
+                location[names[i]] = toIntIfInt(match[i + 1]);
+            }
+        }
+    }
+}
+function parseReg(obj, location, content) {
+    const needsBlank = obj.name && obj.names;
+    if (obj.push && !location[obj.push]) {
+        location[obj.push] = [];
+    }
+    else if (needsBlank && !location[obj.name]) {
+        location[obj.name] = {};
+    }
+    const keyLocation = obj.push
+        ? {} // blank object that will be pushed
+        : needsBlank ? location[obj.name] : location; // otherwise, named location or root
+    attachProperties(content.match(obj.reg), keyLocation, obj.names, obj.name);
+    if (obj.push) {
+        location[obj.push].push(keyLocation);
+    }
+}
+const validLine = RegExp.prototype.test.bind(/^([a-z])=(.*)/);
+function parse(sdp) {
+    const media = [];
+    const session = { media };
+    let location = session; // points at where properties go under (one of the above)
+    // parse lines we understand
+    sdp.split(/(\r\n|\r|\n)/).filter(validLine)
+        .forEach((l) => {
+        const type = l[0];
+        const content = l.slice(2);
+        if (type === 'm') {
+            media.push({ rtp: [], fmtp: [] });
+            location = media[media.length - 1]; // point at latest media line
+        }
+        for (let j = 0; j < (grammar[type] || []).length; j += 1) {
+            const obj = grammar[type][j];
+            if (obj.reg.test(content)) {
+                parseReg(obj, location, content);
+                return;
+            }
+        }
+    });
+    session.media = media; // link it up
+    return session;
+}
+function paramReducer(acc, expr) {
+    const s = expr.split(/=(.+)/, 2);
+    if (s.length === 2) {
+        acc[s[0]] = toIntIfInt(s[1]);
+    }
+    return acc;
+}
+function parseParams(str) {
+    return str.split(/\;\s?/).reduce(paramReducer, {});
+}
+// For backward compatibility - alias will be removed in 3.0.0
+const parseFmtpConfig = parseParams;
+function parsePayloads(str) {
+    return str.split(' ').map(Number);
+}
+function parseRemoteCandidates(str) {
+    const candidates = [];
+    const parts = str.split(' ').map(toIntIfInt);
+    for (let i = 0; i < parts.length; i += 3) {
+        candidates.push({
+            component: parts[i],
+            ip: parts[i + 1],
+            port: parts[i + 2],
+        });
+    }
+    return candidates;
+}
+function parseImageAttributes(str) {
+    return str.split(' ').map((item) => {
+        return item.substring(1, item.length - 1).split(',')
+            .reduce(paramReducer, {});
+    });
+}
+function parseSimulcastStreamList(str) {
+    return str.split(';').map((stream) => {
+        return stream.split(',').map((format) => {
+            let scid;
+            let paused = false;
+            if (format[0] !== '~') {
+                scid = toIntIfInt(format);
+            }
+            else {
+                scid = toIntIfInt(format.substring(1, format.length));
+                paused = true;
+            }
+            return {
+                scid,
+                paused,
+            };
+        });
+    });
+}
+
+// customized util.format - discards excess arguments and can void middle ones
+const formatRegExp = /%[sdv%]/g;
+const format = function (formatStr, ...args) {
+    let i = 0;
+    const len = args.length;
+    return formatStr.replace(formatRegExp, (x) => {
+        if (i >= len) {
+            return x; // missing argument
+        }
+        const arg = args[i];
+        i += 1;
+        switch (x) {
+            case '%%':
+                return '%';
+            case '%s':
+                return String(arg);
+            case '%d':
+                return Number(arg);
+            case '%v':
+                return '';
+            default:
+                return arg;
+        }
+    });
+    // NB: we discard excess arguments - they are typically undefined from makeLine
+};
+const makeLine = function (type, obj, location) {
+    const str = obj.format instanceof Function
+        ? (obj.format(obj.push ? location : location[obj.name]))
+        : obj.format;
+    const formatStr = `${type}=${str}`;
+    const args = [];
+    if (obj.names) {
+        for (let i = 0; i < obj.names.length; i += 1) {
+            const n = obj.names[i];
+            if (obj.name) {
+                args.push(location[obj.name][n]);
+            }
+            else { // for mLine and push attributes
+                args.push(location[obj.names[i]]);
+            }
+        }
+    }
+    else {
+        args.push(location[obj.name]);
+    }
+    return format(formatStr, ...args);
+};
+// RFC specified order
+// TODO: extend this with all the rest
+const defaultOuterOrder = [
+    'v', 'o', 's', 'i',
+    'u', 'e', 'p', 'c',
+    'b', 't', 'r', 'z', 'a',
+];
+const defaultInnerOrder = ['i', 'c', 'b', 'a'];
+function write(session, opts) {
+    opts = opts || {};
+    // ensure certain properties exist
+    if (session.version == null) {
+        session.version = 0; // 'v=0' must be there (only defined version atm)
+    }
+    if (session.name == null) {
+        session.name = ' '; // 's= ' must be there if no meaningful name set
+    }
+    session.media.forEach((mLine) => {
+        if (mLine.payloads == null) {
+            mLine.payloads = '';
+        }
+    });
+    const outerOrder = opts.outerOrder || defaultOuterOrder;
+    const innerOrder = opts.innerOrder || defaultInnerOrder;
+    const sdp = [];
+    // loop through outerOrder for matching properties on session
+    outerOrder.forEach((type) => {
+        grammar[type].forEach((obj) => {
+            if (obj.name in session && session[obj.name] != null) {
+                sdp.push(makeLine(type, obj, session));
+            }
+            else if (obj.push in session && session[obj.push] != null) {
+                session[obj.push].forEach((el) => {
+                    sdp.push(makeLine(type, obj, el));
+                });
+            }
+        });
+    });
+    // then for each media line, follow the innerOrder
+    session.media.forEach((mLine) => {
+        sdp.push(makeLine('m', grammar.m[0], mLine));
+        innerOrder.forEach((type) => {
+            grammar[type].forEach((obj) => {
+                if (obj.name in mLine && mLine[obj.name] != null) {
+                    sdp.push(makeLine(type, obj, mLine));
+                }
+                else if (obj.push in mLine && mLine[obj.push] != null) {
+                    mLine[obj.push].forEach((el) => {
+                        sdp.push(makeLine(type, obj, el));
+                    });
+                }
+            });
+        });
+    });
+    return `${sdp.join('\r\n')}\r\n`;
 }
 
 function closeMediaStream(stream) {
@@ -2329,7 +3727,7 @@ function createRTCStats() {
 }
 
 const log$m = debug('MN:Channel');
-const browser = browser$3.getBrowser();
+const browser$1 = getBrowser();
 var STATUS;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
@@ -2844,7 +4242,7 @@ function createChannel(config) {
         // nothing to do
         if (!localHold && !remoteHold)
             return offer;
-        const sdp = sdpTransform.parse(offer);
+        const sdp = parse(offer);
         // Local hold.
         if (localHold && !remoteHold) {
             for (const m of sdp.media) {
@@ -2872,7 +4270,7 @@ function createChannel(config) {
             }
             // Remote hold.
         }
-        return sdpTransform.write(sdp);
+        return write(sdp);
     }
     function getRemoteStream() {
         log$m('getRemoteStream()');
@@ -3071,7 +4469,7 @@ function createChannel(config) {
             queue.push(connection.createOffer()
                 .then((offer) => connection.setLocalDescription(offer))
                 .then(() => {
-                const sdp = sdpTransform.parse(connection.remoteDescription.sdp);
+                const sdp = parse(connection.remoteDescription.sdp);
                 for (const m of sdp.media) {
                     if (typeof audio !== 'undefined' && m.type === 'audio') {
                         if (audio === 0) {
@@ -3102,7 +4500,7 @@ function createChannel(config) {
                 }
                 const desc = {
                     type: connection.remoteDescription.type,
-                    sdp: sdpTransform.write(sdp),
+                    sdp: write(sdp),
                 };
                 return connection.setRemoteDescription(desc);
             })
@@ -3140,7 +4538,7 @@ function createChannel(config) {
             let stats;
             // use legacy getStats()
             // the new getStats() won't report 'packetsLost' in 'outbound-rtp'
-            if (browser.chrome) {
+            if (browser$1.chrome) {
                 stats = await new Promise((resolve) => {
                     connection.getStats((stats) => {
                         resolve(stats.result());
@@ -3190,7 +4588,7 @@ function createChannel(config) {
 }
 
 const log$n = debug('MN:SDP');
-const browser$1 = browser$3.getBrowser();
+const browser$2 = getBrowser();
 function createModifier() {
     let content = 'main';
     let width = 1920;
@@ -3203,7 +4601,7 @@ function createModifier() {
     function build() {
         return (data) => {
             const { originator, type } = data;
-            const sdp = sdpTransform.parse(data.sdp);
+            const sdp = parse(data.sdp);
             const maxWidth = width;
             const maxHeight = height;
             const maxFrameRate = frameRate;
@@ -3328,8 +4726,8 @@ function createModifier() {
                     // when content sharing or using multiple tab, codec/decode might be error.
                     // and chrome ver58 has a really low resolution in h264 codec when content sharing.
                     // use VP8/VP9 first
-                    if (browser$1.firefox
-                        || (browser$1.chrome && parseInt(browser$1.version, 10) < 63 && content === 'slides')) {
+                    if (browser$2.firefox
+                        || (browser$2.chrome && parseInt(browser$2.version, 10) < 63 && content === 'slides')) {
                         preferCodec = vp8Payloads;
                     }
                     if (!preferCodec.size || !unsupportCodec.size) {
@@ -3398,7 +4796,7 @@ function createModifier() {
                         m.rtp = rtp;
                     }
                 });
-                if (type === 'offer' && browser$1.firefox) {
+                if (type === 'offer' && browser$2.firefox) {
                     sdp.media.forEach((m) => {
                         if (m.mid === undefined) {
                             m.mid = m.type === 'audio'
@@ -3410,7 +4808,7 @@ function createModifier() {
                     });
                 }
             }
-            data.sdp = sdpTransform.write(sdp);
+            data.sdp = write(sdp);
             log$n(`${originator} sdp: \n\n %s \n`, data.sdp);
         };
     }
@@ -3731,8 +5129,8 @@ function createChatChannel(config) {
 }
 
 const log$r = debug('MN:Conference');
-const miniprogram = browser$3.isMiniProgram();
-const browser$2 = browser$3.getBrowser();
+const miniprogram = browser$4.isMiniProgram();
+const browser$3 = browser$4.getBrowser();
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
     STATUS[STATUS["kConnecting"] = 1] = "kConnecting";
@@ -3843,7 +5241,7 @@ function createConference(config) {
             'conference-pwd': options.password,
             'user-agent': useragent,
             'client-url': options.url.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
-            'client-display-text': options.displayName || `${browser$2}`,
+            'client-display-text': options.displayName || `${browser$3}`,
             'client-type': 'http',
             'client-info': clientinfo,
             'pure-ctrl-channel': !hasMedia,
@@ -4242,15 +5640,6 @@ function createUA(config) {
     };
 }
 
-function createChannel$1(api) {
-    // TODO
-    // join & keepalive
-    return {
-        open() { },
-        close(reason) { },
-    };
-}
-
 function createMedia() {
     return {};
 }
@@ -4260,8 +5649,8 @@ const version = process.env.VUE_APP_VERSION;
 // global setup
 function setup$1() {
     setupConfig();
-    if (browser$3.isMiniProgram()) {
-        axios.defaults.adapter = adapter;
+    if (isMiniProgram()) {
+        axios.defaults.adapter = mpAdapter;
     }
     debug.enable(CONFIG.get('debug', 'MN*,-MN:Api*,-MN:Information:Item,-MN:Worker'));
     log$t('setup() [version]: %s', version);
@@ -4278,17 +5667,23 @@ var index = {
     connect,
 };
 
-Object.keys(sdpTransform).forEach(function (k) {
-  if (k !== 'default') exports[k] = sdpTransform[k];
-});
 exports.debug = debug;
 exports.axios = axios;
-exports.adapter = adapter;
-exports.createChannel = createChannel$1;
+exports.adapter = mpAdapter;
 exports.createConference = createConference;
 exports.createEvents = createEvents;
 exports.createMedia = createMedia;
 exports.createReactive = createReactive;
 exports.createUA = createUA;
 exports.default = index;
+exports.paramReducer = paramReducer;
+exports.parse = parse;
+exports.parseFmtpConfig = parseFmtpConfig;
+exports.parseImageAttributes = parseImageAttributes;
+exports.parseParams = parseParams;
+exports.parsePayloads = parsePayloads;
+exports.parseReg = parseReg;
+exports.parseRemoteCandidates = parseRemoteCandidates;
+exports.parseSimulcastStreamList = parseSimulcastStreamList;
 exports.urlToNumber = urlToNumber;
+exports.write = write;

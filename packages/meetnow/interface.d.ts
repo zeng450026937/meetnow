@@ -270,6 +270,9 @@ declare namespace MeetNow {
 
     get(key: keyof ConferenceState): any;
 
+    getSharingUserEntity(): string;
+    getSpeechUserEntity(): string;
+
     /* eslint-disable no-dupe-class-members */
     on(event: 'updated', listener: (data: State) => void): this;
     on(event: 'activeChanged', listener: (data: boolean) => void): this;

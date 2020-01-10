@@ -2085,504 +2085,6 @@ axios_1.default = default_1;
 
 var axios$1 = axios_1;
 
-var bind$1 = function bind(fn, thisArg) {
-  return function wrap() {
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
-    }
-    return fn.apply(thisArg, args);
-  };
-};
-
-/*!
- * Determine if an object is a Buffer
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-
-var isBuffer$1 = function isBuffer (obj) {
-  return obj != null && obj.constructor != null &&
-    typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-};
-
-/*global toString:true*/
-
-// utils is a library of generic helper functions non-specific to axios
-
-var toString$1 = Object.prototype.toString;
-
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
-function isArray$1(val) {
-  return toString$1.call(val) === '[object Array]';
-}
-
-/**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
-function isArrayBuffer$1(val) {
-  return toString$1.call(val) === '[object ArrayBuffer]';
-}
-
-/**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
-function isFormData$1(val) {
-  return (typeof FormData !== 'undefined') && (val instanceof FormData);
-}
-
-/**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
-function isArrayBufferView$1(val) {
-  var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
-    result = ArrayBuffer.isView(val);
-  } else {
-    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
-  }
-  return result;
-}
-
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
-function isString$1(val) {
-  return typeof val === 'string';
-}
-
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
-function isNumber$1(val) {
-  return typeof val === 'number';
-}
-
-/**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
-function isUndefined$1(val) {
-  return typeof val === 'undefined';
-}
-
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
-function isObject$1(val) {
-  return val !== null && typeof val === 'object';
-}
-
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
-function isDate$1(val) {
-  return toString$1.call(val) === '[object Date]';
-}
-
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
-function isFile$1(val) {
-  return toString$1.call(val) === '[object File]';
-}
-
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
-function isBlob$1(val) {
-  return toString$1.call(val) === '[object Blob]';
-}
-
-/**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
-function isFunction$1(val) {
-  return toString$1.call(val) === '[object Function]';
-}
-
-/**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
-function isStream$1(val) {
-  return isObject$1(val) && isFunction$1(val.pipe);
-}
-
-/**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
-function isURLSearchParams$1(val) {
-  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
-}
-
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
-function trim$1(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
-}
-
-/**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- * nativescript
- *  navigator.product -> 'NativeScript' or 'NS'
- */
-function isStandardBrowserEnv$1() {
-  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
-                                           navigator.product === 'NativeScript' ||
-                                           navigator.product === 'NS')) {
-    return false;
-  }
-  return (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
-}
-
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
-function forEach$1(obj, fn) {
-  // Don't bother if no value provided
-  if (obj === null || typeof obj === 'undefined') {
-    return;
-  }
-
-  // Force an array if not already something iterable
-  if (typeof obj !== 'object') {
-    /*eslint no-param-reassign:0*/
-    obj = [obj];
-  }
-
-  if (isArray$1(obj)) {
-    // Iterate over array values
-    for (var i = 0, l = obj.length; i < l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  } else {
-    // Iterate over object keys
-    for (var key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        fn.call(null, obj[key], key, obj);
-      }
-    }
-  }
-}
-
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge$1(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = merge$1(result[key], val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach$1(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Function equal to merge with the difference being that no reference
- * to original objects is kept.
- *
- * @see merge
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function deepMerge$1(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = deepMerge$1(result[key], val);
-    } else if (typeof val === 'object') {
-      result[key] = deepMerge$1({}, val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach$1(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
-function extend$1(a, b, thisArg) {
-  forEach$1(b, function assignValue(val, key) {
-    if (thisArg && typeof val === 'function') {
-      a[key] = bind$1(val, thisArg);
-    } else {
-      a[key] = val;
-    }
-  });
-  return a;
-}
-
-var utils$1 = {
-  isArray: isArray$1,
-  isArrayBuffer: isArrayBuffer$1,
-  isBuffer: isBuffer$1,
-  isFormData: isFormData$1,
-  isArrayBufferView: isArrayBufferView$1,
-  isString: isString$1,
-  isNumber: isNumber$1,
-  isObject: isObject$1,
-  isUndefined: isUndefined$1,
-  isDate: isDate$1,
-  isFile: isFile$1,
-  isBlob: isBlob$1,
-  isFunction: isFunction$1,
-  isStream: isStream$1,
-  isURLSearchParams: isURLSearchParams$1,
-  isStandardBrowserEnv: isStandardBrowserEnv$1,
-  forEach: forEach$1,
-  merge: merge$1,
-  deepMerge: deepMerge$1,
-  extend: extend$1,
-  trim: trim$1
-};
-
-/**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
-var enhanceError$1 = function enhanceError(error, config, code, request, response) {
-  error.config = config;
-  if (code) {
-    error.code = code;
-  }
-
-  error.request = request;
-  error.response = response;
-  error.isAxiosError = true;
-
-  error.toJSON = function() {
-    return {
-      // Standard
-      message: this.message,
-      name: this.name,
-      // Microsoft
-      description: this.description,
-      number: this.number,
-      // Mozilla
-      fileName: this.fileName,
-      lineNumber: this.lineNumber,
-      columnNumber: this.columnNumber,
-      stack: this.stack,
-      // Axios
-      config: this.config,
-      code: this.code
-    };
-  };
-  return error;
-};
-
-/**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */
-var createError$1 = function createError(message, config, code, request, response) {
-  var error = new Error(message);
-  return enhanceError$1(error, config, code, request, response);
-};
-
-/**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
-var settle$1 = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
-  if (!validateStatus || validateStatus(response.status)) {
-    resolve(response);
-  } else {
-    reject(createError$1(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
-  }
-};
-
-function encode$1(val) {
-  return encodeURIComponent(val).
-    replace(/%40/gi, '@').
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
-}
-
-/**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
-var buildURL$1 = function buildURL(url, params, paramsSerializer) {
-  /*eslint no-param-reassign:0*/
-  if (!params) {
-    return url;
-  }
-
-  var serializedParams;
-  if (paramsSerializer) {
-    serializedParams = paramsSerializer(params);
-  } else if (utils$1.isURLSearchParams(params)) {
-    serializedParams = params.toString();
-  } else {
-    var parts = [];
-
-    utils$1.forEach(params, function serialize(val, key) {
-      if (val === null || typeof val === 'undefined') {
-        return;
-      }
-
-      if (utils$1.isArray(val)) {
-        key = key + '[]';
-      } else {
-        val = [val];
-      }
-
-      utils$1.forEach(val, function parseValue(v) {
-        if (utils$1.isDate(v)) {
-          v = v.toISOString();
-        } else if (utils$1.isObject(v)) {
-          v = JSON.stringify(v);
-        }
-        parts.push(encode$1(key) + '=' + encode$1(v));
-      });
-    });
-
-    serializedParams = parts.join('&');
-  }
-
-  if (serializedParams) {
-    var hashmarkIndex = url.indexOf('#');
-    if (hashmarkIndex !== -1) {
-      url = url.slice(0, hashmarkIndex);
-    }
-
-    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
-  }
-
-  return url;
-};
-
 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 // btoa
 function btoa$1(input) {
@@ -2610,7 +2112,7 @@ function btoa$1(input) {
     return output;
 }
 
-const isObject$1$1 = (val) => val !== null && typeof val === 'object';
+const isObject$1 = (val) => val !== null && typeof val === 'object';
 var PLATFORM;
 (function (PLATFORM) {
     PLATFORM[PLATFORM["kUnknown"] = 0] = "kUnknown";
@@ -2618,11 +2120,11 @@ var PLATFORM;
     PLATFORM[PLATFORM["kAlipay"] = 2] = "kAlipay";
     PLATFORM[PLATFORM["kBaidu"] = 3] = "kBaidu";
 })(PLATFORM || (PLATFORM = {}));
-const platform = isObject$1$1(global.wx)
+const platform = isObject$1(global.wx)
     ? PLATFORM.kWechat
-    : isObject$1$1(global.my)
+    : isObject$1(global.my)
         ? PLATFORM.kAlipay
-        : isObject$1$1(global.swan)
+        : isObject$1(global.swan)
             ? PLATFORM.kBaidu
             : PLATFORM.kUnknown;
 const delegate = platform === PLATFORM.kWechat
@@ -2696,10 +2198,10 @@ function createRequest(config) {
                             break;
                     }
                     const error = isAbort
-                        ? createError$1('Request aborted', config, 'ECONNABORTED', '')
+                        ? createError('Request aborted', config, 'ECONNABORTED', '')
                         : isTimeout
-                            ? createError$1('Request Timeout', config, 'ECONNABORTED', '')
-                            : createError$1('Network Error', config, null, '');
+                            ? createError('Request Timeout', config, 'ECONNABORTED', '')
+                            : createError('Network Error', config, null, '');
                     if (isAbort) {
                         onabort && onabort(error);
                     }
@@ -2717,7 +2219,7 @@ function createRequest(config) {
             });
             if (timeout) {
                 timer = setTimeout(() => {
-                    ontimeout && ontimeout(createError$1(`timeout of ${config.timeout || 0}ms exceeded`, config, 'ECONNABORTED', ''));
+                    ontimeout && ontimeout(createError(`timeout of ${config.timeout || 0}ms exceeded`, config, 'ECONNABORTED', ''));
                     timer = undefined;
                 }, timeout);
             }
@@ -2743,7 +2245,7 @@ function createRequest(config) {
     };
 }
 
-const isString$1$1 = (val) => typeof val === 'string';
+const isString$1 = (val) => typeof val === 'string';
 function mpAdapter(config) {
     /* eslint-disable-next-line prefer-arrow-callback */
     return new Promise(function dispatchMpRequest(resolve, reject) {
@@ -2754,7 +2256,7 @@ function mpAdapter(config) {
             headers.Authorization = `Basic ${btoa$1(`${username}:${password}`)}`;
         }
         // Add headers to the request
-        utils$1.forEach(headers, (val, key) => {
+        utils.forEach(headers, (val, key) => {
             const header = key.toLowerCase();
             if ((typeof data === 'undefined' && header === 'content-type') || header === 'referer') {
                 delete headers[key];
@@ -2762,10 +2264,10 @@ function mpAdapter(config) {
         });
         let request = createRequest(config);
         const options = {
-            url: buildURL$1(url, params, paramsSerializer),
+            url: buildURL(url, params, paramsSerializer),
             headers,
             method: method && method.toUpperCase(),
-            data: isString$1$1(data) ? JSON.parse(data) : data,
+            data: isString$1(data) ? JSON.parse(data) : data,
             responseType,
         };
         if (cancelToken) {
@@ -2780,7 +2282,7 @@ function mpAdapter(config) {
         }
         request.timeout = timeout;
         request.onsuccess = function handleLoad(response) {
-            settle$1(resolve, reject, response);
+            settle(resolve, reject, response);
             request = null;
         };
         request.onabort = function handleAbort(error) {
@@ -2819,6 +2321,9 @@ function browser$1(name, version) {
         firefox: name === 'firefox',
         chrome: name === 'chrome' || name === 'chromium',
         wechet: name === 'wechat',
+        toString() {
+            return `${name.toUpperCase()} ${version}`;
+        },
     };
 }
 const browsersList = [
@@ -3303,8 +2808,8 @@ function createApi(config = {}) {
 const isDef = (value) => {
     return value !== undefined && value !== null;
 };
-const { isArray: isArray$2 } = Array;
-const isFunction$2 = (val) => typeof val === 'function';
+const { isArray: isArray$1 } = Array;
+const isFunction$1 = (val) => typeof val === 'function';
 const isObject$2 = (val) => val !== null && typeof val === 'object';
 const { hasOwnProperty } = Object.prototype;
 const hasOwn = (val, key) => hasOwnProperty.call(val, key);
@@ -3334,7 +2839,7 @@ function createWorker(config) {
         }
         if (!running)
             return;
-        interval = isFunction$2(nextInterval) ? nextInterval() : nextInterval;
+        interval = isFunction$1(nextInterval) ? nextInterval() : nextInterval;
         // schedule next
         timeout = setTimeout(job, interval);
     }
@@ -3368,6 +2873,117 @@ function createWorker(config) {
     };
 }
 
+const commonVersionIdentifier$1 = /version\/(\d+(\.?_?\d+)+)/i;
+function getFirstMatch$1(regexp, ua) {
+    const match = ua.match(regexp);
+    return (match && match.length > 0 && match[1]) || '';
+}
+function getSecondMatch$1(regexp, ua) {
+    const match = ua.match(regexp);
+    return (match && match.length > 1 && match[2]) || '';
+}
+function browser$2(name, version) {
+    return {
+        name,
+        version,
+        firefox: name === 'firefox',
+        chrome: name === 'chrome' || name === 'chromium',
+        wechet: name === 'wechat',
+    };
+}
+const browsersList$1 = [
+    {
+        test: [/micromessenger/i],
+        describe(ua) {
+            return browser$2('wechat', getFirstMatch$1(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch$1(commonVersionIdentifier$1, ua));
+        },
+    },
+    {
+        test: [/\sedg\//i],
+        describe(ua) {
+            return browser$2('edge', getFirstMatch$1(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/edg([ea]|ios)/i],
+        describe(ua) {
+            return browser$2('edge', getSecondMatch$1(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/firefox|iceweasel|fxios/i],
+        describe(ua) {
+            return browser$2('firefox', getFirstMatch$1(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/chromium/i],
+        describe(ua) {
+            return browser$2('chromium', getFirstMatch$1(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch$1(commonVersionIdentifier$1, ua));
+        },
+    },
+    {
+        test: [/chrome|crios|crmo/i],
+        describe(ua) {
+            return browser$2('chrome', getFirstMatch$1(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
+        },
+    },
+    {
+        test: [/safari|applewebkit/i],
+        describe(ua) {
+            return browser$2('safari', getFirstMatch$1(commonVersionIdentifier$1, ua));
+        },
+    },
+    /* Something else */
+    {
+        test: [/.*/i],
+        describe(ua) {
+            /* Here we try to make sure that there are explicit details about the device
+             * in order to decide what regexp exactly we want to apply
+             * (as there is a specific decision based on that conclusion)
+             */
+            const regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
+            const regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
+            const hasDeviceSpec = ua.search('\\(') !== -1;
+            const regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
+            return browser$2(getFirstMatch$1(regexp, ua), getSecondMatch$1(regexp, ua));
+        },
+    },
+];
+
+const parsed$1 = {};
+function parseBrowser$1(ua) {
+    if (!parsed$1.browser) {
+        ua = ua || navigator.userAgent;
+        const descriptor = browsersList$1.find((browser) => {
+            return browser.test.some(condition => condition.test(ua));
+        });
+        if (descriptor) {
+            parsed$1.browser = descriptor.describe(ua);
+        }
+    }
+    return parsed$1.browser;
+}
+function getBrowser$1() {
+    return parseBrowser$1();
+}
+const BROWSER$1 = parseBrowser$1();
+/*
+if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
+  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
+    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
+      console.log('在小程序');
+    } else {
+      console.log('在微信');
+    }
+  }, false);
+}
+*/
+function isMiniProgram$1() {
+    return /miniprogram/i.test(navigator.userAgent) || (window && window.__wxjs_environment === 'miniprogram');
+}
+const MINIPROGRAM$1 = isMiniProgram$1();
+
 function createContext(delegate) {
     return new Proxy({}, {
         get(target, key) {
@@ -3381,14 +2997,14 @@ function createEvents(scopedlog = log$3) {
     let instance;
     const events = {};
     function on(event, fn) {
-        if (isArray$2(event)) {
+        if (isArray$1(event)) {
             event.forEach((ev) => on(ev, fn));
             return;
         }
         (events[event] || (events[event] = [])).push(fn);
     }
     function off(event, fn) {
-        if (isArray$2(event)) {
+        if (isArray$1(event)) {
             event.forEach((e) => off(e, fn));
             return;
         }
@@ -4711,7 +4327,7 @@ function createRecord(data, context) {
 
 const log$k = browser('MN:Information:Item');
 function isItem(item) {
-    return isDef(item) && isObject$2(item) && !isArray$2(item);
+    return isDef(item) && isObject$2(item) && !isArray$1(item);
 }
 function isPartialableItem(item) {
     return isItem(item) && hasOwn(item, 'state');
@@ -4784,7 +4400,7 @@ function mergeItem(rhys, item) {
             const value = item[key];
             const current = rhys[key];
             log$k('item key: %s value: %o -> %o', key, current, value);
-            rhys[key] = isArray$2(value)
+            rhys[key] = isArray$1(value)
                 ? mergeItemList(current, value)
                 : isItem(value)
                     ? mergeItem(current, value)
@@ -5801,7 +5417,7 @@ function createRTCStats() {
 }
 
 const log$m = browser('MN:Channel');
-const browser$2 = getBrowser();
+const browser$3 = getBrowser();
 var STATUS;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
@@ -6612,7 +6228,7 @@ function createChannel(config) {
             let stats;
             // use legacy getStats()
             // the new getStats() won't report 'packetsLost' in 'outbound-rtp'
-            if (browser$2.chrome) {
+            if (browser$3.chrome) {
                 stats = await new Promise((resolve) => {
                     connection.getStats((stats) => {
                         resolve(stats.result());
@@ -6662,7 +6278,7 @@ function createChannel(config) {
 }
 
 const log$n = browser('MN:SDP');
-const browser$3 = getBrowser();
+const browser$4 = getBrowser();
 function createModifier() {
     let content = 'main';
     let width = 1920;
@@ -6800,8 +6416,8 @@ function createModifier() {
                     // when content sharing or using multiple tab, codec/decode might be error.
                     // and chrome ver58 has a really low resolution in h264 codec when content sharing.
                     // use VP8/VP9 first
-                    if (browser$3.firefox
-                        || (browser$3.chrome && parseInt(browser$3.version, 10) < 63 && content === 'slides')) {
+                    if (browser$4.firefox
+                        || (browser$4.chrome && parseInt(browser$4.version, 10) < 63 && content === 'slides')) {
                         preferCodec = vp8Payloads;
                     }
                     if (!preferCodec.size || !unsupportCodec.size) {
@@ -6870,7 +6486,7 @@ function createModifier() {
                         m.rtp = rtp;
                     }
                 });
-                if (type === 'offer' && browser$3.firefox) {
+                if (type === 'offer' && browser$4.firefox) {
                     sdp.media.forEach((m) => {
                         if (m.mid === undefined) {
                             m.mid = m.type === 'audio'
@@ -7203,8 +6819,8 @@ function createChatChannel(config) {
 }
 
 const log$r = browser('MN:Conference');
-const miniprogram = isMiniProgram();
-const browser$4 = getBrowser();
+const miniprogram = isMiniProgram$1();
+const browser$5 = getBrowser$1();
 var STATUS$1;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
@@ -7316,7 +6932,7 @@ function createConference(config) {
             'conference-pwd': options.password,
             'user-agent': useragent,
             'client-url': options.url.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
-            'client-display-text': options.displayName || `${browser$4}`,
+            'client-display-text': options.displayName || `${browser$5}`,
             'client-type': 'http',
             'client-info': clientinfo,
             'pure-ctrl-channel': !hasMedia,
@@ -7715,15 +7331,6 @@ function createUA(config) {
     };
 }
 
-function createChannel$1(api) {
-    // TODO
-    // join & keepalive
-    return {
-        open() { },
-        close(reason) { },
-    };
-}
-
 function createMedia() {
     return {};
 }
@@ -7752,4 +7359,4 @@ var index = {
 };
 
 export default index;
-export { STATUS$1 as STATUS, mpAdapter as adapter, axios$1 as axios, createChannel$1 as createChannel, createConference, createEvents, createMedia, createReactive, createUA, browser as debug, paramReducer, parse$1 as parse, parseFmtpConfig, parseImageAttributes, parseParams, parsePayloads, parseReg, parseRemoteCandidates, parseSimulcastStreamList, urlToNumber, write };
+export { STATUS$1 as STATUS, mpAdapter as adapter, axios$1 as axios, createConference, createEvents, createMedia, createReactive, createUA, browser as debug, paramReducer, parse$1 as parse, parseFmtpConfig, parseImageAttributes, parseParams, parsePayloads, parseReg, parseRemoteCandidates, parseSimulcastStreamList, urlToNumber, write };

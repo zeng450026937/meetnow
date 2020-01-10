@@ -1,6 +1,6 @@
 import debug from 'debug';
-import { getBrowser } from '@meetnow/browser';
-import { parse, write } from '@meetnow/sdp-transform';
+import { getBrowser } from '../browser';
+import { parse, write } from '../sdp-transform';
 import { createEvents } from '../events';
 import { getUserMedia } from '../media/get-user-media';
 import { closeMediaStream } from '../media/close-media-stream';
