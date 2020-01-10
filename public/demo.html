@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="icon" href="favicon.ico">
+    <title>DEMO</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      .remote {
+        width: 580px;
+        height: 360px;
+      }
+      .remote-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .local {
+        width: 580px;
+        height: 360px;
+      }
+      .local-video {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+      }
+    </style>
+    <script src="../packages/meetnow/dist/meetnow.umd.js"></script>
+  </head>
+  <body>
+    <div class="form">
+      <div class="number">
+        <input class="number-input" type="text" placeholder="会议ID" required />
+      </div>
+      <div class="password">
+        <input class="password-input" type="text" placeholder="会议密码" />
+      </div>
+      <div class="nickname">
+        <input class="nickname-input" type="text" placeholder="昵称" required />
+      </div>
+      <div class="form__button">
+        <button onclick="join()">加入会议</button>
+        <button onclick="leave()">退出会议</button>
+      </div>
+    </div>
+    <div>
+      <div class="remote">
+        <video class="remote-video" autoplay loop="loop"></video>
+      </div>
+      <div class="local">
+        <video class="local-video" autoplay loop="loop"></video>
+      </div>
+    </div>
+    <script>
+      MeetNow.default.setup();
+      let ua = null;
+      let conf = null;
+      let [number, password, displayName] = ['', '', ''];
+      let [user, users, confStatus] = [{}, {}, 'disconnected'];
+
+      async function join() {
+        if (confStatus !== 'disconnected' || !number || !displayName) {
+          console.error('join() error');
+          return;
+        }
+        conf = await ua.connect({
+          number,
+          password,
+          displayName,
+        });
+
+        this.initBindEvent(conf);
+
+        await conf.join();
+
+        if (conf.mediaChannel) await conf.mediaChannel.connect();
+      }
+
+      function leave() {
+        if (!user || confStatus !== 'connected') {
+          console.error('leave() error');
+          return;
+        }
+
+        const hasPermission = user.isOrganizer() || user.isPresenter();
+
+        if (hasPermission) conf.end();
+        else conf.leave();
+      }
+
+      function initLocalStream() {
+        const constraints = {
+          audio: true,
+          video: true,
+        };
+
+        navigator.mediaDevices
+          .getUserMedia(constraints)
+          .then(mediaStream => {
+            const localVideo = document.querySelector('.local-video');
+
+            if (!localVideo) return;
+
+            localVideo.srcObject = mediaStream;
+            localVideo.onloadedmetadata = function(e) {
+              localVideo.play();
+            };
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+
+      function initBindEvent(conf) {
+        conf.on('connecting', () => {
+          confStatus = 'connecting';
+          console.warn('connecting');
+        });
+        conf.on('disconnecting', () => {
+          confStatus = 'disconnecting';
+          console.warn('disconnecting');
+        });
+
+        conf.on('disconnected', () => {
+          confStatus = 'disconnected';
+          console.warn('disconnected');
+          conf = null;
+          console.log('conf', conf);
+          console.log('confStatus', confStatus);
+        });
+        conf.on('connected', () => {
+          confStatus = 'connected';
+          console.warn('connected');
+          conf.on('error', () => {
+            console.warn('error');
+          });
+
+          conf.users.on('updated', data => {
+            console.warn('updated', data);
+            user = conf.user;
+            users = conf.users;
+          });
+          conf.users.on('user:added', () => {
+            console.warn('user:added');
+            users = conf.users;
+          });
+          conf.users.on('user:updated', () => {
+            console.warn('user:updated');
+          });
+          conf.users.on('user:deleted', () => {
+            console.warn('user:deleted');
+            users = conf.users;
+          });
+
+          conf.mediaChannel.on('localstream', () => {
+            console.warn('localstream');
+          });
+          conf.mediaChannel.on('remotestream', () => {
+            console.warn('remotestream');
+            // const { video } = this.$refs;
+            const remoteVideo = document.querySelector('.remote-video');
+
+            const mediaStream = conf.mediaChannel.getRemoteStream();
+
+            remoteVideo.srcObject = mediaStream;
+          });
+        });
+
+        // currentUser
+        conf.on('user', data => {
+          console.warn('user', data);
+          console.warn('user', data.isCurrent());
+
+          users = conf.users;
+
+          conf.user.on('updated', data => {
+            console.warn('updated', data);
+          });
+          conf.user.on('displayTextChanged', () => {
+            console.warn('displayTextChanged');
+          });
+          conf.user.on('roleChanged', () => {
+            console.warn('roleChanged');
+          });
+          conf.user.on('holdChanged', () => {
+            console.warn('holdChanged');
+          });
+          conf.user.on('handupChanged', data => {
+            console.warn('handupChanged', data);
+          });
+          conf.user.on('audioChanged', () => {
+            console.warn('audioChanged');
+          });
+          conf.user.on('videoChanged', () => {
+            console.warn('videoChanged');
+          });
+          conf.user.on('mediaChanged', data => {
+            console.warn('mediaChanged', data);
+          });
+          conf.user.on('sharingChanged', data => {
+            console.warn('sharingChanged', data);
+          });
+        });
+
+        conf.on('added', () => {
+          console.warn('added');
+        });
+
+        conf.on('updated', () => {
+          console.warn('updated');
+        });
+
+        conf.on('deleted', () => {
+          console.warn('deleted');
+        });
+
+        conf.on('information', () => {
+          console.warn('information');
+        });
+
+        conf.on('message', () => {
+          console.warn('message');
+        });
+      }
+
+      window.onload = function() {
+        console.log(MeetNow);
+        ua = MeetNow.createUA();
+        console.log(ua);
+
+        initLocalStream();
+
+        const [numberInput, passwordInput, nicknameInput] = [
+          document.querySelector('.number-input'),
+          document.querySelector('.password-input'),
+          document.querySelector('.nickname-input'),
+        ];
+
+        numberInput.addEventListener('input', () => {
+          number = numberInput.value;
+        });
+        passwordInput.addEventListener('input', () => {
+          password = passwordInput.value;
+        });
+        nicknameInput.addEventListener('input', () => {
+          displayName = nicknameInput.value;
+        });
+      };
+    </script>
+  </body>
+</html>
