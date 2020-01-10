@@ -2878,117 +2878,6 @@ function createWorker(config) {
     };
 }
 
-const commonVersionIdentifier$1 = /version\/(\d+(\.?_?\d+)+)/i;
-function getFirstMatch$1(regexp, ua) {
-    const match = ua.match(regexp);
-    return (match && match.length > 0 && match[1]) || '';
-}
-function getSecondMatch$1(regexp, ua) {
-    const match = ua.match(regexp);
-    return (match && match.length > 1 && match[2]) || '';
-}
-function browser$2(name, version) {
-    return {
-        name,
-        version,
-        firefox: name === 'firefox',
-        chrome: name === 'chrome' || name === 'chromium',
-        wechet: name === 'wechat',
-    };
-}
-const browsersList$1 = [
-    {
-        test: [/micromessenger/i],
-        describe(ua) {
-            return browser$2('wechat', getFirstMatch$1(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch$1(commonVersionIdentifier$1, ua));
-        },
-    },
-    {
-        test: [/\sedg\//i],
-        describe(ua) {
-            return browser$2('edge', getFirstMatch$1(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
-        },
-    },
-    {
-        test: [/edg([ea]|ios)/i],
-        describe(ua) {
-            return browser$2('edge', getSecondMatch$1(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
-        },
-    },
-    {
-        test: [/firefox|iceweasel|fxios/i],
-        describe(ua) {
-            return browser$2('firefox', getFirstMatch$1(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
-        },
-    },
-    {
-        test: [/chromium/i],
-        describe(ua) {
-            return browser$2('chromium', getFirstMatch$1(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch$1(commonVersionIdentifier$1, ua));
-        },
-    },
-    {
-        test: [/chrome|crios|crmo/i],
-        describe(ua) {
-            return browser$2('chrome', getFirstMatch$1(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
-        },
-    },
-    {
-        test: [/safari|applewebkit/i],
-        describe(ua) {
-            return browser$2('safari', getFirstMatch$1(commonVersionIdentifier$1, ua));
-        },
-    },
-    /* Something else */
-    {
-        test: [/.*/i],
-        describe(ua) {
-            /* Here we try to make sure that there are explicit details about the device
-             * in order to decide what regexp exactly we want to apply
-             * (as there is a specific decision based on that conclusion)
-             */
-            const regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
-            const regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
-            const hasDeviceSpec = ua.search('\\(') !== -1;
-            const regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
-            return browser$2(getFirstMatch$1(regexp, ua), getSecondMatch$1(regexp, ua));
-        },
-    },
-];
-
-const parsed$1 = {};
-function parseBrowser$1(ua) {
-    if (!parsed$1.browser) {
-        ua = ua || navigator.userAgent;
-        const descriptor = browsersList$1.find((browser) => {
-            return browser.test.some(condition => condition.test(ua));
-        });
-        if (descriptor) {
-            parsed$1.browser = descriptor.describe(ua);
-        }
-    }
-    return parsed$1.browser;
-}
-function getBrowser$1() {
-    return parseBrowser$1();
-}
-const BROWSER$1 = parseBrowser$1();
-/*
-if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
-  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
-    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
-      console.log('在小程序');
-    } else {
-      console.log('在微信');
-    }
-  }, false);
-}
-*/
-function isMiniProgram$1() {
-    return /miniprogram/i.test(navigator.userAgent) || (window && window.__wxjs_environment === 'miniprogram');
-}
-const MINIPROGRAM$1 = isMiniProgram$1();
-
 function createContext(delegate) {
     return new Proxy({}, {
         get(target, key) {
@@ -5423,7 +5312,7 @@ function createRTCStats() {
 }
 
 const log$m = browser('MN:Channel');
-const browser$3 = getBrowser();
+const browser$2 = getBrowser();
 var STATUS;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
@@ -6234,7 +6123,7 @@ function createChannel(config) {
             let stats;
             // use legacy getStats()
             // the new getStats() won't report 'packetsLost' in 'outbound-rtp'
-            if (browser$3.chrome) {
+            if (browser$2.chrome) {
                 stats = await new Promise((resolve) => {
                     connection.getStats((stats) => {
                         resolve(stats.result());
@@ -6284,7 +6173,7 @@ function createChannel(config) {
 }
 
 const log$n = browser('MN:SDP');
-const browser$4 = getBrowser();
+const browser$3 = getBrowser();
 function createModifier() {
     let content = 'main';
     let width = 1920;
@@ -6422,8 +6311,8 @@ function createModifier() {
                     // when content sharing or using multiple tab, codec/decode might be error.
                     // and chrome ver58 has a really low resolution in h264 codec when content sharing.
                     // use VP8/VP9 first
-                    if (browser$4.firefox
-                        || (browser$4.chrome && parseInt(browser$4.version, 10) < 63 && content === 'slides')) {
+                    if (browser$3.firefox
+                        || (browser$3.chrome && parseInt(browser$3.version, 10) < 63 && content === 'slides')) {
                         preferCodec = vp8Payloads;
                     }
                     if (!preferCodec.size || !unsupportCodec.size) {
@@ -6492,7 +6381,7 @@ function createModifier() {
                         m.rtp = rtp;
                     }
                 });
-                if (type === 'offer' && browser$4.firefox) {
+                if (type === 'offer' && browser$3.firefox) {
                     sdp.media.forEach((m) => {
                         if (m.mid === undefined) {
                             m.mid = m.type === 'audio'
@@ -6831,8 +6720,8 @@ function createChatChannel(config) {
 }
 
 const log$r = browser('MN:Conference');
-const miniprogram = isMiniProgram$1();
-const browser$5 = getBrowser$1();
+const miniprogram = isMiniProgram();
+const browser$4 = getBrowser();
 var STATUS$1;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
@@ -6944,7 +6833,7 @@ function createConference(config) {
             'conference-pwd': options.password,
             'user-agent': useragent,
             'client-url': options.url.replace(/\w+@/g, miniprogram ? 'wechat@' : 'webrtc@'),
-            'client-display-text': options.displayName || `${browser$5}`,
+            'client-display-text': options.displayName || `${browser$4}`,
             'client-type': 'http',
             'client-info': clientinfo,
             'pure-ctrl-channel': !hasMedia,

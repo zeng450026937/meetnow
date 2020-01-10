@@ -1,6 +1,6 @@
 import debug from 'debug';
 import { AxiosResponse } from 'axios';
-import { getBrowser, isMiniProgram } from '@meetnow/browser';
+import { getBrowser, isMiniProgram } from '../browser';
 import { Api } from '../api';
 import { Request, RequestResult } from '../api/request';
 import { createContext } from './context';

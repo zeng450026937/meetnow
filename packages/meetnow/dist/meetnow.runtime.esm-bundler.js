@@ -3,7 +3,6 @@ import debug from 'debug';
 export { default as debug } from 'debug';
 import axios from 'axios';
 export { default as axios } from 'axios';
-import { isMiniProgram as isMiniProgram$1, getBrowser as getBrowser$1 } from '@meetnow/browser';
 
 var bind = function bind(fn, thisArg) {
   return function wrap() {
@@ -5138,8 +5137,8 @@ function createChatChannel(config) {
 }
 
 const log$r = debug('MN:Conference');
-const miniprogram = isMiniProgram$1();
-const browser$3 = getBrowser$1();
+const miniprogram = isMiniProgram();
+const browser$3 = getBrowser();
 var STATUS$1;
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";

@@ -6,7 +6,6 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var debug = _interopDefault(require('debug'));
 var axios = _interopDefault(require('axios'));
-var browser$4 = require('@meetnow/browser');
 
 var bind = function bind(fn, thisArg) {
   return function wrap() {
@@ -5141,8 +5140,8 @@ function createChatChannel(config) {
 }
 
 const log$r = debug('MN:Conference');
-const miniprogram = browser$4.isMiniProgram();
-const browser$3 = browser$4.getBrowser();
+const miniprogram = isMiniProgram();
+const browser$3 = getBrowser();
 (function (STATUS) {
     STATUS[STATUS["kNull"] = 0] = "kNull";
     STATUS[STATUS["kConnecting"] = 1] = "kConnecting";
