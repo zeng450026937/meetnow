@@ -29,7 +29,12 @@ export function createUA(config?: UAConfigs) {
   let url: string | undefined;
 
   function createUserApi() {
-    const api = createApi({ baseURL: CONFIG.get('baseurl', process.env.VUE_APP_BASEURL) });
+    const api = createApi({
+      baseURL : CONFIG.get(
+        'baseurl',
+        __DEV__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/',
+      ),
+    });
 
     api.interceptors.request.use((config) => {
       if (token) {

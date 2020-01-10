@@ -5520,7 +5520,9 @@ function createUA(config) {
     let partyId;
     let url;
     function createUserApi() {
-        const api = createApi({ baseURL: CONFIG.get('baseurl', process.env.VUE_APP_BASEURL) });
+        const api = createApi({
+            baseURL: CONFIG.get('baseurl', (process.env.NODE_ENV !== 'production') ? '/webapp/' : 'https://meetings.ylyun.com/webapp/'),
+        });
         api.interceptors.request.use((config) => {
             if (token) {
                 config.headers = config.headers || {};

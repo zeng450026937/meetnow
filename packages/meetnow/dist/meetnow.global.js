@@ -7215,7 +7215,9 @@ var MeetNow = (function (exports) {
 	    let partyId;
 	    let url;
 	    function createUserApi() {
-	        const api = createApi({ baseURL: CONFIG.get('baseurl', process.env.VUE_APP_BASEURL) });
+	        const api = createApi({
+	            baseURL: CONFIG.get('baseurl',  '/webapp/' ),
+	        });
 	        api.interceptors.request.use((config) => {
 	            if (token) {
 	                config.headers = config.headers || {};
