@@ -28,7 +28,7 @@ export function createUA(config?: UAConfigs) {
   let partyId: string | undefined;
   let url: string | undefined;
 
-  function createUserApi() {
+  function createUserApi(auth = true) {
     const api = createApi({
       baseURL : CONFIG.get(
         'baseurl',
@@ -37,7 +37,7 @@ export function createUA(config?: UAConfigs) {
     });
 
     api.interceptors.request.use((config) => {
-      if (token) {
+      if (auth && token) {
         config.headers = config.headers || {};
         config.headers.token = token;
       }
@@ -141,7 +141,7 @@ export function createUA(config?: UAConfigs) {
 
     // create user api
     if (!api) {
-      api = createUserApi();
+      api = createUserApi(false);
     }
 
     // creat auth() worker

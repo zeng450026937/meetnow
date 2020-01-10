@@ -7214,12 +7214,12 @@ var MeetNow = (function (exports) {
 	    let token;
 	    let partyId;
 	    let url;
-	    function createUserApi() {
+	    function createUserApi(auth = true) {
 	        const api = createApi({
 	            baseURL: CONFIG.get('baseurl',  '/webapp/' ),
 	        });
 	        api.interceptors.request.use((config) => {
-	            if (token) {
+	            if (auth && token) {
 	                config.headers = config.headers || {};
 	                config.headers.token = token;
 	            }
@@ -7302,7 +7302,7 @@ var MeetNow = (function (exports) {
 	        log$s('connect()');
 	        // create user api
 	        if (!api) {
-	            api = createUserApi();
+	            api = createUserApi(false);
 	        }
 	        // creat auth() worker
 	        if (!worker) {
