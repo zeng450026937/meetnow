@@ -144,6 +144,13 @@ export function createMediaChannel(config: MediaChannelConfigs) {
   return {
     ...channel,
 
+    get status() {
+      return channel.status;
+    },
+    get connection() {
+      return channel.connection;
+    },
+
     get version() {
       return mediaVersion;
     },

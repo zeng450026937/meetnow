@@ -5152,6 +5152,7 @@ function createRTCStats() {
     let outbound = {};
     let archives = [];
     const maxArchiveSize = MAX_ARCHIVE_SIZE;
+    let rtcstats;
     function clear() {
         quality = -1;
         inbound = {};
@@ -5309,7 +5310,7 @@ function createRTCStats() {
         if (!stats) {
             return;
         }
-        const prestats = stats[direction][stats.mediaType];
+        const prestats = rtcstats[direction][stats.mediaType];
         const diff = (x = {}, y = {}, key) => {
             if (typeof x[key] !== 'undefined' && typeof y[key] !== 'undefined') {
                 return Math.abs(x[key] - y[key]);
@@ -5378,11 +5379,11 @@ function createRTCStats() {
                     }
                     stats.track.frameRate = valueDiff ? safe(valueDiff / timeDiff * 1000) : 0;
                 }
-                stats[direction][stats.mediaType] = stats;
+                rtcstats[direction][stats.mediaType] = stats;
             }
         }
         else {
-            stats[direction][stats.mediaType] = stats;
+            rtcstats[direction][stats.mediaType] = stats;
         }
     }
     function archive() {
@@ -5401,7 +5402,7 @@ function createRTCStats() {
         index = Math.min(index, length - 1);
         return archives[index];
     }
-    return {
+    return rtcstats = {
         get quality() {
             return quality;
         },
@@ -6635,6 +6636,12 @@ function createMediaChannel(config) {
     });
     return {
         ...channel,
+        get status() {
+            return channel.status;
+        },
+        get connection() {
+            return channel.connection;
+        },
         get version() {
             return mediaVersion;
         },

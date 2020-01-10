@@ -5155,6 +5155,7 @@ var MeetNow = (function (exports) {
 	    let outbound = {};
 	    let archives = [];
 	    const maxArchiveSize = MAX_ARCHIVE_SIZE;
+	    let rtcstats;
 	    function clear() {
 	        quality = -1;
 	        inbound = {};
@@ -5312,7 +5313,7 @@ var MeetNow = (function (exports) {
 	        if (!stats) {
 	            return;
 	        }
-	        const prestats = stats[direction][stats.mediaType];
+	        const prestats = rtcstats[direction][stats.mediaType];
 	        const diff = (x = {}, y = {}, key) => {
 	            if (typeof x[key] !== 'undefined' && typeof y[key] !== 'undefined') {
 	                return Math.abs(x[key] - y[key]);
@@ -5381,11 +5382,11 @@ var MeetNow = (function (exports) {
 	                    }
 	                    stats.track.frameRate = valueDiff ? safe(valueDiff / timeDiff * 1000) : 0;
 	                }
-	                stats[direction][stats.mediaType] = stats;
+	                rtcstats[direction][stats.mediaType] = stats;
 	            }
 	        }
 	        else {
-	            stats[direction][stats.mediaType] = stats;
+	            rtcstats[direction][stats.mediaType] = stats;
 	        }
 	    }
 	    function archive() {
@@ -5404,7 +5405,7 @@ var MeetNow = (function (exports) {
 	        index = Math.min(index, length - 1);
 	        return archives[index];
 	    }
-	    return {
+	    return rtcstats = {
 	        get quality() {
 	            return quality;
 	        },
@@ -6638,6 +6639,12 @@ var MeetNow = (function (exports) {
 	    });
 	    return {
 	        ...channel,
+	        get status() {
+	            return channel.status;
+	        },
+	        get connection() {
+	            return channel.connection;
+	        },
 	        get version() {
 	            return mediaVersion;
 	        },

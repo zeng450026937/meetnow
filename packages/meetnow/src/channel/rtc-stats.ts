@@ -18,6 +18,8 @@ export function createRTCStats() {
   let archives = [] as ParsedStatsReport[];
   const maxArchiveSize = MAX_ARCHIVE_SIZE;
 
+  let rtcstats: any;
+
   function clear() {
     quality = -1;
     inbound = {} as ParsedStats;
@@ -203,7 +205,7 @@ export function createRTCStats() {
       return;
     }
 
-    const prestats = stats[direction][stats.mediaType];
+    const prestats = rtcstats[direction][stats.mediaType];
 
     const diff = (x: any = {}, y: any = {}, key: string) => {
       if (typeof x[key] !== 'undefined' && typeof y[key] !== 'undefined') {
@@ -285,10 +287,10 @@ export function createRTCStats() {
           stats.track.frameRate = valueDiff ? safe(valueDiff / timeDiff * 1000) : 0;
         }
 
-        stats[direction][stats.mediaType] = stats;
+        rtcstats[direction][stats.mediaType] = stats;
       }
     } else {
-      stats[direction][stats.mediaType] = stats;
+      rtcstats[direction][stats.mediaType] = stats;
     }
   }
 
@@ -309,7 +311,7 @@ export function createRTCStats() {
     return archives[index];
   }
 
-  return {
+  return rtcstats = {
     get quality() {
       return quality;
     },
