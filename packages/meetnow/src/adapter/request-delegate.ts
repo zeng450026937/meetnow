@@ -30,12 +30,9 @@ interface MiniPrograme {
   httpRequest?(options: RequestOptions): RequestTask;
 }
 
-declare const global: any;
 declare const wx: MiniPrograme;
 declare const swan: MiniPrograme;
 declare const my: MiniPrograme;
-
-export const isObject = (val: unknown): val is Record<any, any> => val !== null && typeof val === 'object';
 
 export enum PLATFORM {
   kUnknown,
@@ -44,13 +41,20 @@ export enum PLATFORM {
   kBaidu,
 }
 
-export const platform: PLATFORM = isObject(global.wx)
-  ? PLATFORM.kWechat
-  : isObject(global.my)
-    ? PLATFORM.kAlipay
-    : isObject(global.swan)
-      ? PLATFORM.kBaidu
-      : PLATFORM.kUnknown;
+function getPlatform() {
+  switch (true) {
+    case typeof wx === 'object':
+      return PLATFORM.kWechat;
+    case typeof swan === 'object':
+      return PLATFORM.kBaidu;
+    case typeof my === 'object':
+      return PLATFORM.kAlipay;
+    default:
+      return PLATFORM.kUnknown;
+  }
+}
+
+export const platform: PLATFORM = getPlatform();
 
 export const delegate = platform === PLATFORM.kWechat
   ? wx.request.bind(wx)

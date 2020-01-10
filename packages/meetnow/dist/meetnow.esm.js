@@ -2112,7 +2112,6 @@ function btoa$1(input) {
     return output;
 }
 
-const isObject$1 = (val) => val !== null && typeof val === 'object';
 var PLATFORM;
 (function (PLATFORM) {
     PLATFORM[PLATFORM["kUnknown"] = 0] = "kUnknown";
@@ -2120,13 +2119,19 @@ var PLATFORM;
     PLATFORM[PLATFORM["kAlipay"] = 2] = "kAlipay";
     PLATFORM[PLATFORM["kBaidu"] = 3] = "kBaidu";
 })(PLATFORM || (PLATFORM = {}));
-const platform = isObject$1(global.wx)
-    ? PLATFORM.kWechat
-    : isObject$1(global.my)
-        ? PLATFORM.kAlipay
-        : isObject$1(global.swan)
-            ? PLATFORM.kBaidu
-            : PLATFORM.kUnknown;
+function getPlatform() {
+    switch (true) {
+        case typeof wx === 'object':
+            return PLATFORM.kWechat;
+        case typeof swan === 'object':
+            return PLATFORM.kBaidu;
+        case typeof my === 'object':
+            return PLATFORM.kAlipay;
+        default:
+            return PLATFORM.kUnknown;
+    }
+}
+const platform = getPlatform();
 const delegate = platform === PLATFORM.kWechat
     ? wx.request.bind(wx)
     : platform === PLATFORM.kAlipay
@@ -2810,7 +2815,7 @@ const isDef = (value) => {
 };
 const { isArray: isArray$1 } = Array;
 const isFunction$1 = (val) => typeof val === 'function';
-const isObject$2 = (val) => val !== null && typeof val === 'object';
+const isObject$1 = (val) => val !== null && typeof val === 'object';
 const { hasOwnProperty } = Object.prototype;
 const hasOwn = (val, key) => hasOwnProperty.call(val, key);
 const camelizeRE = /-(\w)/g;
@@ -4327,7 +4332,7 @@ function createRecord(data, context) {
 
 const log$k = browser('MN:Information:Item');
 function isItem(item) {
-    return isDef(item) && isObject$2(item) && !isArray$1(item);
+    return isDef(item) && isObject$1(item) && !isArray$1(item);
 }
 function isPartialableItem(item) {
     return isItem(item) && hasOwn(item, 'state');
@@ -6926,8 +6931,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${process.env.VUE_APP_VERSION}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${process.env.VUE_APP_VERSION}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.0-alpha"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.0-alpha"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -7343,7 +7348,7 @@ function createMedia() {
 }
 
 const log$t = browser('MN');
-const version = process.env.VUE_APP_VERSION;
+const version = "1.0.0-alpha";
 // global setup
 function setup$2() {
     setupConfig();

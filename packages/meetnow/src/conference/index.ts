@@ -153,8 +153,8 @@ export function createConference(config: ConferenceConfigs) {
       ({ url: options.url } = data.data);
     }
 
-    const useragent = CONFIG.get('useragent', `Yealink ${ miniprogram ? 'WECHAT' : 'WEB-APP' } ${ process.env.VUE_APP_VERSION }`);
-    const clientinfo = CONFIG.get('clientinfo', `${ miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC' } ${ process.env.VUE_APP_VERSION }`);
+    const useragent = CONFIG.get('useragent', `Yealink ${ miniprogram ? 'WECHAT' : 'WEB-APP' } ${ __VERSION__ }`);
+    const clientinfo = CONFIG.get('clientinfo', `${ miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC' } ${ __VERSION__ }`);
 
     // join focus
     const apiName = miniprogram ? 'joinWechat' : 'joinFocus';

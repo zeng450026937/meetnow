@@ -15,7 +15,7 @@ export * from './sdp-transform';
 
 const log = debug('MN');
 
-const version = process.env.VUE_APP_VERSION;
+const version = __VERSION__;
 
 // global setup
 function setup() {

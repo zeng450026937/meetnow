@@ -3846,10 +3846,10 @@ declare function connect(options: ConnectOptions): Promise<{
         };
     } | undefined;
     mediaChannel: {
-        version: number;
-        callId: string;
         status: import("./channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        version: number;
+        callId: string;
         isInProgress: () => boolean;
         isEstablished: () => boolean;
         isEnded: () => boolean;
@@ -3921,10 +3921,10 @@ declare function connect(options: ConnectOptions): Promise<{
         };
     } | undefined;
     shareChannel: {
-        version: number;
-        callId: string;
         status: import("./channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        version: number;
+        callId: string;
         isInProgress: () => boolean;
         isEstablished: () => boolean;
         isEnded: () => boolean;
@@ -7590,10 +7590,10 @@ export declare function createConference(config: ConferenceConfigs): {
         };
     } | undefined;
     mediaChannel: {
-        version: number;
-        callId: string;
         status: import("../channel/channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        version: number;
+        callId: string;
         isInProgress: () => boolean;
         isEstablished: () => boolean;
         isEnded: () => boolean;
@@ -7665,10 +7665,10 @@ export declare function createConference(config: ConferenceConfigs): {
         };
     } | undefined;
     shareChannel: {
-        version: number;
-        callId: string;
         status: import("../channel/channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        version: number;
+        callId: string;
         isInProgress: () => boolean;
         isEstablished: () => boolean;
         isEnded: () => boolean;
@@ -11335,10 +11335,10 @@ export declare function createUA(config?: UAConfigs): {
             };
         } | undefined;
         mediaChannel: {
-            version: number;
-            callId: string;
             status: import("../channel").STATUS;
             connection: RTCPeerConnection | undefined;
+            version: number;
+            callId: string;
             isInProgress: () => boolean;
             isEstablished: () => boolean;
             isEnded: () => boolean;
@@ -11410,10 +11410,10 @@ export declare function createUA(config?: UAConfigs): {
             };
         } | undefined;
         shareChannel: {
-            version: number;
-            callId: string;
             status: import("../channel").STATUS;
             connection: RTCPeerConnection | undefined;
+            version: number;
+            callId: string;
             isInProgress: () => boolean;
             isEstablished: () => boolean;
             isEnded: () => boolean;
@@ -11581,7 +11581,7 @@ declare interface CtrlApiData {
 export { debug }
 
 declare const _default: {
-    version: any;
+    version: string;
     createUA: typeof createUA;
     setup: typeof setup;
     connect: typeof connect;
