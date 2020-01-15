@@ -69,15 +69,18 @@ export const saveConfig = (win: Window, c: any) => {
 
 export const configFromURL = (win: Window) => {
   const configObj: any = {};
-  win.location.search.slice(1)
-    .split('&')
-    .map(entry => entry.split('='))
-    .map(([key, value]) => [decodeURIComponent(key), decodeURIComponent(value)])
-    .filter(([key]) => startsWith(key, MEETNOW_PREFIX))
-    .map(([key, value]) => [key.slice(MEETNOW_PREFIX.length), value])
-    .forEach(([key, value]) => {
-      configObj[key] = value;
-    });
-
+  try {
+    win.location.search.slice(1)
+      .split('&')
+      .map(entry => entry.split('='))
+      .map(([key, value]) => [decodeURIComponent(key), decodeURIComponent(value)])
+      .filter(([key]) => startsWith(key, MEETNOW_PREFIX))
+      .map(([key, value]) => [key.slice(MEETNOW_PREFIX.length), value])
+      .forEach(([key, value]) => {
+        configObj[key] = value;
+      });
+  } catch (e) {
+    return configObj;
+  }
   return configObj;
 };

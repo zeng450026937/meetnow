@@ -60,6 +60,8 @@ export function createConference(config: ConferenceConfigs) {
 
   let request: Request | undefined; // request chain
 
+  let trtcInfo: object;
+
 
   function getCurrentUser() {
     if (!user) {
@@ -196,6 +198,8 @@ export function createConference(config: ConferenceConfigs) {
       'conference-user-id': userId,
       'conference-uuid': uuid,
     } = data.data);
+
+    trtcInfo = miniprogram ? data.data : {};
 
     if (!userId || !uuid) {
       log('internal error');
@@ -472,6 +476,10 @@ export function createConference(config: ConferenceConfigs) {
     },
     get chatChannel() {
       return chatChannel;
+    },
+
+    get trtcInfo() {
+      return trtcInfo;
     },
 
     join,

@@ -55,21 +55,21 @@ export function mergeItemList(rhys: ItemValue[], items: ItemValue[]): ItemValue[
       }
       log('item added');
       rhys.push(item);
-      break;
+      continue;
     }
 
     // finded
     // this is weird as we don't know whether the item list is partial or not
     if (state === 'full') {
       rhys.splice(index, 1, item);
-      break;
+      continue;
     }
 
     // wanna delete
     if (state === 'deleted') {
       log('item deleted');
       rhys.splice(index, 1);
-      break;
+      continue;
     }
 
     // wanna update
