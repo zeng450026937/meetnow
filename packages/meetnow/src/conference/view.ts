@@ -25,9 +25,6 @@ export function createView(data: ConferenceView, context: Context) {
   }
 
   function update(diff?: ConferenceView) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    }
     // fire status change events
     watch(reactive);
     events.emit('updated', view as View);

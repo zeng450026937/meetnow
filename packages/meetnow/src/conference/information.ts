@@ -23,22 +23,23 @@ const log = debug('MN:Information');
 export function createInformation(data: ConferenceInformation, context: Context) {
   const events = createEvents(log);
   const { api } = context;
-  const {
-    'conference-description': descriptiondata,
-    'conference-state': statedata,
-    'conference-view': viewdata,
-    users: usersdata,
-    'rtmp-state': rtmpdata,
-    'record-users': recorddata,
-  } = data;
+
+  function createdata<T extends keyof ConferenceInformation>(datakey: T) {
+    return new Proxy({}, {
+      get(target: object, key: string | symbol) {
+        const delegate = data[datakey];
+        return delegate && Reflect.get(delegate, key);
+      },
+    }) as ConferenceInformation[T];
+  }
 
   // create information parts
-  const description = createDescription(descriptiondata!, context);
-  const state = createState(statedata!, context);
-  const view = createView(viewdata!, context);
-  const users = createUsers(usersdata!, context);
-  const rtmp = createRTMP(rtmpdata!, context);
-  const record = createRecord(recorddata!, context);
+  const description = createDescription(createdata('conference-description')!, context);
+  const state = createState(createdata('conference-state')!, context);
+  const view = createView(createdata('conference-view')!, context);
+  const users = createUsers(createdata('users')!, context);
+  const rtmp = createRTMP(createdata('rtmp-state')!, context);
+  const record = createRecord(createdata('record-users')!, context);
 
   let information: any;
 

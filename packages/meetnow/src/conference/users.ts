@@ -53,7 +53,7 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     const deleted: ConferenceUser[] = [];
 
     if (diff) {
-      const { user, state } = diff;
+      const { user } = diff;
       /* eslint-disable no-use-before-define */
       user.forEach((userdata) => {
         const { entity, state } = userdata;
@@ -64,9 +64,6 @@ export function createUsers(data: ConferenceUsers, context: Context) {
           : added.push(userdata);
       });
       /* eslint-enable no-use-before-define */
-      if (state === 'full' || !data) {
-        data = diff;
-      }
     }
     // fire status change events
     watch(reactive);
@@ -80,6 +77,8 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     updated.forEach((userdata) => {
       const { entity } = userdata;
       const user = userMap.get(entity)!;
+      // user data is not proxied, so update it here
+      // if user data is 'full', it will replace the old one
       user.update(userdata);
       log('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:updated', user);

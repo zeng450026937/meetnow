@@ -27,9 +27,6 @@ export function createState(data: ConferenceState, context: Context) {
   }
 
   function update(diff?: ConferenceState) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    }
     // fire status change events
     watch(reactive);
     events.emit('updated', description as State);

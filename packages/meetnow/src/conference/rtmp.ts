@@ -24,9 +24,6 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
   }
 
   function update(diff?: ConferenceRTMPUsers) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    }
     // fire status change events
     watch(reactive);
     events.emit('updated', rtmp as RTMP);

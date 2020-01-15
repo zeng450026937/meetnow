@@ -26,9 +26,6 @@ export function createDescription(data: ConferenceDescription, context: Context)
   }
 
   function update(diff?: ConferenceDescription) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    }
     // fire status change events
     watch(reactive);
     events.emit('updated', description as Description);
