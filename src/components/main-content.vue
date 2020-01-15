@@ -7,7 +7,10 @@
           :class="{'video-content--disconnected': !connected && !mediaConnected}"
           ref="video"
           autoplay
-          loop="loop"
+          loop
+          webkit-playsinline
+          playsinline
+          muted
           :style="{ objectFit }"
         ></video>
       </div>
@@ -24,7 +27,9 @@
           class="video-content"
           ref="remoteVideo"
           autoplay
-          loop="loop"
+          loop
+          webkit-playsinline
+          playsinline
         ></video>
       </div>
       <div
@@ -36,7 +41,10 @@
           :class="{'video-content--disconnected': !connected}"
           ref="localVideo"
           autoplay
-          loop="loop"
+          loop
+          webkit-playsinline
+          playsinline
+          muted
         ></video>
         <img
           class="video-close-img"
@@ -133,7 +141,8 @@ export default {
 
   },
 
-  mounted() {
+  async mounted() {
+    await this.$nextTick();
     this.initLocalStream();
   },
 
@@ -285,27 +294,13 @@ export default {
           this.mediaStatus = 'ended';
           console.warn('mediaChannel - ended');
         });
-        conf.mediaChannel.on('localstream', () => {
+        conf.mediaChannel.on('localstream', (stream) => {
           console.warn('localstream');
-          const constraints = {
-            audio : true,
-            video : true,
+          const { localVideo } = this.$refs;
+          localVideo.srcObject = stream;
+          localVideo.onloadedmetadata = function (e) {
+            localVideo.play();
           };
-
-          navigator
-            .mediaDevices
-            .getUserMedia(constraints)
-            .then((mediaStream) => {
-              const { localVideo } = this.$refs;
-
-              localVideo.srcObject = mediaStream;
-              localVideo.onloadedmetadata = function (e) {
-                localVideo.play();
-              };
-            })
-            .catch((error) => {
-              console.error(error);
-            });
         });
         conf.mediaChannel.on('remotestream', () => {
           console.warn('remotestream');

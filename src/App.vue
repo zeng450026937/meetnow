@@ -7,6 +7,8 @@
 </template>
 
 <script lang="ts">
+import 'webrtc-adapter';
+
 import Vue from 'vue';
 import meetnow from '@meetnow/meetnow';
 import MainContent from './components/main-content.vue';
