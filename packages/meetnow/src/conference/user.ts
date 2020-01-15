@@ -82,7 +82,6 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
 
   function getEndpoint(type: UserEndpoint['session-type']) {
-    console.error('getEndpoint', data.endpoint.find((ep) => ep['session-type'] === type));
     return data.endpoint.find((ep) => ep['session-type'] === type);
   }
   function isOnHold() {
