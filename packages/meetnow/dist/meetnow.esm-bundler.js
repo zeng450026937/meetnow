@@ -1188,7 +1188,7 @@ function createRequest$1(config, delegate = axios) {
 
 const log$1 = debug('MN:Api');
 // long polling timeout within 30 seconds
-const DEFAULT_TIMEOUT = 30 * 1000;
+const DEFAULT_TIMEOUT = 35 * 1000;
 function createApi(config = {}) {
     log$1('createApi()');
     const delegate = axios.create({
@@ -1592,9 +1592,6 @@ function createDescription(data, context) {
         return target;
     }
     function update(diff) {
-        if (diff && (diff.state === 'full' || !data)) {
-            data = diff;
-        }
         // fire status change events
         watch(reactive);
         events.emit('updated', description);
@@ -1669,9 +1666,6 @@ function createState(data, context) {
         return target;
     }
     function update(diff) {
-        if (diff && (diff.state === 'full' || !data)) {
-            data = diff;
-        }
         // fire status change events
         watch(reactive);
         events.emit('updated', description);
@@ -1824,9 +1818,6 @@ function createView(data, context) {
         return target;
     }
     function update(diff) {
-        if (diff && (diff.state === 'full' || !data)) {
-            data = diff;
-        }
         // fire status change events
         watch(reactive);
         events.emit('updated', view);
@@ -2276,7 +2267,7 @@ function createUsers(data, context) {
         const updated = [];
         const deleted = [];
         if (diff) {
-            const { user, state } = diff;
+            const { user } = diff;
             /* eslint-disable no-use-before-define */
             user.forEach((userdata) => {
                 const { entity, state } = userdata;
@@ -2287,9 +2278,6 @@ function createUsers(data, context) {
                     : added.push(userdata);
             });
             /* eslint-enable no-use-before-define */
-            if (state === 'full' || !data) {
-                data = diff;
-            }
         }
         // fire status change events
         watch(reactive);
@@ -2302,6 +2290,8 @@ function createUsers(data, context) {
         updated.forEach((userdata) => {
             const { entity } = userdata;
             const user = userMap.get(entity);
+            // user data is not proxied, so update it here
+            // if user data is 'full', it will replace the old one
             user.update(userdata);
             log$f('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
             users.emit('user:updated', user);
@@ -2484,9 +2474,6 @@ function createRTMP(data, context) {
         return target;
     }
     function update(diff) {
-        if (diff && (diff.state === 'full' || !data)) {
-            data = diff;
-        }
         // fire status change events
         watch(reactive);
         events.emit('updated', rtmp);
@@ -2592,9 +2579,6 @@ function createRecord(data, context) {
         return target;
     }
     function update(diff) {
-        if (diff && (diff.state === 'full' || !data)) {
-            data = diff;
-        }
         // fire status change events
         watch(reactive);
         events.emit('updated', record);
@@ -2666,19 +2650,19 @@ function mergeItemList(rhys, items) {
             }
             log$k('item added');
             rhys.push(item);
-            break;
+            continue;
         }
         // finded
         // this is weird as we don't know whether the item list is partial or not
         if (state === 'full') {
             rhys.splice(index, 1, item);
-            break;
+            continue;
         }
         // wanna delete
         if (state === 'deleted') {
             log$k('item deleted');
             rhys.splice(index, 1);
-            break;
+            continue;
         }
         // wanna update
         /* eslint-disable-next-line no-use-before-define */
@@ -2724,14 +2708,21 @@ const log$l = debug('MN:Information');
 function createInformation(data, context) {
     const events = createEvents(log$l);
     const { api } = context;
-    const { 'conference-description': descriptiondata, 'conference-state': statedata, 'conference-view': viewdata, users: usersdata, 'rtmp-state': rtmpdata, 'record-users': recorddata, } = data;
+    function createdata(datakey) {
+        return new Proxy({}, {
+            get(target, key) {
+                const delegate = data[datakey];
+                return delegate && Reflect.get(delegate, key);
+            },
+        });
+    }
     // create information parts
-    const description = createDescription(descriptiondata, context);
-    const state = createState(statedata);
-    const view = createView(viewdata, context);
-    const users = createUsers(usersdata, context);
-    const rtmp = createRTMP(rtmpdata, context);
-    const record = createRecord(recorddata, context);
+    const description = createDescription(createdata('conference-description'), context);
+    const state = createState(createdata('conference-state'));
+    const view = createView(createdata('conference-view'), context);
+    const users = createUsers(createdata('users'), context);
+    const rtmp = createRTMP(createdata('rtmp-state'), context);
+    const record = createRecord(createdata('record-users'), context);
     let information;
     function update(val) {
         log$l('update()');
@@ -3448,6 +3439,12 @@ async function getUserMedia(constraints) {
     let stream;
     if (navigator.mediaDevices.getUserMedia) {
         stream = await navigator.mediaDevices.getUserMedia(constraints);
+    }
+    else if (navigator.getUserMedia) {
+        // support chrome 52
+        stream = await new Promise((resolve, reject) => {
+            navigator.getUserMedia(constraints, resolve, reject);
+        });
     }
     else {
         throw new Error('Not Supported');

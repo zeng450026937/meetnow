@@ -12,6 +12,19 @@ module.exports = (api, options) => {
       args.target = 'lib';
       args.entry = './packages/meetnow/src/index.ts';
       args.dest = './packages/meetnow/dist';
+
+      api.chainWebpack((config) => {
+        /* eslint-disable-next-line */
+        const masterVersion = require(api.resolve('./package.json')).version;
+
+        config.plugin('define')
+          .tap((opts) => {
+            opts[0].__DEV__ = process.env.NODE_ENV === 'development';
+            opts[0].__VERSION__ = `"${ masterVersion }"`;
+            return opts;
+          });
+      });
+
       await api.service.run('build', args);
     },
   );
