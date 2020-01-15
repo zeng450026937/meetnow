@@ -9,7 +9,7 @@ import { createRequest, RequestResult } from './request';
 const log = debug('MN:Api');
 
 // long polling timeout within 30 seconds
-const DEFAULT_TIMEOUT = 30 * 1000;
+const DEFAULT_TIMEOUT = 35 * 1000;
 
 export function createApi(config: AxiosRequestConfig = {}) {
   log('createApi()');
