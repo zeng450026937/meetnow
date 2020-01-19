@@ -2273,7 +2273,7 @@ var MeetNow = (function (exports) {
 	        let request = createRequest(config);
 	        const options = {
 	            url: buildURL(url, params, paramsSerializer),
-	            headers,
+	            header: headers,
 	            method: method && method.toUpperCase(),
 	            data: isString$1(data) ? JSON.parse(data) : data,
 	            responseType,
@@ -2395,9 +2395,22 @@ var MeetNow = (function (exports) {
 	];
 
 	const parsed = {};
+	function isMiniProgram() {
+	    // return /miniprogram/i.test(navigator.userAgent)
+	    // || (window && window.__wxjs_environment === 'miniprogram');
+	    if (global && global.wx)
+	        return true;
+	    return !window && !navigator && !global;
+	}
 	function parseBrowser(ua) {
 	    if (!parsed.browser) {
-	        ua = ua || navigator.userAgent;
+	        // ua = ua || navigator.userAgent;
+	        if (isMiniProgram()) {
+	            ua = 'miniProgram';
+	        }
+	        else {
+	            ua = ua || navigator.userAgent;
+	        }
 	        const descriptor = browsersList.find((browser) => {
 	            return browser.test.some(condition => condition.test(ua));
 	        });
@@ -2411,21 +2424,6 @@ var MeetNow = (function (exports) {
 	    return parseBrowser();
 	}
 	const BROWSER = parseBrowser();
-	/*
-	if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
-	  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
-	    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
-	      console.log('在小程序');
-	    } else {
-	      console.log('在微信');
-	    }
-	  }, false);
-	}
-	*/
-	function isMiniProgram() {
-	    return /miniprogram/i.test(navigator.userAgent) || (window && window.__wxjs_environment === 'miniprogram');
-	}
-	const MINIPROGRAM = isMiniProgram();
 
 	const startsWith = (input, search) => {
 	    return input.substr(0, search.length) === search;
@@ -2482,21 +2480,26 @@ var MeetNow = (function (exports) {
 	};
 	const configFromURL = (win) => {
 	    const configObj = {};
-	    win.location.search.slice(1)
-	        .split('&')
-	        .map(entry => entry.split('='))
-	        .map(([key, value]) => [decodeURIComponent(key), decodeURIComponent(value)])
-	        .filter(([key]) => startsWith(key, MEETNOW_PREFIX))
-	        .map(([key, value]) => [key.slice(MEETNOW_PREFIX.length), value])
-	        .forEach(([key, value]) => {
-	        configObj[key] = value;
-	    });
+	    try {
+	        win.location.search.slice(1)
+	            .split('&')
+	            .map(entry => entry.split('='))
+	            .map(([key, value]) => [decodeURIComponent(key), decodeURIComponent(value)])
+	            .filter(([key]) => startsWith(key, MEETNOW_PREFIX))
+	            .map(([key, value]) => [key.slice(MEETNOW_PREFIX.length), value])
+	            .forEach(([key, value]) => {
+	            configObj[key] = value;
+	        });
+	    }
+	    catch (e) {
+	        return configObj;
+	    }
 	    return configObj;
 	};
 
-	function setupConfig() {
-	    const win = window;
-	    const MeetNow = win.MeetNow = win.MeetNow || {};
+	function setupConfig(config) {
+	    const win = isMiniProgram() ? wx : window;
+	    const MeetNow = win.MeetNow = win.MeetNow || { config };
 	    // create the Ionic.config from raw config object (if it exists)
 	    // and convert Ionic.config into a ConfigApi that has a get() fn
 	    const configObj = {
@@ -2888,6 +2891,13 @@ var MeetNow = (function (exports) {
 	        },
 	    });
 	}
+	// export function createMessageSender(delegate: any) {
+	//   return new Proxy({}, {
+	//     get(target: object, key: string) {
+	//       return Reflect.get(delegate, hyphenate(key));
+	//     },
+	//   }) as Context;
+	// }
 
 	const log$3 = browser('MN:Events');
 	function createEvents(scopedlog = log$3) {
@@ -6563,7 +6573,7 @@ var MeetNow = (function (exports) {
 	    /* eslint-disable-next-line prefer-destructuring */
 	    let sender = config.sender;
 	    let receiver;
-	    let isPrivate;
+	    let isPrivate = false;
 	    let message;
 	    let request;
 	    async function send(message, target) {
@@ -6656,7 +6666,7 @@ var MeetNow = (function (exports) {
 
 	const log$q = browser('MN:ChatChannel');
 	function createChatChannel(config) {
-	    const { api } = config;
+	    const { api, sender } = config;
 	    const events = createEvents(log$q);
 	    let messages = [];
 	    let request;
@@ -6688,7 +6698,7 @@ var MeetNow = (function (exports) {
 	    }
 	    async function sendMessage(msg, target) {
 	        log$q('sendMessage()');
-	        const message = createMessage({ api });
+	        const message = createMessage({ api, sender });
 	        events.emit('message', {
 	            originator: 'local',
 	            message,
@@ -6746,6 +6756,7 @@ var MeetNow = (function (exports) {
 	    let userId; // as conference entity
 	    let url;
 	    let request; // request chain
+	    let trtc;
 	    function getCurrentUser() {
 	        if (!user) {
 	            // try to get current user
@@ -6858,6 +6869,7 @@ var MeetNow = (function (exports) {
 	            'conference-user-id': userId,
 	            'conference-uuid': uuid,
 	        } = data.data);
+	        trtc = miniprogram ? data.data : {};
 	        if (!userId || !uuid) {
 	            log$r('internal error');
 	            throw new Error('Internal Error');
@@ -7079,6 +7091,9 @@ var MeetNow = (function (exports) {
 	        get chatChannel() {
 	            return chatChannel;
 	        },
+	        get trtc() {
+	            return trtc;
+	        },
 	        join,
 	        leave,
 	        end,
@@ -7240,8 +7255,8 @@ var MeetNow = (function (exports) {
 	const log$t = browser('MN');
 	const version = "1.0.0-alpha";
 	// global setup
-	function setup$2() {
-	    setupConfig();
+	function setup$2(config) {
+	    setupConfig(config);
 	    if (isMiniProgram()) {
 	        axios$1.defaults.adapter = mpAdapter;
 	    }

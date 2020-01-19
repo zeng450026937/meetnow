@@ -2,16 +2,19 @@ import debug from 'debug';
 import { Api } from '../api';
 import { Request } from '../api/request';
 import { createEvents } from '../events';
-import { createMessage, Message, MessageData } from './message';
+import {
+  createMessage, Message, MessageData, MessageSender,
+} from './message';
 
 const log = debug('MN:ChatChannel');
 
 export interface ChatChannelConfigs {
   api: Api;
+  sender?: MessageSender;
 }
 
 export function createChatChannel(config: ChatChannelConfigs) {
-  const { api } = config;
+  const { api, sender } = config;
   const events = createEvents(log);
   let messages: Message[] = [];
   let request: Request | undefined;
@@ -56,7 +59,7 @@ export function createChatChannel(config: ChatChannelConfigs) {
   async function sendMessage(msg: string, target?: string[]) {
     log('sendMessage()');
 
-    const message = createMessage({ api });
+    const message = createMessage({ api, sender });
 
     events.emit('message', {
       originator : 'local',

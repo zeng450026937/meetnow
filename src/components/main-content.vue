@@ -7,10 +7,7 @@
           :class="{'video-content--disconnected': !connected && !mediaConnected}"
           ref="video"
           autoplay
-          loop
-          webkit-playsinline
-          playsinline
-          muted
+          loop="loop"
           :style="{ objectFit }"
         ></video>
       </div>
@@ -27,9 +24,7 @@
           class="video-content"
           ref="remoteVideo"
           autoplay
-          loop
-          webkit-playsinline
-          playsinline
+          loop="loop"
         ></video>
       </div>
       <div
@@ -41,10 +36,7 @@
           :class="{'video-content--disconnected': !connected}"
           ref="localVideo"
           autoplay
-          loop
-          webkit-playsinline
-          playsinline
-          muted
+          loop="loop"
         ></video>
         <img
           class="video-close-img"
@@ -141,8 +133,7 @@ export default {
 
   },
 
-  async mounted() {
-    await this.$nextTick();
+  mounted() {
     this.initLocalStream();
   },
 
@@ -243,16 +234,17 @@ export default {
         this.conf = null;
         this.initLocalStream();
       });
+
+      conf.on('error', () => {
+        console.warn('error');
+      });
+
       conf.on('connected', () => {
         this.confStatus = 'connected';
         if (conf.view) {
           this.speakMode = conf.view.getLayout()['speak-mode'] || 'free';
         }
         console.warn('connected');
-
-        conf.on('error', () => {
-          console.warn('error');
-        });
 
         // users
         conf.users.on('updated', (data) => {
@@ -297,6 +289,7 @@ export default {
         conf.mediaChannel.on('localstream', (stream) => {
           console.warn('localstream');
           const { localVideo } = this.$refs;
+
           localVideo.srcObject = stream;
           localVideo.onloadedmetadata = function (e) {
             localVideo.play();
@@ -326,6 +319,19 @@ export default {
             this.initShareStream(conf);
           }
         });
+
+        conf.chatChannel.on('ready', () => {
+          console.warn('chatChannel - ready');
+        });
+        conf.chatChannel.on('connected', () => {
+          console.warn('chatChannel - connected');
+        });
+        conf.chatChannel.on('disconnected', () => {
+          console.warn('chatChannel - disconnected');
+        });
+        conf.chatChannel.on('message', (data) => {
+          console.warn('chatChannel - message', data);
+        });
       });
 
       // currentUser
@@ -336,6 +342,21 @@ export default {
 
         this.localStream = !data.isVideoBlocked();
         this.mute = data.isAudioBlocked();
+
+        // const video = this.data.checkboxOptions[0].checked;
+        // const audio = this.data.checkboxOptions[1].checked;
+
+        setTimeout(() => {
+          // conf.setVideoFilter(false);
+          console.log('getEndpoint', conf.user.getEndpoint());
+          // console.log(conf.user.setVideoFilter(false));
+        }, 1000);
+        // if (video === false) {
+        // data.setVideoFilter(false);
+        // }
+        // if (audio === false && !conf.user.isAudioBlocked()) {
+        // data.setAudioFilter(false);
+        // }
 
         console.log('localStream', this.localStream, 'mute', this.mute);
 

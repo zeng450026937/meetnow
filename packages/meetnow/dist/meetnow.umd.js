@@ -7076,6 +7076,101 @@ addToUnscopables(FIND_INDEX);
 
 /***/ }),
 
+/***/ "c74a":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export getFirstMatch */
+/* unused harmony export getSecondMatch */
+/* unused harmony export browser */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return browsersList; });
+/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("99af");
+/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("ac1f");
+/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("466d");
+/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("841c");
+/* harmony import */ var core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
+function getFirstMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 0 && match[1] || '';
+}
+function getSecondMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 1 && match[2] || '';
+}
+function browser(name, version) {
+  return {
+    name: name,
+    version: version,
+    firefox: name === 'firefox',
+    chrome: name === 'chrome' || name === 'chromium',
+    wechet: name === 'wechat',
+    toString: function toString() {
+      return "".concat(name.toUpperCase(), " ").concat(version);
+    }
+  };
+}
+var browsersList = [{
+  test: [/micromessenger/i],
+  describe: function describe(ua) {
+    return browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/\sedg\//i],
+  describe: function describe(ua) {
+    return browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/edg([ea]|ios)/i],
+  describe: function describe(ua) {
+    return browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/firefox|iceweasel|fxios/i],
+  describe: function describe(ua) {
+    return browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/chromium/i],
+  describe: function describe(ua) {
+    return browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/chrome|crios|crmo/i],
+  describe: function describe(ua) {
+    return browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/safari|applewebkit/i],
+  describe: function describe(ua) {
+    return browser('safari', getFirstMatch(commonVersionIdentifier, ua));
+  }
+},
+/* Something else */
+{
+  test: [/.*/i],
+  describe: function describe(ua) {
+    /* Here we try to make sure that there are explicit details about the device
+     * in order to decide what regexp exactly we want to apply
+     * (as there is a specific decision based on that conclusion)
+     */
+    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
+    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
+    var hasDeviceSpec = ua.search('\\(') !== -1;
+    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
+    return browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
+  }
+}];
+
+/***/ }),
+
 /***/ "c7ce":
 /***/ (function(module, exports) {
 
@@ -7684,6 +7779,65 @@ $({ target: 'Object', stat: true, sham: !DESCRIPTORS }, {
   }
 });
 
+
+/***/ }),
+
+/***/ "dc99":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return isMiniProgram; });
+/* unused harmony export parseBrowser */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getBrowser; });
+/* unused harmony export BROWSER */
+/* unused harmony export isBrowser */
+/* unused harmony export MINIPROGRAM */
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("7db0");
+/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("b0c0");
+/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _browser_list__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("c74a");
+
+
+
+var parsed = {};
+function isMiniProgram() {
+  // return /miniprogram/i.test(navigator.userAgent)
+  // || (window && window.__wxjs_environment === 'miniprogram');
+  if (global && global.wx) return true;
+  return !window && !navigator && !global;
+}
+function parseBrowser(ua) {
+  if (!parsed.browser) {
+    // ua = ua || navigator.userAgent;
+    if (isMiniProgram()) {
+      ua = 'miniProgram';
+    } else {
+      ua = ua || navigator.userAgent;
+    }
+
+    var descriptor = _browser_list__WEBPACK_IMPORTED_MODULE_2__[/* browsersList */ "a"].find(function (browser) {
+      return browser.test.some(function (condition) {
+        return condition.test(ua);
+      });
+    });
+
+    if (descriptor) {
+      parsed.browser = descriptor.describe(ua);
+    }
+  }
+
+  return parsed.browser;
+}
+function getBrowser() {
+  return parseBrowser();
+}
+var BROWSER = parseBrowser();
+function isBrowser(name) {
+  return parseBrowser().name === name;
+}
+var MINIPROGRAM = isMiniProgram();
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("c8ba")))
 
 /***/ }),
 
@@ -9435,7 +9589,7 @@ function mpAdapter(config) {
     var request = createRequest(config);
     var options = {
       url: buildURL_default()(url, params, paramsSerializer),
-      headers: headers,
+      header: headers,
       method: method && method.toUpperCase(),
       data: isString(data) ? JSON.parse(data) : data,
       responseType: responseType
@@ -9478,142 +9632,9 @@ function mpAdapter(config) {
     request.send(options);
   });
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
-var es_array_find = __webpack_require__("7db0");
+// EXTERNAL MODULE: ./packages/meetnow/src/browser/index.ts
+var src_browser = __webpack_require__("dc99");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__("b0c0");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.exec.js
-var es_regexp_exec = __webpack_require__("ac1f");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
-var es_string_match = __webpack_require__("466d");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
-var es_string_search = __webpack_require__("841c");
-
-// CONCATENATED MODULE: ./packages/meetnow/src/browser/browser-list.ts
-
-
-
-
-var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
-function getFirstMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 0 && match[1] || '';
-}
-function getSecondMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 1 && match[2] || '';
-}
-function browser_list_browser(name, version) {
-  return {
-    name: name,
-    version: version,
-    firefox: name === 'firefox',
-    chrome: name === 'chrome' || name === 'chromium',
-    wechet: name === 'wechat',
-    toString: function toString() {
-      return "".concat(name.toUpperCase(), " ").concat(version);
-    }
-  };
-}
-var browsersList = [{
-  test: [/micromessenger/i],
-  describe: function describe(ua) {
-    return browser_list_browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/\sedg\//i],
-  describe: function describe(ua) {
-    return browser_list_browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/edg([ea]|ios)/i],
-  describe: function describe(ua) {
-    return browser_list_browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/firefox|iceweasel|fxios/i],
-  describe: function describe(ua) {
-    return browser_list_browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/chromium/i],
-  describe: function describe(ua) {
-    return browser_list_browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/chrome|crios|crmo/i],
-  describe: function describe(ua) {
-    return browser_list_browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/safari|applewebkit/i],
-  describe: function describe(ua) {
-    return browser_list_browser('safari', getFirstMatch(commonVersionIdentifier, ua));
-  }
-},
-/* Something else */
-{
-  test: [/.*/i],
-  describe: function describe(ua) {
-    /* Here we try to make sure that there are explicit details about the device
-     * in order to decide what regexp exactly we want to apply
-     * (as there is a specific decision based on that conclusion)
-     */
-    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
-    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
-    var hasDeviceSpec = ua.search('\\(') !== -1;
-    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
-    return browser_list_browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
-  }
-}];
-// CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
-
-
-
-var parsed = {};
-function parseBrowser(ua) {
-  if (!parsed.browser) {
-    ua = ua || navigator.userAgent;
-    var descriptor = browsersList.find(function (browser) {
-      return browser.test.some(function (condition) {
-        return condition.test(ua);
-      });
-    });
-
-    if (descriptor) {
-      parsed.browser = descriptor.describe(ua);
-    }
-  }
-
-  return parsed.browser;
-}
-function getBrowser() {
-  return parseBrowser();
-}
-var BROWSER = parseBrowser();
-function isBrowser(name) {
-  return parseBrowser().name === name;
-}
-/*
-if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是否存在微信桥
-  document.addEventListener('WeixinJSBridgeReady', () => { // 微信桥不存在则监听微信桥准备事件
-    if (window.__wxjs_environment === 'miniprogram') { // 当微信桥挂在上了之后则判断当前微信环境是否为小程序
-      console.log('在小程序');
-    } else {
-      console.log('在微信');
-    }
-  }, false);
-}
-*/
-
-function isMiniProgram() {
-  return /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
-}
-var MINIPROGRAM = isMiniProgram();
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.map.js
 var es_array_map = __webpack_require__("d81d");
 
@@ -9631,6 +9652,12 @@ var es_number_is_nan = __webpack_require__("9129");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.entries.js
 var es_object_entries = __webpack_require__("4fad");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.exec.js
+var es_regexp_exec = __webpack_require__("ac1f");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
+var es_string_search = __webpack_require__("841c");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.split.js
 var es_string_split = __webpack_require__("1276");
@@ -9809,32 +9836,38 @@ var saveConfig = function saveConfig(win, c) {
 };
 var config_configFromURL = function configFromURL(win) {
   var configObj = {};
-  win.location.search.slice(1).split('&').map(function (entry) {
-    return entry.split('=');
-  }).map(function (_ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        key = _ref2[0],
-        value = _ref2[1];
 
-    return [decodeURIComponent(key), decodeURIComponent(value)];
-  }).filter(function (_ref3) {
-    var _ref4 = _slicedToArray(_ref3, 1),
-        key = _ref4[0];
+  try {
+    win.location.search.slice(1).split('&').map(function (entry) {
+      return entry.split('=');
+    }).map(function (_ref) {
+      var _ref2 = _slicedToArray(_ref, 2),
+          key = _ref2[0],
+          value = _ref2[1];
 
-    return startsWith(key, MEETNOW_PREFIX);
-  }).map(function (_ref5) {
-    var _ref6 = _slicedToArray(_ref5, 2),
-        key = _ref6[0],
-        value = _ref6[1];
+      return [decodeURIComponent(key), decodeURIComponent(value)];
+    }).filter(function (_ref3) {
+      var _ref4 = _slicedToArray(_ref3, 1),
+          key = _ref4[0];
 
-    return [key.slice(MEETNOW_PREFIX.length), value];
-  }).forEach(function (_ref7) {
-    var _ref8 = _slicedToArray(_ref7, 2),
-        key = _ref8[0],
-        value = _ref8[1];
+      return startsWith(key, MEETNOW_PREFIX);
+    }).map(function (_ref5) {
+      var _ref6 = _slicedToArray(_ref5, 2),
+          key = _ref6[0],
+          value = _ref6[1];
 
-    configObj[key] = value;
-  });
+      return [key.slice(MEETNOW_PREFIX.length), value];
+    }).forEach(function (_ref7) {
+      var _ref8 = _slicedToArray(_ref7, 2),
+          key = _ref8[0],
+          value = _ref8[1];
+
+      configObj[key] = value;
+    });
+  } catch (e) {
+    return configObj;
+  }
+
   return configObj;
 };
 // CONCATENATED MODULE: ./packages/meetnow/src/config/index.ts
@@ -9850,12 +9883,15 @@ function config_ownKeys(object, enumerableOnly) { var keys = Object.keys(object)
 
 function config_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { config_ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { config_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
+
  // export config
 
 
-function setupConfig() {
-  var win = window;
-  var MeetNow = win.MeetNow = win.MeetNow || {}; // create the Ionic.config from raw config object (if it exists)
+function setupConfig(config) {
+  var win = Object(src_browser["b" /* isMiniProgram */])() ? wx : window;
+  var MeetNow = win.MeetNow = win.MeetNow || {
+    config: config
+  }; // create the Ionic.config from raw config object (if it exists)
   // and convert Ionic.config into a ConfigApi that has a get() fn
 
   var configObj = config_objectSpread({}, configFromSession(win), {
@@ -10082,6 +10118,9 @@ var configs = {
   }
 };
 var CONFIGS = configs;
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
+var es_function_name = __webpack_require__("b0c0");
+
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
 function _assertThisInitialized(self) {
   if (self === void 0) {
@@ -10326,7 +10365,7 @@ function api_objectSpread(target) { for (var i = 1; i < arguments.length; i++) {
 
 var api_log = browser_default()('MN:Api'); // long polling timeout within 30 seconds
 
-var DEFAULT_TIMEOUT = 35 * 1000;
+var DEFAULT_TIMEOUT = 30 * 1000;
 function createApi() {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   api_log('createApi()');
@@ -10598,7 +10637,13 @@ function createContext(delegate) {
       return key in target ? target[key] : Reflect.get(delegate, key);
     }
   });
-}
+} // export function createMessageSender(delegate: any) {
+//   return new Proxy({}, {
+//     get(target: object, key: string) {
+//       return Reflect.get(delegate, hyphenate(key));
+//     },
+//   }) as Context;
+// }
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.splice.js
 var es_array_splice = __webpack_require__("a434");
 
@@ -11177,7 +11222,11 @@ function createDescription(data, context) {
   }
 
   function update(diff) {
-    // fire status change events
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    } // fire status change events
+
+
     watch(reactive);
     events.emit('updated', description);
   }
@@ -11332,8 +11381,9 @@ function createState(data, context) {
   var description;
 
   function watch(target) {
-    var active = data.active,
-        locked = data.locked;
+    var _data = data,
+        active = _data.active,
+        locked = _data.locked;
     /* eslint-disable no-use-before-define */
 
     target.active = active;
@@ -11346,18 +11396,24 @@ function createState(data, context) {
   }
 
   function update(diff) {
-    // fire status change events
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    } // fire status change events
+
+
     watch(reactive);
     events.emit('updated', description);
   }
 
   function getSharingUserEntity() {
-    var applicationsharer = data.applicationsharer;
+    var _data2 = data,
+        applicationsharer = _data2.applicationsharer;
     return applicationsharer.user && applicationsharer.user.entity;
   }
 
   function getSpeechUserEntity() {
-    var speechUserEntity = data['speech-user-entity'];
+    var _data3 = data,
+        speechUserEntity = _data3['speech-user-entity'];
     return speechUserEntity;
   }
 
@@ -11374,6 +11430,9 @@ function createState(data, context) {
     getSpeechUserEntity: getSpeechUserEntity
   });
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
+var es_array_find = __webpack_require__("7db0");
+
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/layout-ctrl.ts
 
 
@@ -11738,7 +11797,11 @@ function createView(data, context) {
   }
 
   function update(diff) {
-    // fire status change events
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    } // fire status change events
+
+
     watch(reactive);
     events.emit('updated', view);
   }
@@ -12730,7 +12793,8 @@ function createUsers(data, context) {
     var deleted = [];
 
     if (diff) {
-      var user = diff.user;
+      var user = diff.user,
+          state = diff.state;
       /* eslint-disable no-use-before-define */
 
       user.forEach(function (userdata) {
@@ -12739,6 +12803,10 @@ function createUsers(data, context) {
         hasUser(entity) ? state === 'deleted' ? deleted.push(userdata) : updated.push(userdata) : added.push(userdata);
       });
       /* eslint-enable no-use-before-define */
+
+      if (state === 'full' || !data) {
+        data = diff;
+      }
     } // fire status change events
 
 
@@ -12751,9 +12819,7 @@ function createUsers(data, context) {
     });
     updated.forEach(function (userdata) {
       var entity = userdata.entity;
-      var user = userMap.get(entity); // user data is not proxied, so update it here
-      // if user data is 'full', it will replace the old one
-
+      var user = userMap.get(entity);
       user.update(userdata);
       users_log('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:updated', user);
@@ -13111,7 +13177,11 @@ function createRTMP(data, context) {
   }
 
   function update(diff) {
-    // fire status change events
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    } // fire status change events
+
+
     watch(reactive);
     events.emit('updated', rtmp);
   }
@@ -13274,7 +13344,11 @@ function createRecord(data, context) {
   }
 
   function update(diff) {
-    // fire status change events
+    if (diff && (diff.state === 'full' || !data)) {
+      data = diff;
+    } // fire status change events
+
+
     watch(reactive);
     events.emit('updated', record);
   }
@@ -13472,7 +13546,6 @@ function mergeItem(rhys, item) {
 
 
 
-
 function information_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function information_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { information_ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { information_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -13497,23 +13570,19 @@ var information_log = browser_default()('MN:Information');
 function createInformation(data, context) {
   var events = createEvents(information_log);
   var api = context.api;
+  var descriptiondata = data['conference-description'],
+      statedata = data['conference-state'],
+      viewdata = data['conference-view'],
+      usersdata = data.users,
+      rtmpdata = data['rtmp-state'],
+      recorddata = data['record-users']; // create information parts
 
-  function createdata(datakey) {
-    return new Proxy({}, {
-      get: function get(target, key) {
-        var delegate = data[datakey];
-        return delegate && Reflect.get(delegate, key);
-      }
-    });
-  } // create information parts
-
-
-  var description = createDescription(createdata('conference-description'), context);
-  var state = createState(createdata('conference-state'), context);
-  var view = createView(createdata('conference-view'), context);
-  var users = createUsers(createdata('users'), context);
-  var rtmp = createRTMP(createdata('rtmp-state'), context);
-  var record = createRecord(createdata('record-users'), context);
+  var description = createDescription(descriptiondata, context);
+  var state = createState(statedata, context);
+  var view = createView(viewdata, context);
+  var users = createUsers(usersdata, context);
+  var rtmp = createRTMP(rtmpdata, context);
+  var record = createRecord(recorddata, context);
   var information;
 
   function update(val) {
@@ -13628,6 +13697,9 @@ function createInformation(data, context) {
 }
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.constructor.js
 var es_regexp_constructor = __webpack_require__("4d63");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
+var es_string_match = __webpack_require__("466d");
 
 // CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/grammar.ts
 
@@ -14282,8 +14354,6 @@ function stream_utils_setup(stream) {
 
 
 
-
-
 function getUserMedia(_x) {
   return _getUserMedia.apply(this, arguments);
 }
@@ -14307,32 +14377,16 @@ function _getUserMedia() {
 
           case 3:
             stream = _context.sent;
-            _context.next = 13;
+            _context.next = 7;
             break;
 
           case 6:
-            if (!navigator.getUserMedia) {
-              _context.next = 12;
-              break;
-            }
-
-            _context.next = 9;
-            return new Promise(function (resolve, reject) {
-              navigator.getUserMedia(constraints, resolve, reject);
-            });
-
-          case 9:
-            stream = _context.sent;
-            _context.next = 13;
-            break;
-
-          case 12:
             throw new Error('Not Supported');
 
-          case 13:
+          case 7:
             return _context.abrupt("return", stream_utils_setup(stream));
 
-          case 14:
+          case 8:
           case "end":
             return _context.stop();
         }
@@ -14722,7 +14776,7 @@ function channel_objectSpread(target) { for (var i = 1; i < arguments.length; i+
 
 
 var channel_log = browser_default()('MN:Channel');
-var channel_browser = getBrowser();
+var channel_browser = Object(src_browser["a" /* getBrowser */])();
 var STATUS;
 
 (function (STATUS) {
@@ -16253,7 +16307,7 @@ var es_string_includes = __webpack_require__("2532");
 
 
 var sdp_modifier_log = browser_default()('MN:SDP');
-var sdp_modifier_browser = getBrowser();
+var sdp_modifier_browser = Object(src_browser["a" /* getBrowser */])();
 function createModifier() {
   var _content = 'main';
   var _width = 1920;
@@ -16768,7 +16822,7 @@ function createMessage(config) {
 
   var sender = config.sender;
   var receiver;
-  var isPrivate;
+  var isPrivate = false;
   var message;
   var request;
 
@@ -16955,7 +17009,8 @@ function chat_channel_objectSpread(target) { for (var i = 1; i < arguments.lengt
 
 var chat_channel_log = browser_default()('MN:ChatChannel');
 function createChatChannel(config) {
-  var api = config.api;
+  var api = config.api,
+      sender = config.sender;
   var events = createEvents(chat_channel_log);
   var messages = [];
   var request;
@@ -17064,7 +17119,8 @@ function createChatChannel(config) {
             case 0:
               chat_channel_log('sendMessage()');
               message = createMessage({
-                api: api
+                api: api,
+                sender: sender
               });
               events.emit('message', {
                 originator: 'local',
@@ -17141,8 +17197,8 @@ function conference_objectSpread(target) { for (var i = 1; i < arguments.length;
 
 
 var conference_log = browser_default()('MN:Conference');
-var miniprogram = isMiniProgram();
-var conference_browser = getBrowser();
+var miniprogram = Object(src_browser["b" /* isMiniProgram */])();
+var conference_browser = Object(src_browser["a" /* getBrowser */])();
 var conference_STATUS;
 
 (function (STATUS) {
@@ -17172,6 +17228,8 @@ function createConference(config) {
 
   var url;
   var request; // request chain
+
+  var trtc;
 
   function getCurrentUser() {
     if (!user) {
@@ -17331,8 +17389,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.0-alpha"));
-              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.0-alpha")); // join focus
+              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat(__VERSION__));
+              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat(__VERSION__)); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -17377,16 +17435,17 @@ function createConference(config) {
               _data$data = data.data;
               userId = _data$data['conference-user-id'];
               uuid = _data$data['conference-uuid'];
+              trtc = miniprogram ? data.data : {};
 
               if (!(!userId || !uuid)) {
-                _context2.next = 38;
+                _context2.next = 39;
                 break;
               }
 
               conference_log('internal error');
               throw new Error('Internal Error');
 
-            case 38:
+            case 39:
               url = options.url;
               // setup request interceptor for ctrl api
               interceptor = api.interceptors.request.use(function (config) {
@@ -17401,22 +17460,22 @@ function createConference(config) {
               }); // get full info
 
               request = api.request('getFullInfo');
-              _context2.prev = 41;
-              _context2.next = 44;
+              _context2.prev = 42;
+              _context2.next = 45;
               return request.send();
 
-            case 44:
+            case 45:
               response = _context2.sent;
-              _context2.next = 51;
+              _context2.next = 52;
               break;
 
-            case 47:
-              _context2.prev = 47;
-              _context2.t1 = _context2["catch"](41);
+            case 48:
+              _context2.prev = 48;
+              _context2.t1 = _context2["catch"](42);
               events.emit('failed', _context2.t1);
               throw _context2.t1;
 
-            case 51:
+            case 52:
               _response3 = response;
               data = _response3.data;
               info = data.data; // create context
@@ -17427,12 +17486,12 @@ function createConference(config) {
               onConnected();
               return _context2.abrupt("return", conference);
 
-            case 58:
+            case 59:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2, null, [[20, 26], [41, 47]]);
+      }, _callee2, null, [[20, 26], [42, 48]]);
     }));
     return _join.apply(this, arguments);
   }
@@ -17800,6 +17859,10 @@ function createConference(config) {
       return chatChannel;
     },
 
+    get trtc() {
+      return trtc;
+    },
+
     join: join,
     leave: leave,
     end: end,
@@ -17848,7 +17911,7 @@ function createUA(config) {
   function createUserApi() {
     var auth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     var api = createApi({
-      baseURL: CONFIG.get('baseurl',  false ? undefined : 'https://meetings.ylyun.com/webapp/')
+      baseURL: CONFIG.get('baseurl', __DEV__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/')
     });
     api.interceptors.request.use(function (config) {
       if (auth && token) {
@@ -18159,12 +18222,12 @@ function createMedia() {
 
 
 var src_log = browser_default()('MN');
-var src_version = "1.0.0-alpha"; // global setup
+var src_version = __VERSION__; // global setup
 
-function src_setup() {
-  setupConfig();
+function src_setup(config) {
+  setupConfig(config);
 
-  if (isMiniProgram()) {
+  if (Object(src_browser["b" /* isMiniProgram */])()) {
     axios_default.a.defaults.adapter = mpAdapter;
   }
 
