@@ -2,15 +2,18 @@ import {
   CONFIG,
   configFromSession,
   configFromURL,
+  MeetnowConfig,
   saveConfig,
 } from './config';
-
+import { isMiniProgram } from '../browser';
 // export config
 export * from './config';
 
-export function setupConfig() {
-  const win = window;
-  const MeetNow = (win as any).MeetNow = (win as any).MeetNow || {};
+declare const wx: Window & typeof globalThis;
+
+export function setupConfig(config?: MeetnowConfig) {
+  const win = isMiniProgram() ? wx : window;
+  const MeetNow = (win as any).MeetNow = (win as any).MeetNow || { config };
 
   // create the Ionic.config from raw config object (if it exists)
   // and convert Ionic.config into a ConfigApi that has a get() fn

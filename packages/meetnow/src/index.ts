@@ -2,7 +2,7 @@ import debug from 'debug';
 import axios from 'axios';
 import adapter from './adapter';
 import { isMiniProgram } from './browser';
-import { CONFIG, setupConfig } from './config';
+import { CONFIG, MeetnowConfig, setupConfig } from './config';
 import { ConnectOptions, createUA } from './user-agent';
 
 export { debug, axios, adapter };
@@ -18,8 +18,8 @@ const log = debug('MN');
 const version = __VERSION__;
 
 // global setup
-function setup() {
-  setupConfig();
+function setup(config?: MeetnowConfig) {
+  setupConfig(config);
 
   if (isMiniProgram()) {
     axios.defaults.adapter = adapter;

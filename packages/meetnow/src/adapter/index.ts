@@ -40,7 +40,7 @@ export default function mpAdapter(config: AxiosRequestConfig): AxiosPromise {
 
     const options = {
       url    : buildURL(url, params, paramsSerializer),
-      headers,
+      header : headers,
       method : method && method.toUpperCase(),
       data   : isString(data) ? JSON.parse(data) : data,
       responseType,
