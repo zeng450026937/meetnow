@@ -24,7 +24,7 @@ export interface MessageData {
 export interface MessageSender {
   'entity': string;
   'subjectId': string;
-  'displayText': string;
+  'displayText': string; // get display text from user instance as display text can be changed
 }
 
 export interface MessageConfigs {
@@ -47,7 +47,7 @@ export function createMessage(config: MessageConfigs) {
   /* eslint-disable-next-line prefer-destructuring */
   let sender: MessageSender | undefined = config.sender;
   let receiver: string[] | undefined;
-  let isPrivate: boolean | undefined;
+  let isPrivate: boolean = false;
 
   let message: any;
   let request: Request | undefined;

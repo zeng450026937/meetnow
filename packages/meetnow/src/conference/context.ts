@@ -1,4 +1,5 @@
 import { Api } from '../api';
+// import { hyphenate } from '../utils';
 
 // conference context is passed to all submodule(users, lobby, ...)
 export interface Context {
@@ -20,3 +21,11 @@ export function createContext(delegate: any) {
     },
   }) as Context;
 }
+
+// export function createMessageSender(delegate: any) {
+//   return new Proxy({}, {
+//     get(target: object, key: string) {
+//       return Reflect.get(delegate, hyphenate(key));
+//     },
+//   }) as Context;
+// }

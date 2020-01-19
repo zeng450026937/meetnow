@@ -27,6 +27,8 @@ declare const global: any;
 export function isMiniProgram() {
   // return /miniprogram/i.test(navigator.userAgent)
   // || (window && window.__wxjs_environment === 'miniprogram');
+  if (global && global.wx) return true;
+
   return !window && !navigator && !global;
 }
 

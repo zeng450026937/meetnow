@@ -4052,6 +4052,7 @@ declare function connect(options: ConnectOptions): Promise<{
             emit(event: string, ...args: any[]): any;
         };
     } | undefined;
+    trtc: object;
     join: (options?: Partial<import("./conference").JoinOptions>) => Promise<any>;
     leave: () => Promise<any>;
     end: () => Promise<any>;
@@ -7796,6 +7797,7 @@ export declare function createConference(config: ConferenceConfigs): {
             emit(event: string, ...args: any[]): any;
         };
     } | undefined;
+    trtc: object;
     join: (options?: Partial<JoinOptions>) => Promise<any>;
     leave: () => Promise<any>;
     end: () => Promise<any>;
@@ -11541,6 +11543,7 @@ export declare function createUA(config?: UAConfigs): {
                 emit(event: string, ...args: any[]): any;
             };
         } | undefined;
+        trtc: object;
         join: (options?: Partial<JoinOptions>) => Promise<any>;
         leave: () => Promise<any>;
         end: () => Promise<any>;
@@ -11644,6 +11647,15 @@ export declare interface JoinOptions {
 declare interface MediaFilter {
     'type': 'unblock' | 'block' | 'unblocking';
     'blockby': 'server' | string;
+}
+
+declare interface MeetnowConfig {
+    baseurl?: string;
+    useragent?: string;
+    clientinfo?: string;
+    debug?: string;
+    persistent?: boolean;
+    testing?: boolean;
 }
 
 declare interface Organizer {
@@ -11861,7 +11873,7 @@ export declare interface SDP {
     }[];
 }
 
-declare function setup(): void;
+declare function setup(config?: MeetnowConfig): void;
 
 declare interface StateReason {
     'reason-code': number;
