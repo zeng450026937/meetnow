@@ -234,16 +234,17 @@ export default {
         this.conf = null;
         this.initLocalStream();
       });
+
+      conf.on('error', () => {
+        console.warn('error');
+      });
+
       conf.on('connected', () => {
         this.confStatus = 'connected';
         if (conf.view) {
           this.speakMode = conf.view.getLayout()['speak-mode'] || 'free';
         }
         console.warn('connected');
-
-        conf.on('error', () => {
-          console.warn('error');
-        });
 
         // users
         conf.users.on('updated', (data) => {
@@ -285,27 +286,14 @@ export default {
           this.mediaStatus = 'ended';
           console.warn('mediaChannel - ended');
         });
-        conf.mediaChannel.on('localstream', () => {
+        conf.mediaChannel.on('localstream', (stream) => {
           console.warn('localstream');
-          const constraints = {
-            audio : true,
-            video : true,
+          const { localVideo } = this.$refs;
+
+          localVideo.srcObject = stream;
+          localVideo.onloadedmetadata = function (e) {
+            localVideo.play();
           };
-
-          navigator
-            .mediaDevices
-            .getUserMedia(constraints)
-            .then((mediaStream) => {
-              const { localVideo } = this.$refs;
-
-              localVideo.srcObject = mediaStream;
-              localVideo.onloadedmetadata = function (e) {
-                localVideo.play();
-              };
-            })
-            .catch((error) => {
-              console.error(error);
-            });
         });
         conf.mediaChannel.on('remotestream', () => {
           console.warn('remotestream');
@@ -331,6 +319,19 @@ export default {
             this.initShareStream(conf);
           }
         });
+
+        conf.chatChannel.on('ready', () => {
+          console.warn('chatChannel - ready');
+        });
+        conf.chatChannel.on('connected', () => {
+          console.warn('chatChannel - connected');
+        });
+        conf.chatChannel.on('disconnected', () => {
+          console.warn('chatChannel - disconnected');
+        });
+        conf.chatChannel.on('message', (data) => {
+          console.warn('chatChannel - message', data);
+        });
       });
 
       // currentUser
@@ -341,6 +342,21 @@ export default {
 
         this.localStream = !data.isVideoBlocked();
         this.mute = data.isAudioBlocked();
+
+        // const video = this.data.checkboxOptions[0].checked;
+        // const audio = this.data.checkboxOptions[1].checked;
+
+        setTimeout(() => {
+          // conf.setVideoFilter(false);
+          console.log('getEndpoint', conf.user.getEndpoint());
+          // console.log(conf.user.setVideoFilter(false));
+        }, 1000);
+        // if (video === false) {
+        // data.setVideoFilter(false);
+        // }
+        // if (audio === false && !conf.user.isAudioBlocked()) {
+        // data.setAudioFilter(false);
+        // }
 
         console.log('localStream', this.localStream, 'mute', this.mute);
 
