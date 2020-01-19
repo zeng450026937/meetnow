@@ -5247,8 +5247,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.0-alpha"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.0-alpha"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.0-beta"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.0-beta"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -5670,7 +5670,7 @@ function createMedia() {
 }
 
 const log$t = debug('MN');
-const version = "1.0.0-alpha";
+const version = "1.0.0-beta";
 // global setup
 function setup$1(config) {
     setupConfig(config);

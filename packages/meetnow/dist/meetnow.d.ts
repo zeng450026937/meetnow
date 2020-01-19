@@ -4007,7 +4007,7 @@ declare function connect(options: ConnectOptions): Promise<{
             readonly version: number | undefined;
             readonly sender: import("./channel/message").MessageSender | undefined;
             readonly receiver: string[] | undefined;
-            readonly private: boolean | undefined;
+            readonly private: boolean;
             send: (message: string, target?: string[] | undefined) => Promise<void>;
             retry: () => Promise<void>;
             cancel: () => void;
@@ -4021,7 +4021,7 @@ declare function connect(options: ConnectOptions): Promise<{
             readonly version: number | undefined;
             readonly sender: import("./channel/message").MessageSender | undefined;
             readonly receiver: string[] | undefined;
-            readonly private: boolean | undefined;
+            readonly private: boolean;
             send: (message: string, target?: string[] | undefined) => Promise<void>;
             retry: () => Promise<void>;
             cancel: () => void;
@@ -7752,7 +7752,7 @@ export declare function createConference(config: ConferenceConfigs): {
             readonly version: number | undefined;
             readonly sender: import("../channel/message").MessageSender | undefined;
             readonly receiver: string[] | undefined;
-            readonly private: boolean | undefined;
+            readonly private: boolean;
             send: (message: string, target?: string[] | undefined) => Promise<void>;
             retry: () => Promise<void>;
             cancel: () => void;
@@ -7766,7 +7766,7 @@ export declare function createConference(config: ConferenceConfigs): {
             readonly version: number | undefined;
             readonly sender: import("../channel/message").MessageSender | undefined;
             readonly receiver: string[] | undefined;
-            readonly private: boolean | undefined;
+            readonly private: boolean;
             send: (message: string, target?: string[] | undefined) => Promise<void>;
             retry: () => Promise<void>;
             cancel: () => void;
@@ -11543,7 +11543,6 @@ export declare function createUA(config?: UAConfigs): {
                 emit(event: string, ...args: any[]): any;
             };
         } | undefined;
-        trtc: object;
         join: (options?: Partial<JoinOptions>) => Promise<any>;
         leave: () => Promise<any>;
         end: () => Promise<any>;

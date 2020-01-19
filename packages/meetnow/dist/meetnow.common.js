@@ -10356,7 +10356,7 @@ function api_objectSpread(target) { for (var i = 1; i < arguments.length; i++) {
 
 var api_log = browser_default()('MN:Api'); // long polling timeout within 30 seconds
 
-var DEFAULT_TIMEOUT = 30 * 1000;
+var DEFAULT_TIMEOUT = 35 * 1000;
 function createApi() {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   api_log('createApi()');
@@ -11213,11 +11213,7 @@ function createDescription(data, context) {
   }
 
   function update(diff) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    } // fire status change events
-
-
+    // fire status change events
     watch(reactive);
     events.emit('updated', description);
   }
@@ -11372,9 +11368,8 @@ function createState(data, context) {
   var description;
 
   function watch(target) {
-    var _data = data,
-        active = _data.active,
-        locked = _data.locked;
+    var active = data.active,
+        locked = data.locked;
     /* eslint-disable no-use-before-define */
 
     target.active = active;
@@ -11387,24 +11382,18 @@ function createState(data, context) {
   }
 
   function update(diff) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    } // fire status change events
-
-
+    // fire status change events
     watch(reactive);
     events.emit('updated', description);
   }
 
   function getSharingUserEntity() {
-    var _data2 = data,
-        applicationsharer = _data2.applicationsharer;
+    var applicationsharer = data.applicationsharer;
     return applicationsharer.user && applicationsharer.user.entity;
   }
 
   function getSpeechUserEntity() {
-    var _data3 = data,
-        speechUserEntity = _data3['speech-user-entity'];
+    var speechUserEntity = data['speech-user-entity'];
     return speechUserEntity;
   }
 
@@ -11788,11 +11777,7 @@ function createView(data, context) {
   }
 
   function update(diff) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    } // fire status change events
-
-
+    // fire status change events
     watch(reactive);
     events.emit('updated', view);
   }
@@ -12784,8 +12769,7 @@ function createUsers(data, context) {
     var deleted = [];
 
     if (diff) {
-      var user = diff.user,
-          state = diff.state;
+      var user = diff.user;
       /* eslint-disable no-use-before-define */
 
       user.forEach(function (userdata) {
@@ -12794,10 +12778,6 @@ function createUsers(data, context) {
         hasUser(entity) ? state === 'deleted' ? deleted.push(userdata) : updated.push(userdata) : added.push(userdata);
       });
       /* eslint-enable no-use-before-define */
-
-      if (state === 'full' || !data) {
-        data = diff;
-      }
     } // fire status change events
 
 
@@ -12810,7 +12790,9 @@ function createUsers(data, context) {
     });
     updated.forEach(function (userdata) {
       var entity = userdata.entity;
-      var user = userMap.get(entity);
+      var user = userMap.get(entity); // user data is not proxied, so update it here
+      // if user data is 'full', it will replace the old one
+
       user.update(userdata);
       users_log('updated user:\n\n %s(%s)  \n', user.getDisplayText(), user.getEntity());
       users.emit('user:updated', user);
@@ -13168,11 +13150,7 @@ function createRTMP(data, context) {
   }
 
   function update(diff) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    } // fire status change events
-
-
+    // fire status change events
     watch(reactive);
     events.emit('updated', rtmp);
   }
@@ -13335,11 +13313,7 @@ function createRecord(data, context) {
   }
 
   function update(diff) {
-    if (diff && (diff.state === 'full' || !data)) {
-      data = diff;
-    } // fire status change events
-
-
+    // fire status change events
     watch(reactive);
     events.emit('updated', record);
   }
@@ -13537,6 +13511,7 @@ function mergeItem(rhys, item) {
 
 
 
+
 function information_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function information_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { information_ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { information_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -13561,19 +13536,23 @@ var information_log = browser_default()('MN:Information');
 function createInformation(data, context) {
   var events = createEvents(information_log);
   var api = context.api;
-  var descriptiondata = data['conference-description'],
-      statedata = data['conference-state'],
-      viewdata = data['conference-view'],
-      usersdata = data.users,
-      rtmpdata = data['rtmp-state'],
-      recorddata = data['record-users']; // create information parts
 
-  var description = createDescription(descriptiondata, context);
-  var state = createState(statedata, context);
-  var view = createView(viewdata, context);
-  var users = createUsers(usersdata, context);
-  var rtmp = createRTMP(rtmpdata, context);
-  var record = createRecord(recorddata, context);
+  function createdata(datakey) {
+    return new Proxy({}, {
+      get: function get(target, key) {
+        var delegate = data[datakey];
+        return delegate && Reflect.get(delegate, key);
+      }
+    });
+  } // create information parts
+
+
+  var description = createDescription(createdata('conference-description'), context);
+  var state = createState(createdata('conference-state'), context);
+  var view = createView(createdata('conference-view'), context);
+  var users = createUsers(createdata('users'), context);
+  var rtmp = createRTMP(createdata('rtmp-state'), context);
+  var record = createRecord(createdata('record-users'), context);
   var information;
 
   function update(val) {
@@ -14345,6 +14324,8 @@ function stream_utils_setup(stream) {
 
 
 
+
+
 function getUserMedia(_x) {
   return _getUserMedia.apply(this, arguments);
 }
@@ -14368,16 +14349,32 @@ function _getUserMedia() {
 
           case 3:
             stream = _context.sent;
-            _context.next = 7;
+            _context.next = 13;
             break;
 
           case 6:
+            if (!navigator.getUserMedia) {
+              _context.next = 12;
+              break;
+            }
+
+            _context.next = 9;
+            return new Promise(function (resolve, reject) {
+              navigator.getUserMedia(constraints, resolve, reject);
+            });
+
+          case 9:
+            stream = _context.sent;
+            _context.next = 13;
+            break;
+
+          case 12:
             throw new Error('Not Supported');
 
-          case 7:
+          case 13:
             return _context.abrupt("return", stream_utils_setup(stream));
 
-          case 8:
+          case 14:
           case "end":
             return _context.stop();
         }
@@ -17380,8 +17377,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat(__VERSION__));
-              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat(__VERSION__)); // join focus
+              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.0-beta"));
+              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.0-beta")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -17902,7 +17899,7 @@ function createUA(config) {
   function createUserApi() {
     var auth = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     var api = createApi({
-      baseURL: CONFIG.get('baseurl', __DEV__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/')
+      baseURL: CONFIG.get('baseurl',  false ? undefined : 'https://meetings.ylyun.com/webapp/')
     });
     api.interceptors.request.use(function (config) {
       if (auth && token) {
@@ -18213,7 +18210,7 @@ function createMedia() {
 
 
 var src_log = browser_default()('MN');
-var src_version = __VERSION__; // global setup
+var src_version = "1.0.0-beta"; // global setup
 
 function src_setup(config) {
   setupConfig(config);
