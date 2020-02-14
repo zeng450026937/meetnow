@@ -2391,23 +2391,33 @@ const browsersList = [
     },
 ];
 
+const isDef = (value) => {
+    return value !== undefined && value !== null;
+};
+const { isArray: isArray$1 } = Array;
+const isFunction$1 = (val) => typeof val === 'function';
+const isObject$1 = (val) => typeof val === 'object' && val !== null;
+const { hasOwnProperty } = Object.prototype;
+const hasOwn = (val, key) => hasOwnProperty.call(val, key);
+const camelizeRE = /-(\w)/g;
+const camelize = (str) => {
+    return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
+};
+// compare whether a value has changed, accounting for NaN.
+const hasChanged = (value, oldValue) => {
+    /* eslint-disable-next-line no-self-compare */
+    return value !== oldValue && (value === value || oldValue === oldValue);
+};
+
 const parsed = {};
 function isMiniProgram() {
-    // return /miniprogram/i.test(navigator.userAgent)
-    // || (window && window.__wxjs_environment === 'miniprogram');
-    if (global && global.wx)
-        return true;
-    return !window && !navigator && !global;
+    return isObject$1(wx) || isObject$1(swan) || isObject$1(my)
+        || /miniprogram/i.test(navigator.userAgent)
+        || (window && window.__wxjs_environment === 'miniprogram');
 }
 function parseBrowser(ua) {
     if (!parsed.browser) {
-        // ua = ua || navigator.userAgent;
-        if (isMiniProgram()) {
-            ua = 'miniProgram';
-        }
-        else {
-            ua = ua || navigator.userAgent;
-        }
+        ua = ua || (isMiniProgram() ? 'miniprogram' : navigator.userAgent);
         const descriptor = browsersList.find((browser) => {
             return browser.test.some(condition => condition.test(ua));
         });
@@ -2421,6 +2431,7 @@ function getBrowser() {
     return parseBrowser();
 }
 const BROWSER = parseBrowser();
+const MINIPROGRAM = isMiniProgram();
 
 const startsWith = (input, search) => {
     return input.substr(0, search.length) === search;
@@ -2812,24 +2823,6 @@ function createApi(config = {}) {
         request,
     };
 }
-
-const isDef = (value) => {
-    return value !== undefined && value !== null;
-};
-const { isArray: isArray$1 } = Array;
-const isFunction$1 = (val) => typeof val === 'function';
-const isObject$1 = (val) => val !== null && typeof val === 'object';
-const { hasOwnProperty } = Object.prototype;
-const hasOwn = (val, key) => hasOwnProperty.call(val, key);
-const camelizeRE = /-(\w)/g;
-const camelize = (str) => {
-    return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
-};
-// compare whether a value has changed, accounting for NaN.
-const hasChanged = (value, oldValue) => {
-    /* eslint-disable-next-line no-self-compare */
-    return value !== oldValue && (value === value || oldValue === oldValue);
-};
 
 const log$2 = browser('MN:Worker');
 function createWorker(config) {

@@ -1,4 +1,5 @@
 import { browsersList } from './browser-list';
+import { isObject } from '../utils';
 
 export interface ParsedResult {
   browser: {
@@ -22,24 +23,19 @@ if (!window.WeixinJSBridge || !WeixinJSBridge.invoke) { // 首先判断当前是
   }, false);
 }
 */
-declare const global: any;
+declare const wx: any;
+declare const swan: any;
+declare const my: any;
 
 export function isMiniProgram() {
-  // return /miniprogram/i.test(navigator.userAgent)
-  // || (window && window.__wxjs_environment === 'miniprogram');
-  if (global && global.wx) return true;
-
-  return !window && !navigator && !global;
+  return isObject(wx) || isObject(swan) || isObject(my)
+  || /miniprogram/i.test(navigator.userAgent)
+  || (window && window.__wxjs_environment === 'miniprogram');
 }
 
 export function parseBrowser(ua?: string) {
   if (!parsed.browser) {
-    // ua = ua || navigator.userAgent;
-    if (isMiniProgram()) {
-      ua = 'miniProgram';
-    } else {
-      ua = ua || navigator.userAgent;
-    }
+    ua = ua || (isMiniProgram() ? 'miniprogram' : navigator.userAgent);
 
     const descriptor = browsersList.find((browser) => {
       return browser.test.some(condition => condition.test((ua as string)));

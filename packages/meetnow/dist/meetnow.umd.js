@@ -7076,101 +7076,6 @@ addToUnscopables(FIND_INDEX);
 
 /***/ }),
 
-/***/ "c74a":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export getFirstMatch */
-/* unused harmony export getSecondMatch */
-/* unused harmony export browser */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return browsersList; });
-/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("99af");
-/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("ac1f");
-/* harmony import */ var core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_exec__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("466d");
-/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("841c");
-/* harmony import */ var core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_search__WEBPACK_IMPORTED_MODULE_3__);
-
-
-
-
-var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
-function getFirstMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 0 && match[1] || '';
-}
-function getSecondMatch(regexp, ua) {
-  var match = ua.match(regexp);
-  return match && match.length > 1 && match[2] || '';
-}
-function browser(name, version) {
-  return {
-    name: name,
-    version: version,
-    firefox: name === 'firefox',
-    chrome: name === 'chrome' || name === 'chromium',
-    wechet: name === 'wechat',
-    toString: function toString() {
-      return "".concat(name.toUpperCase(), " ").concat(version);
-    }
-  };
-}
-var browsersList = [{
-  test: [/micromessenger/i],
-  describe: function describe(ua) {
-    return browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/\sedg\//i],
-  describe: function describe(ua) {
-    return browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/edg([ea]|ios)/i],
-  describe: function describe(ua) {
-    return browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/firefox|iceweasel|fxios/i],
-  describe: function describe(ua) {
-    return browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/chromium/i],
-  describe: function describe(ua) {
-    return browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
-  }
-}, {
-  test: [/chrome|crios|crmo/i],
-  describe: function describe(ua) {
-    return browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
-  }
-}, {
-  test: [/safari|applewebkit/i],
-  describe: function describe(ua) {
-    return browser('safari', getFirstMatch(commonVersionIdentifier, ua));
-  }
-},
-/* Something else */
-{
-  test: [/.*/i],
-  describe: function describe(ua) {
-    /* Here we try to make sure that there are explicit details about the device
-     * in order to decide what regexp exactly we want to apply
-     * (as there is a specific decision based on that conclusion)
-     */
-    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
-    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
-    var hasDeviceSpec = ua.search('\\(') !== -1;
-    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
-    return browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
-  }
-}];
-
-/***/ }),
-
 /***/ "c7ce":
 /***/ (function(module, exports) {
 
@@ -7779,65 +7684,6 @@ $({ target: 'Object', stat: true, sham: !DESCRIPTORS }, {
   }
 });
 
-
-/***/ }),
-
-/***/ "dc99":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return isMiniProgram; });
-/* unused harmony export parseBrowser */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getBrowser; });
-/* unused harmony export BROWSER */
-/* unused harmony export isBrowser */
-/* unused harmony export MINIPROGRAM */
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("7db0");
-/* harmony import */ var core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_find__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("b0c0");
-/* harmony import */ var core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_function_name__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _browser_list__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("c74a");
-
-
-
-var parsed = {};
-function isMiniProgram() {
-  // return /miniprogram/i.test(navigator.userAgent)
-  // || (window && window.__wxjs_environment === 'miniprogram');
-  if (global && global.wx) return true;
-  return !window && !navigator && !global;
-}
-function parseBrowser(ua) {
-  if (!parsed.browser) {
-    // ua = ua || navigator.userAgent;
-    if (isMiniProgram()) {
-      ua = 'miniProgram';
-    } else {
-      ua = ua || navigator.userAgent;
-    }
-
-    var descriptor = _browser_list__WEBPACK_IMPORTED_MODULE_2__[/* browsersList */ "a"].find(function (browser) {
-      return browser.test.some(function (condition) {
-        return condition.test(ua);
-      });
-    });
-
-    if (descriptor) {
-      parsed.browser = descriptor.describe(ua);
-    }
-  }
-
-  return parsed.browser;
-}
-function getBrowser() {
-  return parseBrowser();
-}
-var BROWSER = parseBrowser();
-function isBrowser(name) {
-  return parseBrowser().name === name;
-}
-var MINIPROGRAM = isMiniProgram();
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("c8ba")))
 
 /***/ }),
 
@@ -9632,17 +9478,100 @@ function mpAdapter(config) {
     request.send(options);
   });
 }
-// EXTERNAL MODULE: ./packages/meetnow/src/browser/index.ts
-var src_browser = __webpack_require__("dc99");
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
+var es_array_find = __webpack_require__("7db0");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.map.js
-var es_array_map = __webpack_require__("d81d");
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
+var es_function_name = __webpack_require__("b0c0");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.exec.js
+var es_regexp_exec = __webpack_require__("ac1f");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
+var es_string_match = __webpack_require__("466d");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
+var es_string_search = __webpack_require__("841c");
+
+// CONCATENATED MODULE: ./packages/meetnow/src/browser/browser-list.ts
+
+
+
+
+var commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
+function getFirstMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 0 && match[1] || '';
+}
+function getSecondMatch(regexp, ua) {
+  var match = ua.match(regexp);
+  return match && match.length > 1 && match[2] || '';
+}
+function browser_list_browser(name, version) {
+  return {
+    name: name,
+    version: version,
+    firefox: name === 'firefox',
+    chrome: name === 'chrome' || name === 'chromium',
+    wechet: name === 'wechat',
+    toString: function toString() {
+      return "".concat(name.toUpperCase(), " ").concat(version);
+    }
+  };
+}
+var browsersList = [{
+  test: [/micromessenger/i],
+  describe: function describe(ua) {
+    return browser_list_browser('wechat', getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/\sedg\//i],
+  describe: function describe(ua) {
+    return browser_list_browser('edge', getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/edg([ea]|ios)/i],
+  describe: function describe(ua) {
+    return browser_list_browser('edge', getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/firefox|iceweasel|fxios/i],
+  describe: function describe(ua) {
+    return browser_list_browser('firefox', getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/chromium/i],
+  describe: function describe(ua) {
+    return browser_list_browser('chromium', getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || getFirstMatch(commonVersionIdentifier, ua));
+  }
+}, {
+  test: [/chrome|crios|crmo/i],
+  describe: function describe(ua) {
+    return browser_list_browser('chrome', getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua));
+  }
+}, {
+  test: [/safari|applewebkit/i],
+  describe: function describe(ua) {
+    return browser_list_browser('safari', getFirstMatch(commonVersionIdentifier, ua));
+  }
+},
+/* Something else */
+{
+  test: [/.*/i],
+  describe: function describe(ua) {
+    /* Here we try to make sure that there are explicit details about the device
+     * in order to decide what regexp exactly we want to apply
+     * (as there is a specific decision based on that conclusion)
+     */
+    var regexpWithoutDeviceSpec = /^(.*)\/(.*) /;
+    var regexpWithDeviceSpec = /^(.*)\/(.*)[ \t]\((.*)/;
+    var hasDeviceSpec = ua.search('\\(') !== -1;
+    var regexp = hasDeviceSpec ? regexpWithDeviceSpec : regexpWithoutDeviceSpec;
+    return browser_list_browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
+  }
+}];
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.slice.js
 var es_array_slice = __webpack_require__("fb6a");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.map.js
-var es_map = __webpack_require__("4ec9");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.constructor.js
 var es_number_constructor = __webpack_require__("a9e3");
@@ -9650,14 +9579,135 @@ var es_number_constructor = __webpack_require__("a9e3");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.is-nan.js
 var es_number_is_nan = __webpack_require__("9129");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.to-string.js
+var es_regexp_to_string = __webpack_require__("25f0");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.replace.js
+var es_string_replace = __webpack_require__("5319");
+
+// CONCATENATED MODULE: ./packages/meetnow/src/utils/index.ts
+
+
+
+
+
+
+
+
+
+var debounce = function debounce(func) {
+  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var timer;
+  return function () {
+    var _this = this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    clearTimeout(timer);
+    timer = setTimeout.apply(void 0, [function () {
+      return func.call.apply(func, [_this].concat(args));
+    }, wait].concat(args));
+  };
+};
+var isDef = function isDef(value) {
+  return value !== undefined && value !== null;
+};
+var isEmpty = function isEmpty(val) {
+  return val === undefined || val === null || val === '' || Array.isArray(val) && val.length === 0 || typeof val === 'number' && Number.isNaN(val);
+};
+var NOOP = function NOOP() {};
+var NO = function NO() {
+  return false;
+};
+var isArray = Array.isArray;
+
+var isFunction = function isFunction(val) {
+  return typeof val === 'function';
+};
+var utils_isString = function isString(val) {
+  return typeof val === 'string';
+};
+var utils_isSymbol = function isSymbol(val) {
+  return _typeof(val) === 'symbol';
+};
+var utils_isObject = function isObject(val) {
+  return _typeof(val) === 'object' && val !== null;
+};
+function isPromise(val) {
+  return utils_isObject(val) && isFunction(val.then) && isFunction(val.catch);
+}
+var utils_hasOwnProperty = Object.prototype.hasOwnProperty;
+var hasOwn = function hasOwn(val, key) {
+  return utils_hasOwnProperty.call(val, key);
+};
+var objectToString = Object.prototype.toString;
+var toTypeString = function toTypeString(value) {
+  return objectToString.call(value);
+};
+var isPlainObject = function isPlainObject(val) {
+  return toTypeString(val) === '[object Object]';
+};
+var camelizeRE = /-(\w)/g;
+var camelize = function camelize(str) {
+  return str.replace(camelizeRE, function (_, c) {
+    return c ? c.toUpperCase() : '';
+  });
+};
+var hyphenateRE = /\B([A-Z])/g;
+var hyphenate = function hyphenate(str) {
+  return str.replace(hyphenateRE, '-$1').toLowerCase();
+};
+var capitalize = function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}; // compare whether a value has changed, accounting for NaN.
+
+var hasChanged = function hasChanged(value, oldValue) {
+  /* eslint-disable-next-line no-self-compare */
+  return value !== oldValue && (value === value || oldValue === oldValue);
+};
+// CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
+
+
+
+
+var parsed = {};
+function isMiniProgram() {
+  return utils_isObject(wx) || utils_isObject(swan) || utils_isObject(my) || /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
+}
+function parseBrowser(ua) {
+  if (!parsed.browser) {
+    ua = ua || (isMiniProgram() ? 'miniprogram' : navigator.userAgent);
+    var descriptor = browsersList.find(function (browser) {
+      return browser.test.some(function (condition) {
+        return condition.test(ua);
+      });
+    });
+
+    if (descriptor) {
+      parsed.browser = descriptor.describe(ua);
+    }
+  }
+
+  return parsed.browser;
+}
+function getBrowser() {
+  return parseBrowser();
+}
+var BROWSER = parseBrowser();
+function isBrowser(name) {
+  return parseBrowser().name === name;
+}
+var MINIPROGRAM = isMiniProgram();
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.map.js
+var es_array_map = __webpack_require__("d81d");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.map.js
+var es_map = __webpack_require__("4ec9");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.entries.js
 var es_object_entries = __webpack_require__("4fad");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.exec.js
-var es_regexp_exec = __webpack_require__("ac1f");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.search.js
-var es_string_search = __webpack_require__("841c");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.split.js
 var es_string_split = __webpack_require__("1276");
@@ -9666,9 +9716,6 @@ var es_string_split = __webpack_require__("1276");
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.to-string.js
-var es_regexp_to_string = __webpack_require__("25f0");
-
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 
 
@@ -9888,7 +9935,7 @@ function config_objectSpread(target) { for (var i = 1; i < arguments.length; i++
 
 
 function setupConfig(config) {
-  var win = Object(src_browser["b" /* isMiniProgram */])() ? wx : window;
+  var win = isMiniProgram() ? wx : window;
   var MeetNow = win.MeetNow = win.MeetNow || {
     config: config
   }; // create the Ionic.config from raw config object (if it exists)
@@ -10118,9 +10165,6 @@ var configs = {
   }
 };
 var CONFIGS = configs;
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__("b0c0");
-
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
 function _assertThisInitialized(self) {
   if (self === void 0) {
@@ -10407,91 +10451,6 @@ function createApi() {
     request: request
   };
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.replace.js
-var es_string_replace = __webpack_require__("5319");
-
-// CONCATENATED MODULE: ./packages/meetnow/src/utils/index.ts
-
-
-
-
-
-
-
-
-
-var debounce = function debounce(func) {
-  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var timer;
-  return function () {
-    var _this = this;
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    clearTimeout(timer);
-    timer = setTimeout.apply(void 0, [function () {
-      return func.call.apply(func, [_this].concat(args));
-    }, wait].concat(args));
-  };
-};
-var isDef = function isDef(value) {
-  return value !== undefined && value !== null;
-};
-var isEmpty = function isEmpty(val) {
-  return val === undefined || val === null || val === '' || Array.isArray(val) && val.length === 0 || typeof val === 'number' && Number.isNaN(val);
-};
-var NOOP = function NOOP() {};
-var NO = function NO() {
-  return false;
-};
-var isArray = Array.isArray;
-
-var isFunction = function isFunction(val) {
-  return typeof val === 'function';
-};
-var utils_isString = function isString(val) {
-  return typeof val === 'string';
-};
-var utils_isSymbol = function isSymbol(val) {
-  return _typeof(val) === 'symbol';
-};
-var utils_isObject = function isObject(val) {
-  return val !== null && _typeof(val) === 'object';
-};
-function isPromise(val) {
-  return utils_isObject(val) && isFunction(val.then) && isFunction(val.catch);
-}
-var utils_hasOwnProperty = Object.prototype.hasOwnProperty;
-var hasOwn = function hasOwn(val, key) {
-  return utils_hasOwnProperty.call(val, key);
-};
-var objectToString = Object.prototype.toString;
-var toTypeString = function toTypeString(value) {
-  return objectToString.call(value);
-};
-var isPlainObject = function isPlainObject(val) {
-  return toTypeString(val) === '[object Object]';
-};
-var camelizeRE = /-(\w)/g;
-var camelize = function camelize(str) {
-  return str.replace(camelizeRE, function (_, c) {
-    return c ? c.toUpperCase() : '';
-  });
-};
-var hyphenateRE = /\B([A-Z])/g;
-var hyphenate = function hyphenate(str) {
-  return str.replace(hyphenateRE, '-$1').toLowerCase();
-};
-var capitalize = function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}; // compare whether a value has changed, accounting for NaN.
-
-var hasChanged = function hasChanged(value, oldValue) {
-  /* eslint-disable-next-line no-self-compare */
-  return value !== oldValue && (value === value || oldValue === oldValue);
-};
 // CONCATENATED MODULE: ./packages/meetnow/src/utils/worker.ts
 
 
@@ -11419,9 +11378,6 @@ function createState(data, context) {
     getSpeechUserEntity: getSpeechUserEntity
   });
 }
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
-var es_array_find = __webpack_require__("7db0");
-
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/layout-ctrl.ts
 
 
@@ -13677,9 +13633,6 @@ function createInformation(data, context) {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.constructor.js
 var es_regexp_constructor = __webpack_require__("4d63");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.match.js
-var es_string_match = __webpack_require__("466d");
-
 // CONCATENATED MODULE: ./packages/meetnow/src/sdp-transform/grammar.ts
 
 
@@ -14773,7 +14726,7 @@ function channel_objectSpread(target) { for (var i = 1; i < arguments.length; i+
 
 
 var channel_log = browser_default()('MN:Channel');
-var channel_browser = Object(src_browser["a" /* getBrowser */])();
+var channel_browser = getBrowser();
 var STATUS;
 
 (function (STATUS) {
@@ -16304,7 +16257,7 @@ var es_string_includes = __webpack_require__("2532");
 
 
 var sdp_modifier_log = browser_default()('MN:SDP');
-var sdp_modifier_browser = Object(src_browser["a" /* getBrowser */])();
+var sdp_modifier_browser = getBrowser();
 function createModifier() {
   var _content = 'main';
   var _width = 1920;
@@ -17194,8 +17147,8 @@ function conference_objectSpread(target) { for (var i = 1; i < arguments.length;
 
 
 var conference_log = browser_default()('MN:Conference');
-var miniprogram = Object(src_browser["b" /* isMiniProgram */])();
-var conference_browser = Object(src_browser["a" /* getBrowser */])();
+var miniprogram = isMiniProgram();
+var conference_browser = getBrowser();
 var conference_STATUS;
 
 (function (STATUS) {
@@ -18262,7 +18215,7 @@ var src_version = "1.0.0-beta"; // global setup
 function src_setup(config) {
   setupConfig(config);
 
-  if (Object(src_browser["b" /* isMiniProgram */])()) {
+  if (isMiniProgram()) {
     axios_default.a.defaults.adapter = mpAdapter;
   }
 
