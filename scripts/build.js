@@ -12,6 +12,7 @@ module.exports = (api, options) => {
       args.target = 'lib';
       args.entry = './packages/meetnow/src/index.ts';
       args.dest = './packages/meetnow/dist';
+      args.formats = 'umd,umd-min';
 
       api.chainWebpack((config) => {
         /* eslint-disable-next-line */

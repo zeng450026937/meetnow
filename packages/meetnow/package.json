@@ -32,6 +32,7 @@
       "esm-bundler-runtime",
       "cjs",
       "global",
+      "global-compat",
       "esm"
     ]
   }

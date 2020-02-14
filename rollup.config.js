@@ -7,7 +7,7 @@ import json from '@rollup/plugin-json';
 import noderesolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 // import buble from '@rollup/plugin-buble';
-// import babel from 'rollup-plugin-babel';
+import babel from 'rollup-plugin-babel';
 
 if (!process.env.TARGET) {
   throw new Error('TARGET package must be specified via --environment flag.');
@@ -47,6 +47,10 @@ const outputConfigs = {
     file   : resolve(`dist/${ name }.global.js`),
     format : 'iife',
   },
+  'global-compat' : {
+    file   : resolve(`dist/${ name }.global-compat.js`),
+    format : 'iife',
+  },
   esm : {
     file   : resolve(`dist/${ name }.esm.js`),
     format : 'es',
@@ -65,7 +69,7 @@ if (process.env.NODE_ENV === 'production') {
     if (format === 'cjs' && packageOptions.prod !== false) {
       packageConfigs.push(createProductionConfig(format));
     }
-    if (format === 'global' || format === 'esm') {
+    if (format === 'global' || format === 'global-compat' || format === 'esm') {
       packageConfigs.push(createMinifiedConfig(format));
     }
   });
@@ -86,6 +90,7 @@ function createConfig(format, output, plugins = []) {
   const isRawESMBuild = format === 'esm';
   const isBundlerESMBuild = /esm-bundler/.test(format);
   const isRuntimeCompileBuild = /meetnow\./.test(output.file);
+  const isCompatBuild = /compat/.test(format);
 
   if (isGlobalBuild) {
     output.name = packageOptions.name;
@@ -114,6 +119,23 @@ function createConfig(format, output, plugins = []) {
 
   const entryFile = format === 'esm-bundler-runtime' ? 'src/runtime.ts' : 'src/index.ts';
 
+  const compatPlugin = isCompatBuild
+    ? babel({
+      extensions     : ['.js', '.ts'],
+      exclude        : 'node_modules/**',
+      babelrc        : false,
+      configFile     : path.resolve(__dirname, 'babel.config.js'),
+      runtimeHelpers : true,
+    })
+    : null;
+    // : buble({
+    //   target     : { chrome: 70 },
+    //   transforms : {
+    //     objectRestSpread : true,
+    //   },
+    //   objectAssign : true,
+    // });
+
   return {
     input    : resolve(entryFile),
     // Global and Browser ESM builds inlines everything so that they can be
@@ -132,26 +154,13 @@ function createConfig(format, output, plugins = []) {
       }),
       tsPlugin,
       createReplacePlugin(
-        isProductionBuild,
+        isProductionBuild || isCompatBuild,
         isBundlerESMBuild,
         (isGlobalBuild || isRawESMBuild || isBundlerESMBuild)
           && !packageOptions.enableNonBrowserBranches,
         isRuntimeCompileBuild,
       ),
-      // babel({
-      //   extensions     : ['.js', '.ts'],
-      //   exclude        : 'node_modules/**',
-      //   babelrc        : false,
-      //   configFile     : path.resolve(__dirname, 'babel.config.js'),
-      //   runtimeHelpers : true,
-      // }),
-      // buble({
-      //   transforms : {
-      //     asyncAwait : false,
-      //     forOf      : false,
-      //   },
-      //   objectAssign : true,
-      // }),
+      compatPlugin,
       ...plugins,
     ],
     output,
@@ -217,7 +226,14 @@ function createMinifiedConfig(format) {
     },
     [
       terser({
-        module : /^esm/.test(format),
+        module   : /^esm/.test(format),
+        compress : {
+          ecma         : 2015,
+          pure_getters : true,
+        },
+        output : {
+          comments : false,
+        },
       }),
     ],
   );
