@@ -86,6 +86,10 @@ export function createUA(config?: UAConfigs) {
     let partyId: string;
     let url: string;
 
+    if (!api) {
+      api = createUserApi(false);
+    }
+
     // get conference url
     response = await api
       .request('getURL')

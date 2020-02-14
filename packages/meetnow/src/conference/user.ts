@@ -32,10 +32,11 @@ export function createUser(data: ConferenceUser, context: Context) {
     target.role = getRole();
 
     target.hold = isOnHold();
-    target.handup = isHandup();
 
     target.audio = !isAudioBlocked();
     target.video = !isVideoBlocked();
+
+    target.handup = isHandup();
 
     target.media = hasMedia();
     target.sharing = isSharing();
