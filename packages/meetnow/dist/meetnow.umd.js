@@ -11965,9 +11965,9 @@ function createUser(data, context) {
     target.displayText = data['display-text'];
     target.role = getRole();
     target.hold = isOnHold();
-    target.handup = isHandup();
     target.audio = !isAudioBlocked();
     target.video = !isVideoBlocked();
+    target.handup = isHandup();
     target.media = hasMedia();
     target.sharing = isSharing();
     /* eslint-enable no-use-before-define */
@@ -17756,6 +17756,37 @@ function createConference(config) {
     return _share.apply(this, arguments);
   }
 
+  function setSharing() {
+    return _setSharing.apply(this, arguments);
+  }
+
+  function _setSharing() {
+    _setSharing = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee6() {
+      var enable,
+          _args6 = arguments;
+      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              enable = _args6.length > 0 && _args6[0] !== undefined ? _args6[0] : true;
+              throwIfNotStatus(conference_STATUS.kConnected);
+              _context6.next = 4;
+              return api.request('switchShare').data({
+                share: enable
+              }).send();
+
+            case 4:
+            case "end":
+              return _context6.stop();
+          }
+        }
+      }, _callee6);
+    }));
+    return _setSharing.apply(this, arguments);
+  }
+
   function sendMessage(_x2, _x3) {
     return _sendMessage.apply(this, arguments);
   }
@@ -17763,30 +17794,30 @@ function createConference(config) {
   function _sendMessage() {
     _sendMessage = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee6(msg, target) {
-      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    regeneratorRuntime.mark(function _callee7(msg, target) {
+      return regeneratorRuntime.wrap(function _callee7$(_context7) {
         while (1) {
-          switch (_context6.prev = _context6.next) {
+          switch (_context7.prev = _context7.next) {
             case 0:
               throwIfNotStatus(conference_STATUS.kConnected);
 
               if (!(!chatChannel || !chatChannel.ready)) {
-                _context6.next = 3;
+                _context7.next = 3;
                 break;
               }
 
               throw new Error('Not Ready');
 
             case 3:
-              _context6.next = 5;
+              _context7.next = 5;
               return chatChannel.sendMessage(msg, target);
 
             case 5:
             case "end":
-              return _context6.stop();
+              return _context7.stop();
           }
         }
-      }, _callee6);
+      }, _callee7);
     }));
     return _sendMessage.apply(this, arguments);
   }
@@ -17864,6 +17895,7 @@ function createConference(config) {
     leave: leave,
     end: end,
     share: share,
+    setSharing: setSharing,
     sendMessage: sendMessage
   });
 }
@@ -17997,64 +18029,70 @@ function createUA(config) {
           switch (_context2.prev = _context2.next) {
             case 0:
               user_agent_log('fetch()');
-              _context2.next = 3;
+
+              if (!api) {
+                api = createUserApi(false);
+              } // get conference url
+
+
+              _context2.next = 4;
               return api.request('getURL').data({
                 'long-number': number
               }).send();
 
-            case 3:
+            case 4:
               response = _context2.sent;
               _response = response;
               data = _response.data;
               _data$data = data.data;
               partyId = _data$data['party-id'];
               url = _data$data.url;
-              _context2.prev = 9;
-              _context2.next = 12;
+              _context2.prev = 10;
+              _context2.next = 13;
               return api.request('getBasicInfo').data({
                 'conference-url': url
               }).send();
 
-            case 12:
+            case 13:
               response = _context2.sent;
               _response2 = response;
               data = _response2.data;
               info = data.data;
-              _context2.next = 33;
+              _context2.next = 34;
               break;
 
-            case 18:
-              _context2.prev = 18;
-              _context2.t0 = _context2["catch"](9);
+            case 19:
+              _context2.prev = 19;
+              _context2.t0 = _context2["catch"](10);
               user_agent_log('Conference not started.');
-              _context2.prev = 21;
-              _context2.next = 24;
+              _context2.prev = 22;
+              _context2.next = 25;
               return api.request('getBasicInfoOffline').data({
                 'long-number': number
               }).send();
 
-            case 24:
+            case 25:
               response = _context2.sent;
               _response3 = response;
               data = _response3.data;
               info = data.data;
-              _context2.next = 33;
+              _context2.next = 34;
               break;
 
-            case 30:
-              _context2.prev = 30;
-              _context2.t1 = _context2["catch"](21);
+            case 31:
+              _context2.prev = 31;
+              _context2.t1 = _context2["catch"](22);
               user_agent_log('Conference not exist.');
 
-            case 33:
+            case 34:
               if (info) {
-                _context2.next = 35;
+                _context2.next = 36;
                 break;
               }
 
               throw new Error('Not Exist');
 
-            case 35:
+            case 36:
               return _context2.abrupt("return", {
                 partyId: partyId,
                 number: number,
@@ -18062,12 +18100,12 @@ function createUA(config) {
                 info: info
               });
 
-            case 36:
+            case 37:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2, null, [[9, 18], [21, 30]]);
+      }, _callee2, null, [[10, 19], [22, 31]]);
     }));
     return _fetch.apply(this, arguments);
   }

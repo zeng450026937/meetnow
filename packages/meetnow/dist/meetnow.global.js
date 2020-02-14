@@ -3532,9 +3532,9 @@ var MeetNow = (function (exports) {
 	        target.displayText = data['display-text'];
 	        target.role = getRole();
 	        target.hold = isOnHold();
-	        target.handup = isHandup();
 	        target.audio = !isAudioBlocked();
 	        target.video = !isVideoBlocked();
+	        target.handup = isHandup();
 	        target.media = hasMedia();
 	        target.sharing = isSharing();
 	        /* eslint-enable no-use-before-define */
@@ -7034,6 +7034,13 @@ var MeetNow = (function (exports) {
 	            .data({ share: true })
 	            .send();
 	    }
+	    async function setSharing(enable = true) {
+	        throwIfNotStatus(exports.STATUS.kConnected);
+	        await api
+	            .request('switchShare')
+	            .data({ share: enable })
+	            .send();
+	    }
 	    async function sendMessage(msg, target) {
 	        throwIfNotStatus(exports.STATUS.kConnected);
 	        if (!chatChannel || !chatChannel.ready)
@@ -7098,6 +7105,7 @@ var MeetNow = (function (exports) {
 	        leave,
 	        end,
 	        share,
+	        setSharing,
 	        sendMessage,
 	    };
 	}
@@ -7157,6 +7165,9 @@ var MeetNow = (function (exports) {
 	        let info;
 	        let partyId;
 	        let url;
+	        if (!api) {
+	            api = createUserApi(false);
+	        }
 	        // get conference url
 	        response = await api
 	            .request('getURL')

@@ -6,6 +6,8 @@ import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
 import noderesolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+// import buble from '@rollup/plugin-buble';
+// import babel from 'rollup-plugin-babel';
 
 if (!process.env.TARGET) {
   throw new Error('TARGET package must be specified via --environment flag.');
@@ -136,6 +138,20 @@ function createConfig(format, output, plugins = []) {
           && !packageOptions.enableNonBrowserBranches,
         isRuntimeCompileBuild,
       ),
+      // babel({
+      //   extensions     : ['.js', '.ts'],
+      //   exclude        : 'node_modules/**',
+      //   babelrc        : false,
+      //   configFile     : path.resolve(__dirname, 'babel.config.js'),
+      //   runtimeHelpers : true,
+      // }),
+      // buble({
+      //   transforms : {
+      //     asyncAwait : false,
+      //     forOf      : false,
+      //   },
+      //   objectAssign : true,
+      // }),
       ...plugins,
     ],
     output,

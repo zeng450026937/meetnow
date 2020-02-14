@@ -4057,6 +4057,7 @@ declare function connect(options: ConnectOptions): Promise<{
     leave: () => Promise<any>;
     end: () => Promise<any>;
     share: (options?: import("./channel").ConnectOptions | undefined) => Promise<void>;
+    setSharing: (enable?: boolean) => Promise<void>;
     sendMessage: (msg: string, target?: string[] | undefined) => Promise<void>;
     on(event: string | string[], fn: Function): {
         on(event: string | string[], fn: Function): any;
@@ -7802,6 +7803,7 @@ export declare function createConference(config: ConferenceConfigs): {
     leave: () => Promise<any>;
     end: () => Promise<any>;
     share: (options?: ConnectOptions_2 | undefined) => Promise<void>;
+    setSharing: (enable?: boolean) => Promise<void>;
     sendMessage: (msg: string, target?: string[] | undefined) => Promise<void>;
     on(event: string | string[], fn: Function): {
         on(event: string | string[], fn: Function): any;
@@ -11498,7 +11500,7 @@ export declare function createUA(config?: UAConfigs): {
                 readonly version: number | undefined;
                 readonly sender: import("../channel/message").MessageSender | undefined;
                 readonly receiver: string[] | undefined;
-                readonly private: boolean | undefined;
+                readonly private: boolean;
                 send: (message: string, target?: string[] | undefined) => Promise<void>;
                 retry: () => Promise<void>;
                 cancel: () => void;
@@ -11512,7 +11514,7 @@ export declare function createUA(config?: UAConfigs): {
                 readonly version: number | undefined;
                 readonly sender: import("../channel/message").MessageSender | undefined;
                 readonly receiver: string[] | undefined;
-                readonly private: boolean | undefined;
+                readonly private: boolean;
                 send: (message: string, target?: string[] | undefined) => Promise<void>;
                 retry: () => Promise<void>;
                 cancel: () => void;
@@ -11543,10 +11545,12 @@ export declare function createUA(config?: UAConfigs): {
                 emit(event: string, ...args: any[]): any;
             };
         } | undefined;
+        trtc: object;
         join: (options?: Partial<JoinOptions>) => Promise<any>;
         leave: () => Promise<any>;
         end: () => Promise<any>;
         share: (options?: import("../channel").ConnectOptions | undefined) => Promise<void>;
+        setSharing: (enable?: boolean) => Promise<void>;
         sendMessage: (msg: string, target?: string[] | undefined) => Promise<void>;
         on(event: string | string[], fn: Function): {
             on(event: string | string[], fn: Function): any;

@@ -3529,9 +3529,9 @@ function createUser(data, context) {
         target.displayText = data['display-text'];
         target.role = getRole();
         target.hold = isOnHold();
-        target.handup = isHandup();
         target.audio = !isAudioBlocked();
         target.video = !isVideoBlocked();
+        target.handup = isHandup();
         target.media = hasMedia();
         target.sharing = isSharing();
         /* eslint-enable no-use-before-define */
@@ -7032,6 +7032,13 @@ function createConference(config) {
             .data({ share: true })
             .send();
     }
+    async function setSharing(enable = true) {
+        throwIfNotStatus(STATUS$1.kConnected);
+        await api
+            .request('switchShare')
+            .data({ share: enable })
+            .send();
+    }
     async function sendMessage(msg, target) {
         throwIfNotStatus(STATUS$1.kConnected);
         if (!chatChannel || !chatChannel.ready)
@@ -7096,6 +7103,7 @@ function createConference(config) {
         leave,
         end,
         share,
+        setSharing,
         sendMessage,
     };
 }
@@ -7155,6 +7163,9 @@ function createUA(config) {
         let info;
         let partyId;
         let url;
+        if (!api) {
+            api = createUserApi(false);
+        }
         // get conference url
         response = await api
             .request('getURL')

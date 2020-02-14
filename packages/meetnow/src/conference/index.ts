@@ -413,6 +413,15 @@ export function createConference(config: ConferenceConfigs) {
       .send();
   }
 
+  async function setSharing(enable: boolean = true) {
+    throwIfNotStatus(STATUS.kConnected);
+
+    await api
+      .request('switchShare')
+      .data({ share: enable })
+      .send();
+  }
+
   async function sendMessage(msg: string, target?: string[]) {
     throwIfNotStatus(STATUS.kConnected);
 
@@ -487,6 +496,8 @@ export function createConference(config: ConferenceConfigs) {
     end,
 
     share,
+    setSharing,
+
     sendMessage,
   };
 }

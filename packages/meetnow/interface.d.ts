@@ -555,6 +555,7 @@ declare namespace MeetNow {
     end(): Promise<this>;
 
     share(options?: ChannelConnectOptions): Promise<void>;
+    setSharing(enable?: boolean): Promise<void>;
     sendMessage(msg: string, target?: string[]): Promise<void>;
 
     /* eslint-disable no-dupe-class-members */
