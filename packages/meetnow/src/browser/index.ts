@@ -28,7 +28,7 @@ declare const swan: any;
 declare const my: any;
 
 export function isMiniProgram() {
-  return isObject(wx) || isObject(swan) || isObject(my)
+  return (typeof wx === 'object') || (typeof swan === 'object') || (typeof my === 'object')
   || /miniprogram/i.test(navigator.userAgent)
   || (window && window.__wxjs_environment === 'miniprogram');
 }
