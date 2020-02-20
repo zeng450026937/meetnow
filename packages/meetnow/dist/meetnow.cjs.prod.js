@@ -811,27 +811,9 @@ const browsersList = [
     },
 ];
 
-const isDef = (value) => {
-    return value !== undefined && value !== null;
-};
-const { isArray: isArray$1 } = Array;
-const isFunction$1 = (val) => typeof val === 'function';
-const isObject$1 = (val) => typeof val === 'object' && val !== null;
-const { hasOwnProperty } = Object.prototype;
-const hasOwn = (val, key) => hasOwnProperty.call(val, key);
-const camelizeRE = /-(\w)/g;
-const camelize = (str) => {
-    return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
-};
-// compare whether a value has changed, accounting for NaN.
-const hasChanged = (value, oldValue) => {
-    /* eslint-disable-next-line no-self-compare */
-    return value !== oldValue && (value === value || oldValue === oldValue);
-};
-
 const parsed = {};
 function isMiniProgram() {
-    return isObject$1(wx) || isObject$1(swan) || isObject$1(my)
+    return (typeof wx === 'object') || (typeof swan === 'object') || (typeof my === 'object')
         || /miniprogram/i.test(navigator.userAgent)
         || (window && window.__wxjs_environment === 'miniprogram');
 }
@@ -1243,6 +1225,24 @@ function createApi(config = {}) {
         request,
     };
 }
+
+const isDef = (value) => {
+    return value !== undefined && value !== null;
+};
+const { isArray: isArray$1 } = Array;
+const isFunction$1 = (val) => typeof val === 'function';
+const isObject$1 = (val) => typeof val === 'object' && val !== null;
+const { hasOwnProperty } = Object.prototype;
+const hasOwn = (val, key) => hasOwnProperty.call(val, key);
+const camelizeRE = /-(\w)/g;
+const camelize = (str) => {
+    return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''));
+};
+// compare whether a value has changed, accounting for NaN.
+const hasChanged = (value, oldValue) => {
+    /* eslint-disable-next-line no-self-compare */
+    return value !== oldValue && (value === value || oldValue === oldValue);
+};
 
 const log$2 = debug('MN:Worker');
 function createWorker(config) {
@@ -3748,7 +3748,7 @@ var STATUS;
  */
 const holdMediaTypes = ['audio', 'video'];
 function createChannel(config) {
-    const { invite, confirm, cancel, bye, } = config;
+    const { invite, confirm, cancel, bye, localstream, } = config;
     const events = createEvents(log$m);
     // The RTCPeerConnection instance (public attribute).
     let connection;
@@ -3763,6 +3763,8 @@ function createChannel(config) {
     let localMediaStreamLocallyGenerated = false;
     // Flag to indicate PeerConnection ready for new actions.
     let rtcReady = false;
+    let startTime;
+    let endTime;
     // Mute/Hold state.
     let audioMuted = false;
     let videoMuted = false;
@@ -3955,6 +3957,12 @@ function createChannel(config) {
             localMediaStream.getTracks().forEach((track) => {
                 connection.addTrack(track, localMediaStream);
             });
+            try {
+                await localstream(localMediaStream);
+            }
+            catch (error) {
+                // ignore error
+            }
         }
         const localSDP = await createLocalDescription('offer', rtcOfferConstraints)
             .catch((error) => {
@@ -4066,9 +4074,8 @@ function createChannel(config) {
                 log$m('error closing RTCPeerConnection %o', error);
             }
         }
-        if (localMediaStream && localMediaStreamLocallyGenerated) {
-            closeMediaStream(localMediaStream);
-        }
+        /* eslint-disable-next-line no-use-before-define */
+        maybeCloseLocalMediaStream();
         localMediaStream = undefined;
         localMediaStreamLocallyGenerated = false;
         rtcStats.clear();
@@ -4104,6 +4111,13 @@ function createChannel(config) {
         toggleMuteAudio(!enableAudio);
         toggleMuteVideo(!enableVideo);
     }
+    function maybeCloseLocalMediaStream() {
+        if (localMediaStream && localMediaStreamLocallyGenerated) {
+            closeMediaStream(localMediaStream);
+            localMediaStream = undefined;
+            localMediaStreamLocallyGenerated = false;
+        }
+    }
     function onProgress(originator, message) {
         log$m('channel progress');
         events.emit('progress', {
@@ -4117,9 +4131,11 @@ function createChannel(config) {
             originator,
             message,
         });
+        startTime = new Date();
     }
     function onEnded(originator, message) {
         log$m('channel ended');
+        endTime = new Date();
         close();
         events.emit('ended', {
             originator,
@@ -4241,6 +4257,15 @@ function createChannel(config) {
             events.emit('peerconnection:setremotedescriptionfailed', error);
             throw error;
         }
+        try {
+            await confirm();
+        }
+        catch (error) {
+            /* eslint-disable-next-line no-use-before-define */
+            onFailed('local', 'Request Error');
+            log$m('confirm failed: %o', error);
+            throw error;
+        }
     }
     function mangleOffer(offer) {
         log$m('mangleOffer()');
@@ -4296,44 +4321,6 @@ function createChannel(config) {
         }
         return stream;
     }
-    function addLocalStream(stream) {
-        log$m('addLocalStream()');
-        if (!stream)
-            return;
-        if (connection.addTrack) {
-            stream
-                .getTracks()
-                .forEach((track) => {
-                connection.addTrack(track, stream);
-            });
-        }
-        else if (connection.addStream) {
-            connection.addStream(stream);
-        }
-    }
-    function removeLocalStream() {
-        log$m('removeLocalStream()');
-        if (connection.getSenders && connection.removeTrack) {
-            connection.getSenders().forEach((sender) => {
-                if (sender.track) {
-                    sender.track.stop();
-                }
-                connection.removeTrack(sender);
-            });
-        }
-        else if (connection.getLocalStreams && connection.removeStream) {
-            connection
-                .getLocalStreams()
-                .forEach((stream) => {
-                stream
-                    .getTracks()
-                    .forEach((track) => {
-                    track.stop();
-                });
-                connection.removeStream(stream);
-            });
-        }
-    }
     function getLocalStream() {
         log$m('getLocalStream()');
         let stream;
@@ -4353,9 +4340,35 @@ function createChannel(config) {
         }
         return stream;
     }
-    function setLocalStream(stream) {
-        removeLocalStream();
-        addLocalStream(stream);
+    function addLocalStream(stream) {
+        log$m('addLocalStream()');
+        if (!stream)
+            return;
+        if (connection.addTrack) {
+            stream
+                .getTracks()
+                .forEach((track) => {
+                connection.addTrack(track, stream);
+            });
+        }
+        else if (connection.addStream) {
+            connection.addStream(stream);
+        }
+    }
+    function removeLocalStream() {
+        log$m('removeLocalStream()');
+        if (connection.getSenders && connection.removeTrack) {
+            connection.getSenders().forEach((sender) => {
+                connection.removeTrack(sender);
+            });
+        }
+        else if (connection.getLocalStreams && connection.removeStream) {
+            connection
+                .getLocalStreams()
+                .forEach((stream) => {
+                connection.removeStream(stream);
+            });
+        }
     }
     async function replaceLocalStream(stream, renegotiation = false) {
         log$m('replaceLocalStream()');
@@ -4375,6 +4388,8 @@ function createChannel(config) {
             renegotiationNeeded = (Boolean(audioTrack) !== peerHasAudio)
                 || (Boolean(videoTrack) !== peerHasVideo)
                 || renegotiation;
+            /* eslint-disable-next-line no-use-before-define */
+            maybeCloseLocalMediaStream();
             if (renegotiationNeeded) {
                 removeLocalStream();
                 addLocalStream(stream);
@@ -4416,7 +4431,17 @@ function createChannel(config) {
                 await connection.setRemoteDescription(connection.remoteDescription);
             };
         }
-        await Promise.all(queue);
+        await Promise.all(queue)
+            .finally(async () => {
+            localMediaStream = getLocalStream();
+            localMediaStreamLocallyGenerated = false;
+        });
+        try {
+            await localstream(localMediaStream);
+        }
+        catch (error) {
+            // ignore error
+        }
     }
     function replaceSSRCs(currentDescription, newDescription) {
         let ssrcs = currentDescription.match(/a=ssrc-group:FID (\d+) (\d+)\r\n/);
@@ -4568,6 +4593,12 @@ function createChannel(config) {
         get connection() {
             return connection;
         },
+        get startTime() {
+            return startTime;
+        },
+        get endTime() {
+            return endTime;
+        },
         isInProgress,
         isEstablished,
         isEnded,
@@ -4581,10 +4612,7 @@ function createChannel(config) {
         hold,
         unhold,
         getRemoteStream,
-        addLocalStream,
-        removeLocalStream,
         getLocalStream,
-        setLocalStream,
         replaceLocalStream,
         adjustBandWidth,
         applyConstraints,
@@ -4879,8 +4907,8 @@ function createMediaChannel(config) {
             const response = await request.send();
             ({
                 sdp,
-                'media-version': mediaVersion,
-                'mcu-callid': callId,
+                'media-version': mediaVersion = mediaVersion,
+                'mcu-callid': callId = callId,
             } = response.data.data);
             log$o('MCU call-id: %s', callId);
             return { sdp };
@@ -4888,17 +4916,20 @@ function createMediaChannel(config) {
         confirm: () => {
             log$o('confirm()');
             request = undefined;
-            localstream = channel.getLocalStream();
-            channel.emit('localstream', localstream);
             // send confirm
         },
         cancel: () => {
             log$o('cancel()');
             request && request.cancel();
+            request = undefined;
         },
         bye: () => {
             log$o('bye()');
             request = undefined;
+        },
+        localstream: (stream) => {
+            localstream = stream;
+            channel.emit('localstream', localstream);
         },
     });
     channel.on('sdp', createModifier()
@@ -4917,6 +4948,7 @@ function createMediaChannel(config) {
         });
         pc.addEventListener('negotiationneeded', () => {
             log$o('peerconnection:negotiationneeded');
+            channel.emit('negotiationneeded');
         });
         pc.addEventListener('track', (event) => {
             log$o('peerconnection:track: %o', event);
@@ -4955,6 +4987,12 @@ function createMediaChannel(config) {
         },
         get connection() {
             return channel.connection;
+        },
+        get startTime() {
+            return channel.startTime;
+        },
+        get endTime() {
+            return channel.endTime;
         },
         get version() {
             return mediaVersion;
@@ -5240,8 +5278,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.0-beta"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.0-beta"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.1-beta"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.1-beta"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -5674,7 +5712,7 @@ function createMedia() {
 }
 
 const log$t = debug('MN');
-const version = "1.0.0-beta";
+const version = "1.0.1-beta";
 // global setup
 function setup$1(config) {
     setupConfig(config);

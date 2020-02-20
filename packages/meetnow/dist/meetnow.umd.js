@@ -5884,6 +5884,44 @@ module.exports = function (argument) {
 
 /***/ }),
 
+/***/ "a79d":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__("23e7");
+var IS_PURE = __webpack_require__("c430");
+var NativePromise = __webpack_require__("fea9");
+var getBuiltIn = __webpack_require__("d066");
+var speciesConstructor = __webpack_require__("4840");
+var promiseResolve = __webpack_require__("cdf9");
+var redefine = __webpack_require__("6eeb");
+
+// `Promise.prototype.finally` method
+// https://tc39.github.io/ecma262/#sec-promise.prototype.finally
+$({ target: 'Promise', proto: true, real: true }, {
+  'finally': function (onFinally) {
+    var C = speciesConstructor(this, getBuiltIn('Promise'));
+    var isFunction = typeof onFinally == 'function';
+    return this.then(
+      isFunction ? function (x) {
+        return promiseResolve(C, onFinally()).then(function () { return x; });
+      } : onFinally,
+      isFunction ? function (e) {
+        return promiseResolve(C, onFinally()).then(function () { throw e; });
+      } : onFinally
+    );
+  }
+});
+
+// patch native Promise.prototype for native async functions
+if (!IS_PURE && typeof NativePromise == 'function' && !NativePromise.prototype['finally']) {
+  redefine(NativePromise.prototype, 'finally', getBuiltIn('Promise').prototype['finally']);
+}
+
+
+/***/ }),
+
 /***/ "a9e3":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9570,103 +9608,6 @@ var browsersList = [{
     return browser_list_browser(getFirstMatch(regexp, ua), getSecondMatch(regexp, ua));
   }
 }];
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.slice.js
-var es_array_slice = __webpack_require__("fb6a");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.constructor.js
-var es_number_constructor = __webpack_require__("a9e3");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.is-nan.js
-var es_number_is_nan = __webpack_require__("9129");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.to-string.js
-var es_regexp_to_string = __webpack_require__("25f0");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.replace.js
-var es_string_replace = __webpack_require__("5319");
-
-// CONCATENATED MODULE: ./packages/meetnow/src/utils/index.ts
-
-
-
-
-
-
-
-
-
-var debounce = function debounce(func) {
-  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var timer;
-  return function () {
-    var _this = this;
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    clearTimeout(timer);
-    timer = setTimeout.apply(void 0, [function () {
-      return func.call.apply(func, [_this].concat(args));
-    }, wait].concat(args));
-  };
-};
-var isDef = function isDef(value) {
-  return value !== undefined && value !== null;
-};
-var isEmpty = function isEmpty(val) {
-  return val === undefined || val === null || val === '' || Array.isArray(val) && val.length === 0 || typeof val === 'number' && Number.isNaN(val);
-};
-var NOOP = function NOOP() {};
-var NO = function NO() {
-  return false;
-};
-var isArray = Array.isArray;
-
-var isFunction = function isFunction(val) {
-  return typeof val === 'function';
-};
-var utils_isString = function isString(val) {
-  return typeof val === 'string';
-};
-var utils_isSymbol = function isSymbol(val) {
-  return _typeof(val) === 'symbol';
-};
-var utils_isObject = function isObject(val) {
-  return _typeof(val) === 'object' && val !== null;
-};
-function isPromise(val) {
-  return utils_isObject(val) && isFunction(val.then) && isFunction(val.catch);
-}
-var utils_hasOwnProperty = Object.prototype.hasOwnProperty;
-var hasOwn = function hasOwn(val, key) {
-  return utils_hasOwnProperty.call(val, key);
-};
-var objectToString = Object.prototype.toString;
-var toTypeString = function toTypeString(value) {
-  return objectToString.call(value);
-};
-var isPlainObject = function isPlainObject(val) {
-  return toTypeString(val) === '[object Object]';
-};
-var camelizeRE = /-(\w)/g;
-var camelize = function camelize(str) {
-  return str.replace(camelizeRE, function (_, c) {
-    return c ? c.toUpperCase() : '';
-  });
-};
-var hyphenateRE = /\B([A-Z])/g;
-var hyphenate = function hyphenate(str) {
-  return str.replace(hyphenateRE, '-$1').toLowerCase();
-};
-var capitalize = function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}; // compare whether a value has changed, accounting for NaN.
-
-var hasChanged = function hasChanged(value, oldValue) {
-  /* eslint-disable-next-line no-self-compare */
-  return value !== oldValue && (value === value || oldValue === oldValue);
-};
 // CONCATENATED MODULE: ./packages/meetnow/src/browser/index.ts
 
 
@@ -9674,7 +9615,7 @@ var hasChanged = function hasChanged(value, oldValue) {
 
 var parsed = {};
 function isMiniProgram() {
-  return utils_isObject(wx) || utils_isObject(swan) || utils_isObject(my) || /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
+  return (typeof wx === "undefined" ? "undefined" : _typeof(wx)) === 'object' || (typeof swan === "undefined" ? "undefined" : _typeof(swan)) === 'object' || (typeof my === "undefined" ? "undefined" : _typeof(my)) === 'object' || /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
 }
 function parseBrowser(ua) {
   if (!parsed.browser) {
@@ -9703,8 +9644,17 @@ var MINIPROGRAM = isMiniProgram();
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.map.js
 var es_array_map = __webpack_require__("d81d");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.slice.js
+var es_array_slice = __webpack_require__("fb6a");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.map.js
 var es_map = __webpack_require__("4ec9");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.constructor.js
+var es_number_constructor = __webpack_require__("a9e3");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.number.is-nan.js
+var es_number_is_nan = __webpack_require__("9129");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.entries.js
 var es_object_entries = __webpack_require__("4fad");
@@ -9716,6 +9666,9 @@ var es_string_split = __webpack_require__("1276");
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.to-string.js
+var es_regexp_to_string = __webpack_require__("25f0");
+
 // CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
 
 
@@ -10451,6 +10404,91 @@ function createApi() {
     request: request
   };
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.replace.js
+var es_string_replace = __webpack_require__("5319");
+
+// CONCATENATED MODULE: ./packages/meetnow/src/utils/index.ts
+
+
+
+
+
+
+
+
+
+var debounce = function debounce(func) {
+  var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var timer;
+  return function () {
+    var _this = this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    clearTimeout(timer);
+    timer = setTimeout.apply(void 0, [function () {
+      return func.call.apply(func, [_this].concat(args));
+    }, wait].concat(args));
+  };
+};
+var isDef = function isDef(value) {
+  return value !== undefined && value !== null;
+};
+var isEmpty = function isEmpty(val) {
+  return val === undefined || val === null || val === '' || Array.isArray(val) && val.length === 0 || typeof val === 'number' && Number.isNaN(val);
+};
+var NOOP = function NOOP() {};
+var NO = function NO() {
+  return false;
+};
+var isArray = Array.isArray;
+
+var isFunction = function isFunction(val) {
+  return typeof val === 'function';
+};
+var utils_isString = function isString(val) {
+  return typeof val === 'string';
+};
+var utils_isSymbol = function isSymbol(val) {
+  return _typeof(val) === 'symbol';
+};
+var utils_isObject = function isObject(val) {
+  return _typeof(val) === 'object' && val !== null;
+};
+function isPromise(val) {
+  return utils_isObject(val) && isFunction(val.then) && isFunction(val.catch);
+}
+var utils_hasOwnProperty = Object.prototype.hasOwnProperty;
+var hasOwn = function hasOwn(val, key) {
+  return utils_hasOwnProperty.call(val, key);
+};
+var objectToString = Object.prototype.toString;
+var toTypeString = function toTypeString(value) {
+  return objectToString.call(value);
+};
+var isPlainObject = function isPlainObject(val) {
+  return toTypeString(val) === '[object Object]';
+};
+var camelizeRE = /-(\w)/g;
+var camelize = function camelize(str) {
+  return str.replace(camelizeRE, function (_, c) {
+    return c ? c.toUpperCase() : '';
+  });
+};
+var hyphenateRE = /\B([A-Z])/g;
+var hyphenate = function hyphenate(str) {
+  return str.replace(hyphenateRE, '-$1').toLowerCase();
+};
+var capitalize = function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}; // compare whether a value has changed, accounting for NaN.
+
+var hasChanged = function hasChanged(value, oldValue) {
+  /* eslint-disable-next-line no-self-compare */
+  return value !== oldValue && (value === value || oldValue === oldValue);
+};
 // CONCATENATED MODULE: ./packages/meetnow/src/utils/worker.ts
 
 
@@ -13630,6 +13668,9 @@ function createInformation(data, context) {
     update: update
   });
 }
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.promise.finally.js
+var es_promise_finally = __webpack_require__("a79d");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.regexp.constructor.js
 var es_regexp_constructor = __webpack_require__("4d63");
 
@@ -14714,6 +14755,7 @@ function createRTCStats() {
 
 
 
+
 function channel_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function channel_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { channel_ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { channel_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -14748,7 +14790,8 @@ function createChannel(config) {
   var invite = config.invite,
       confirm = config.confirm,
       cancel = config.cancel,
-      bye = config.bye;
+      bye = config.bye,
+      localstream = config.localstream;
   var events = createEvents(channel_log); // The RTCPeerConnection instance (public attribute).
 
   var connection;
@@ -15087,13 +15130,28 @@ function createChannel(config) {
             case 24:
               throwIfTerminated();
 
-              if (localMediaStream) {
-                localMediaStream.getTracks().forEach(function (track) {
-                  connection.addTrack(track, localMediaStream);
-                });
+              if (!localMediaStream) {
+                _context2.next = 34;
+                break;
               }
 
-              _context2.next = 28;
+              localMediaStream.getTracks().forEach(function (track) {
+                connection.addTrack(track, localMediaStream);
+              });
+              _context2.prev = 27;
+              _context2.next = 30;
+              return localstream(localMediaStream);
+
+            case 30:
+              _context2.next = 34;
+              break;
+
+            case 32:
+              _context2.prev = 32;
+              _context2.t0 = _context2["catch"](27);
+
+            case 34:
+              _context2.next = 36;
               return createLocalDescription('offer', rtcOfferConstraints).catch(function (error) {
                 /* eslint-disable-next-line no-use-before-define */
                 onFailed('local', 'WebRTC Error');
@@ -15101,31 +15159,31 @@ function createChannel(config) {
                 throw error;
               });
 
-            case 28:
+            case 36:
               localSDP = _context2.sent;
               throwIfTerminated();
               status = STATUS.kOffered;
-              _context2.prev = 31;
-              _context2.next = 34;
+              _context2.prev = 39;
+              _context2.next = 42;
               return invite({
                 sdp: localSDP
               });
 
-            case 34:
+            case 42:
               answer = _context2.sent;
-              _context2.next = 42;
+              _context2.next = 50;
               break;
 
-            case 37:
-              _context2.prev = 37;
-              _context2.t0 = _context2["catch"](31);
+            case 45:
+              _context2.prev = 45;
+              _context2.t1 = _context2["catch"](39);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'Request Error');
-              channel_log('invite failed: %o', _context2.t0);
-              throw _context2.t0;
+              channel_log('invite failed: %o', _context2.t1);
+              throw _context2.t1;
 
-            case 42:
+            case 50:
               throwIfTerminated();
               status = STATUS.kAnswered;
               _answer = answer, remoteSDP = _answer.sdp;
@@ -15137,93 +15195,93 @@ function createChannel(config) {
               events.emit('sdp', desc);
 
               if (!(connection.signalingState === 'stable')) {
-                _context2.next = 63;
+                _context2.next = 71;
                 break;
               }
 
-              _context2.prev = 48;
-              _context2.next = 51;
+              _context2.prev = 56;
+              _context2.next = 59;
               return connection.createOffer();
 
-            case 51:
+            case 59:
               offer = _context2.sent;
-              _context2.next = 54;
+              _context2.next = 62;
               return connection.setLocalDescription(offer);
 
-            case 54:
-              _context2.next = 63;
+            case 62:
+              _context2.next = 71;
               break;
 
-            case 56:
-              _context2.prev = 56;
-              _context2.t1 = _context2["catch"](48);
+            case 64:
+              _context2.prev = 64;
+              _context2.t2 = _context2["catch"](56);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'WebRTC Error');
-              channel_log('createOff|setLocalDescription failed: %o', _context2.t1);
-              _context2.next = 62;
+              channel_log('createOff|setLocalDescription failed: %o', _context2.t2);
+              _context2.next = 70;
               return bye();
 
-            case 62:
-              throw _context2.t1;
+            case 70:
+              throw _context2.t2;
 
-            case 63:
-              _context2.prev = 63;
-              _context2.next = 66;
+            case 71:
+              _context2.prev = 71;
+              _context2.next = 74;
               return connection.setRemoteDescription({
                 type: 'answer',
                 sdp: desc.sdp
               });
 
-            case 66:
-              _context2.next = 76;
+            case 74:
+              _context2.next = 84;
               break;
-
-            case 68:
-              _context2.prev = 68;
-              _context2.t2 = _context2["catch"](63);
-
-              /* eslint-disable-next-line no-use-before-define */
-              onFailed('local', 'Bad Media Description');
-              events.emit('peerconnection:setremotedescriptionfailed', _context2.t2);
-              channel_log('setRemoteDescription failed: %o', _context2.t2);
-              _context2.next = 75;
-              return bye();
-
-            case 75:
-              throw _context2.t2;
 
             case 76:
               _context2.prev = 76;
-              _context2.next = 79;
+              _context2.t3 = _context2["catch"](71);
+
+              /* eslint-disable-next-line no-use-before-define */
+              onFailed('local', 'Bad Media Description');
+              events.emit('peerconnection:setremotedescriptionfailed', _context2.t3);
+              channel_log('setRemoteDescription failed: %o', _context2.t3);
+              _context2.next = 83;
+              return bye();
+
+            case 83:
+              throw _context2.t3;
+
+            case 84:
+              _context2.prev = 84;
+              _context2.next = 87;
               return confirm();
 
-            case 79:
-              _context2.next = 86;
+            case 87:
+              _context2.next = 94;
               break;
 
-            case 81:
-              _context2.prev = 81;
-              _context2.t3 = _context2["catch"](76);
+            case 89:
+              _context2.prev = 89;
+              _context2.t4 = _context2["catch"](84);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'Request Error');
-              channel_log('confirm failed: %o', _context2.t3);
-              throw _context2.t3;
+              channel_log('confirm failed: %o', _context2.t4);
+              throw _context2.t4;
 
-            case 86:
+            case 94:
               status = STATUS.kAccepted;
               /* eslint-disable-next-line no-use-before-define */
 
               onAccepted('local');
               events.emit('connected');
 
-            case 89:
+            case 97:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2, null, [[31, 37], [48, 56], [63, 68], [76, 81]]);
+      }, _callee2, null, [[27, 32], [39, 45], [56, 64], [71, 76], [84, 89]]);
     }));
     return _connect.apply(this, arguments);
   }
@@ -15307,11 +15365,10 @@ function createChannel(config) {
         channel_log('error closing RTCPeerConnection %o', error);
       }
     }
+    /* eslint-disable-next-line no-use-before-define */
 
-    if (localMediaStream && localMediaStreamLocallyGenerated) {
-      closeMediaStream(localMediaStream);
-    }
 
+    maybeCloseLocalMediaStream();
     localMediaStream = undefined;
     localMediaStreamLocallyGenerated = false;
     rtcStats.clear();
@@ -15353,6 +15410,14 @@ function createChannel(config) {
 
     toggleMuteAudio(!enableAudio);
     toggleMuteVideo(!enableVideo);
+  }
+
+  function maybeCloseLocalMediaStream() {
+    if (localMediaStream && localMediaStreamLocallyGenerated) {
+      closeMediaStream(localMediaStream);
+      localMediaStream = undefined;
+      localMediaStreamLocallyGenerated = false;
+    }
   }
 
   function onProgress(originator, message) {
@@ -15613,11 +15678,29 @@ function createChannel(config) {
               throw _context6.t0;
 
             case 21:
+              _context6.prev = 21;
+              _context6.next = 24;
+              return confirm();
+
+            case 24:
+              _context6.next = 31;
+              break;
+
+            case 26:
+              _context6.prev = 26;
+              _context6.t1 = _context6["catch"](21);
+
+              /* eslint-disable-next-line no-use-before-define */
+              onFailed('local', 'Request Error');
+              channel_log('confirm failed: %o', _context6.t1);
+              throw _context6.t1;
+
+            case 31:
             case "end":
               return _context6.stop();
           }
         }
-      }, _callee6, null, [[13, 17]]);
+      }, _callee6, null, [[13, 17], [21, 26]]);
     }));
     return _renegotiate.apply(this, arguments);
   }
@@ -15754,40 +15837,6 @@ function createChannel(config) {
     return stream;
   }
 
-  function addLocalStream(stream) {
-    channel_log('addLocalStream()');
-    if (!stream) return;
-
-    if (connection.addTrack) {
-      stream.getTracks().forEach(function (track) {
-        connection.addTrack(track, stream);
-      });
-    } else if (connection.addStream) {
-      connection.addStream(stream);
-    }
-  }
-
-  function removeLocalStream() {
-    channel_log('removeLocalStream()');
-
-    if (connection.getSenders && connection.removeTrack) {
-      connection.getSenders().forEach(function (sender) {
-        if (sender.track) {
-          sender.track.stop();
-        }
-
-        connection.removeTrack(sender);
-      });
-    } else if (connection.getLocalStreams && connection.removeStream) {
-      connection.getLocalStreams().forEach(function (stream) {
-        stream.getTracks().forEach(function (track) {
-          track.stop();
-        });
-        connection.removeStream(stream);
-      });
-    }
-  }
-
   function getLocalStream() {
     channel_log('getLocalStream()');
     var stream;
@@ -15808,9 +15857,31 @@ function createChannel(config) {
     return stream;
   }
 
-  function setLocalStream(stream) {
-    removeLocalStream();
-    addLocalStream(stream);
+  function addLocalStream(stream) {
+    channel_log('addLocalStream()');
+    if (!stream) return;
+
+    if (connection.addTrack) {
+      stream.getTracks().forEach(function (track) {
+        connection.addTrack(track, stream);
+      });
+    } else if (connection.addStream) {
+      connection.addStream(stream);
+    }
+  }
+
+  function removeLocalStream() {
+    channel_log('removeLocalStream()');
+
+    if (connection.getSenders && connection.removeTrack) {
+      connection.getSenders().forEach(function (sender) {
+        connection.removeTrack(sender);
+      });
+    } else if (connection.getLocalStreams && connection.removeStream) {
+      connection.getLocalStreams().forEach(function (stream) {
+        connection.removeStream(stream);
+      });
+    }
   }
 
   function replaceLocalStream(_x4) {
@@ -15820,7 +15891,7 @@ function createChannel(config) {
   function _replaceLocalStream() {
     _replaceLocalStream = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee8(stream) {
+    regeneratorRuntime.mark(function _callee9(stream) {
       var renegotiation,
           audioTrack,
           videoTrack,
@@ -15829,12 +15900,12 @@ function createChannel(config) {
           peerHasAudio,
           peerHasVideo,
           shimReplaceTrack,
-          _args8 = arguments;
-      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+          _args9 = arguments;
+      return regeneratorRuntime.wrap(function _callee9$(_context9) {
         while (1) {
-          switch (_context8.prev = _context8.next) {
+          switch (_context9.prev = _context9.next) {
             case 0:
-              shimReplaceTrack = function _ref(sender) {
+              shimReplaceTrack = function _ref2(sender) {
                 sender.replaceTrack =
                 /*#__PURE__*/
                 function () {
@@ -15880,7 +15951,7 @@ function createChannel(config) {
                 }();
               };
 
-              renegotiation = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : false;
+              renegotiation = _args9.length > 1 && _args9[1] !== undefined ? _args9[1] : false;
               channel_log('replaceLocalStream()');
               audioTrack = stream ? stream.getAudioTracks()[0] : null;
               videoTrack = stream ? stream.getVideoTracks()[0] : null;
@@ -15896,6 +15967,9 @@ function createChannel(config) {
                   peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
                 });
                 renegotiationNeeded = Boolean(audioTrack) !== peerHasAudio || Boolean(videoTrack) !== peerHasVideo || renegotiation;
+                /* eslint-disable-next-line no-use-before-define */
+
+                maybeCloseLocalMediaStream();
 
                 if (renegotiationNeeded) {
                   removeLocalStream();
@@ -15925,15 +15999,46 @@ function createChannel(config) {
                 }
               }
 
-              _context8.next = 12;
-              return Promise.all(queue);
+              _context9.next = 12;
+              return Promise.all(queue).finally(
+              /*#__PURE__*/
+              _asyncToGenerator(
+              /*#__PURE__*/
+              regeneratorRuntime.mark(function _callee8() {
+                return regeneratorRuntime.wrap(function _callee8$(_context8) {
+                  while (1) {
+                    switch (_context8.prev = _context8.next) {
+                      case 0:
+                        localMediaStream = getLocalStream();
+                        localMediaStreamLocallyGenerated = false;
+
+                      case 2:
+                      case "end":
+                        return _context8.stop();
+                    }
+                  }
+                }, _callee8);
+              })));
 
             case 12:
+              _context9.prev = 12;
+              _context9.next = 15;
+              return localstream(localMediaStream);
+
+            case 15:
+              _context9.next = 19;
+              break;
+
+            case 17:
+              _context9.prev = 17;
+              _context9.t0 = _context9["catch"](12);
+
+            case 19:
             case "end":
-              return _context8.stop();
+              return _context9.stop();
           }
         }
-      }, _callee8);
+      }, _callee9, null, [[12, 17]]);
     }));
     return _replaceLocalStream.apply(this, arguments);
   }
@@ -15962,11 +16067,11 @@ function createChannel(config) {
   function _adjustBandWidth() {
     _adjustBandWidth = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee9(options) {
+    regeneratorRuntime.mark(function _callee10(options) {
       var audio, video, queue;
-      return regeneratorRuntime.wrap(function _callee9$(_context9) {
+      return regeneratorRuntime.wrap(function _callee10$(_context10) {
         while (1) {
-          switch (_context9.prev = _context9.next) {
+          switch (_context10.prev = _context10.next) {
             case 0:
               channel_log('adjustBandWidth()');
               audio = options.audio, video = options.video;
@@ -16063,15 +16168,15 @@ function createChannel(config) {
                 }));
               }
 
-              _context9.next = 6;
+              _context10.next = 6;
               return Promise.all(queue);
 
             case 6:
             case "end":
-              return _context9.stop();
+              return _context10.stop();
           }
         }
-      }, _callee9);
+      }, _callee10);
     }));
     return _adjustBandWidth.apply(this, arguments);
   }
@@ -16083,11 +16188,11 @@ function createChannel(config) {
   function _applyConstraints() {
     _applyConstraints = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee10(options) {
+    regeneratorRuntime.mark(function _callee11(options) {
       var audio, video, queue;
-      return regeneratorRuntime.wrap(function _callee10$(_context10) {
+      return regeneratorRuntime.wrap(function _callee11$(_context11) {
         while (1) {
-          switch (_context10.prev = _context10.next) {
+          switch (_context11.prev = _context11.next) {
             case 0:
               channel_log('applyConstraints()');
               audio = options.audio, video = options.video;
@@ -16109,15 +16214,15 @@ function createChannel(config) {
                 });
               }
 
-              _context10.next = 6;
+              _context11.next = 6;
               return Promise.all(queue);
 
             case 6:
             case "end":
-              return _context10.stop();
+              return _context11.stop();
           }
         }
-      }, _callee10);
+      }, _callee11);
     }));
     return _applyConstraints.apply(this, arguments);
   }
@@ -16129,25 +16234,25 @@ function createChannel(config) {
   function _getStats() {
     _getStats = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee11() {
+    regeneratorRuntime.mark(function _callee12() {
       var stats;
-      return regeneratorRuntime.wrap(function _callee11$(_context11) {
+      return regeneratorRuntime.wrap(function _callee12$(_context12) {
         while (1) {
-          switch (_context11.prev = _context11.next) {
+          switch (_context12.prev = _context12.next) {
             case 0:
               channel_log('getStats()');
 
               if (!(connection.signalingState === 'stable')) {
-                _context11.next = 14;
+                _context12.next = 14;
                 break;
               }
 
               if (!channel_browser.chrome) {
-                _context11.next = 8;
+                _context12.next = 8;
                 break;
               }
 
-              _context11.next = 5;
+              _context12.next = 5;
               return new Promise(function (resolve) {
                 connection.getStats(function (stats) {
                   resolve(stats.result());
@@ -16155,34 +16260,34 @@ function createChannel(config) {
               });
 
             case 5:
-              stats = _context11.sent;
-              _context11.next = 11;
+              stats = _context12.sent;
+              _context12.next = 11;
               break;
 
             case 8:
-              _context11.next = 10;
+              _context12.next = 10;
               return connection.getStats();
 
             case 10:
-              stats = _context11.sent;
+              stats = _context12.sent;
 
             case 11:
               rtcStats.update(stats);
-              _context11.next = 15;
+              _context12.next = 15;
               break;
 
             case 14:
               channel_log('update rtc stats failed since connection is unstable.');
 
             case 15:
-              return _context11.abrupt("return", rtcStats);
+              return _context12.abrupt("return", rtcStats);
 
             case 16:
             case "end":
-              return _context11.stop();
+              return _context12.stop();
           }
         }
-      }, _callee11);
+      }, _callee12);
     }));
     return _getStats.apply(this, arguments);
   }
@@ -16194,6 +16299,14 @@ function createChannel(config) {
 
     get connection() {
       return connection;
+    },
+
+    get startTime() {
+      return startTime;
+    },
+
+    get endTime() {
+      return endTime;
     },
 
     isInProgress: isInProgress,
@@ -16209,10 +16322,7 @@ function createChannel(config) {
     hold: hold,
     unhold: unhold,
     getRemoteStream: getRemoteStream,
-    addLocalStream: addLocalStream,
-    removeLocalStream: removeLocalStream,
     getLocalStream: getLocalStream,
-    setLocalStream: setLocalStream,
     replaceLocalStream: replaceLocalStream,
     adjustBandWidth: adjustBandWidth,
     applyConstraints: applyConstraints,
@@ -16616,14 +16726,16 @@ function createMediaChannel(config) {
   var callId;
   var request;
   var icetimmeout;
-  var localstream;
+
+  var _localstream;
+
   var remotestream;
   var channel = createChannel({
     invite: function () {
       var _invite = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(offer) {
-        var sdp, apiName, response, _response$data$data;
+        var sdp, apiName, response, _response$data$data, _response$data$data$m, _response$data$data$m2;
 
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -16643,14 +16755,16 @@ function createMediaChannel(config) {
                 response = _context.sent;
                 _response$data$data = response.data.data;
                 sdp = _response$data$data.sdp;
-                mediaVersion = _response$data$data['media-version'];
-                callId = _response$data$data['mcu-callid'];
+                _response$data$data$m = _response$data$data['media-version'];
+                mediaVersion = _response$data$data$m === void 0 ? mediaVersion : _response$data$data$m;
+                _response$data$data$m2 = _response$data$data['mcu-callid'];
+                callId = _response$data$data$m2 === void 0 ? callId : _response$data$data$m2;
                 media_channel_log('MCU call-id: %s', callId);
                 return _context.abrupt("return", {
                   sdp: sdp
                 });
 
-              case 13:
+              case 15:
               case "end":
                 return _context.stop();
             }
@@ -16666,17 +16780,20 @@ function createMediaChannel(config) {
     }(),
     confirm: function confirm() {
       media_channel_log('confirm()');
-      request = undefined;
-      localstream = channel.getLocalStream();
-      channel.emit('localstream', localstream); // send confirm
+      request = undefined; // send confirm
     },
     cancel: function cancel() {
       media_channel_log('cancel()');
       request && request.cancel();
+      request = undefined;
     },
     bye: function bye() {
       media_channel_log('bye()');
       request = undefined;
+    },
+    localstream: function localstream(stream) {
+      _localstream = stream;
+      channel.emit('localstream', _localstream);
     }
   });
   channel.on('sdp', createModifier().content(type).prefer('h264').build());
@@ -16692,6 +16809,7 @@ function createMediaChannel(config) {
     });
     pc.addEventListener('negotiationneeded', function () {
       media_channel_log('peerconnection:negotiationneeded');
+      channel.emit('negotiationneeded');
     });
     pc.addEventListener('track', function (event) {
       media_channel_log('peerconnection:track: %o', event);
@@ -16733,6 +16851,14 @@ function createMediaChannel(config) {
 
     get connection() {
       return channel.connection;
+    },
+
+    get startTime() {
+      return channel.startTime;
+    },
+
+    get endTime() {
+      return channel.endTime;
     },
 
     get version() {
@@ -17339,8 +17465,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.0-beta"));
-              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.0-beta")); // join focus
+              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.1-beta"));
+              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.1-beta")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -18210,7 +18336,7 @@ function createMedia() {
 
 
 var src_log = browser_default()('MN');
-var src_version = "1.0.0-beta"; // global setup
+var src_version = "1.0.1-beta"; // global setup
 
 function src_setup(config) {
   setupConfig(config);

@@ -3279,357 +3279,9 @@
 	  }
 	}];
 
-	var SPECIES$3 = wellKnownSymbol('species');
-	var nativeSlice = [].slice;
-	var max$1 = Math.max;
-
-	// `Array.prototype.slice` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.slice
-	// fallback for not array-like ES3 strings and DOM objects
-	_export({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('slice') }, {
-	  slice: function slice(start, end) {
-	    var O = toIndexedObject(this);
-	    var length = toLength(O.length);
-	    var k = toAbsoluteIndex(start, length);
-	    var fin = toAbsoluteIndex(end === undefined ? length : end, length);
-	    // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
-	    var Constructor, result, n;
-	    if (isArray(O)) {
-	      Constructor = O.constructor;
-	      // cross-realm fallback
-	      if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
-	        Constructor = undefined;
-	      } else if (isObject(Constructor)) {
-	        Constructor = Constructor[SPECIES$3];
-	        if (Constructor === null) Constructor = undefined;
-	      }
-	      if (Constructor === Array || Constructor === undefined) {
-	        return nativeSlice.call(O, k, fin);
-	      }
-	    }
-	    result = new (Constructor === undefined ? Array : Constructor)(max$1(fin - k, 0));
-	    for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
-	    result.length = n;
-	    return result;
-	  }
-	});
-
-	var aPossiblePrototype = function (it) {
-	  if (!isObject(it) && it !== null) {
-	    throw TypeError("Can't set " + String(it) + ' as a prototype');
-	  } return it;
-	};
-
-	// `Object.setPrototypeOf` method
-	// https://tc39.github.io/ecma262/#sec-object.setprototypeof
-	// Works with __proto__ only. Old v8 can't work with null proto objects.
-	/* eslint-disable no-proto */
-	var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-	  var CORRECT_SETTER = false;
-	  var test = {};
-	  var setter;
-	  try {
-	    setter = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set;
-	    setter.call(test, []);
-	    CORRECT_SETTER = test instanceof Array;
-	  } catch (error) { /* empty */ }
-	  return function setPrototypeOf(O, proto) {
-	    anObject(O);
-	    aPossiblePrototype(proto);
-	    if (CORRECT_SETTER) setter.call(O, proto);
-	    else O.__proto__ = proto;
-	    return O;
-	  };
-	}() : undefined);
-
-	// makes subclassing work correct for wrapped built-ins
-	var inheritIfRequired = function ($this, dummy, Wrapper) {
-	  var NewTarget, NewTargetPrototype;
-	  if (
-	    // it can work only with native `setPrototypeOf`
-	    objectSetPrototypeOf &&
-	    // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
-	    typeof (NewTarget = dummy.constructor) == 'function' &&
-	    NewTarget !== Wrapper &&
-	    isObject(NewTargetPrototype = NewTarget.prototype) &&
-	    NewTargetPrototype !== Wrapper.prototype
-	  ) objectSetPrototypeOf($this, NewTargetPrototype);
-	  return $this;
-	};
-
-	// a string of all valid unicode whitespaces
-	// eslint-disable-next-line max-len
-	var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
-
-	var whitespace = '[' + whitespaces + ']';
-	var ltrim = RegExp('^' + whitespace + whitespace + '*');
-	var rtrim = RegExp(whitespace + whitespace + '*$');
-
-	// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
-	var createMethod$3 = function (TYPE) {
-	  return function ($this) {
-	    var string = String(requireObjectCoercible($this));
-	    if (TYPE & 1) string = string.replace(ltrim, '');
-	    if (TYPE & 2) string = string.replace(rtrim, '');
-	    return string;
-	  };
-	};
-
-	var stringTrim = {
-	  // `String.prototype.{ trimLeft, trimStart }` methods
-	  // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
-	  start: createMethod$3(1),
-	  // `String.prototype.{ trimRight, trimEnd }` methods
-	  // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
-	  end: createMethod$3(2),
-	  // `String.prototype.trim` method
-	  // https://tc39.github.io/ecma262/#sec-string.prototype.trim
-	  trim: createMethod$3(3)
-	};
-
-	var getOwnPropertyNames = objectGetOwnPropertyNames.f;
-	var getOwnPropertyDescriptor$2 = objectGetOwnPropertyDescriptor.f;
-	var defineProperty$3 = objectDefineProperty.f;
-	var trim$1 = stringTrim.trim;
-
-	var NUMBER = 'Number';
-	var NativeNumber = global_1[NUMBER];
-	var NumberPrototype = NativeNumber.prototype;
-
-	// Opera ~12 has broken Object#toString
-	var BROKEN_CLASSOF = classofRaw(objectCreate(NumberPrototype)) == NUMBER;
-
-	// `ToNumber` abstract operation
-	// https://tc39.github.io/ecma262/#sec-tonumber
-	var toNumber = function (argument) {
-	  var it = toPrimitive(argument, false);
-	  var first, third, radix, maxCode, digits, length, index, code;
-	  if (typeof it == 'string' && it.length > 2) {
-	    it = trim$1(it);
-	    first = it.charCodeAt(0);
-	    if (first === 43 || first === 45) {
-	      third = it.charCodeAt(2);
-	      if (third === 88 || third === 120) return NaN; // Number('+0x1') should be NaN, old V8 fix
-	    } else if (first === 48) {
-	      switch (it.charCodeAt(1)) {
-	        case 66: case 98: radix = 2; maxCode = 49; break; // fast equal of /^0b[01]+$/i
-	        case 79: case 111: radix = 8; maxCode = 55; break; // fast equal of /^0o[0-7]+$/i
-	        default: return +it;
-	      }
-	      digits = it.slice(2);
-	      length = digits.length;
-	      for (index = 0; index < length; index++) {
-	        code = digits.charCodeAt(index);
-	        // parseInt parses a string to a first unavailable symbol
-	        // but ToNumber should return NaN if a string contains unavailable symbols
-	        if (code < 48 || code > maxCode) return NaN;
-	      } return parseInt(digits, radix);
-	    }
-	  } return +it;
-	};
-
-	// `Number` constructor
-	// https://tc39.github.io/ecma262/#sec-number-constructor
-	if (isForced_1(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumber('+0x1'))) {
-	  var NumberWrapper = function Number(value) {
-	    var it = arguments.length < 1 ? 0 : value;
-	    var dummy = this;
-	    return dummy instanceof NumberWrapper
-	      // check on 1..constructor(foo) case
-	      && (BROKEN_CLASSOF ? fails(function () { NumberPrototype.valueOf.call(dummy); }) : classofRaw(dummy) != NUMBER)
-	        ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
-	  };
-	  for (var keys$1 = descriptors ? getOwnPropertyNames(NativeNumber) : (
-	    // ES3:
-	    'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' +
-	    // ES2015 (in case, if modules with ES2015 Number statics required before):
-	    'EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,' +
-	    'MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger'
-	  ).split(','), j = 0, key; keys$1.length > j; j++) {
-	    if (has(NativeNumber, key = keys$1[j]) && !has(NumberWrapper, key)) {
-	      defineProperty$3(NumberWrapper, key, getOwnPropertyDescriptor$2(NativeNumber, key));
-	    }
-	  }
-	  NumberWrapper.prototype = NumberPrototype;
-	  NumberPrototype.constructor = NumberWrapper;
-	  redefine(global_1, NUMBER, NumberWrapper);
-	}
-
-	// `Number.isNaN` method
-	// https://tc39.github.io/ecma262/#sec-number.isnan
-	_export({ target: 'Number', stat: true }, {
-	  isNaN: function isNaN(number) {
-	    // eslint-disable-next-line no-self-compare
-	    return number != number;
-	  }
-	});
-
-	var TO_STRING = 'toString';
-	var RegExpPrototype = RegExp.prototype;
-	var nativeToString = RegExpPrototype[TO_STRING];
-
-	var NOT_GENERIC = fails(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
-	// FF44- RegExp#toString has a wrong name
-	var INCORRECT_NAME = nativeToString.name != TO_STRING;
-
-	// `RegExp.prototype.toString` method
-	// https://tc39.github.io/ecma262/#sec-regexp.prototype.tostring
-	if (NOT_GENERIC || INCORRECT_NAME) {
-	  redefine(RegExp.prototype, TO_STRING, function toString() {
-	    var R = anObject(this);
-	    var p = String(R.source);
-	    var rf = R.flags;
-	    var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? regexpFlags.call(R) : rf);
-	    return '/' + p + '/' + f;
-	  }, { unsafe: true });
-	}
-
-	var max$2 = Math.max;
-	var min$2 = Math.min;
-	var floor$1 = Math.floor;
-	var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
-	var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
-
-	var maybeToString = function (it) {
-	  return it === undefined ? it : String(it);
-	};
-
-	// @@replace logic
-	fixRegexpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, maybeCallNative) {
-	  return [
-	    // `String.prototype.replace` method
-	    // https://tc39.github.io/ecma262/#sec-string.prototype.replace
-	    function replace(searchValue, replaceValue) {
-	      var O = requireObjectCoercible(this);
-	      var replacer = searchValue == undefined ? undefined : searchValue[REPLACE];
-	      return replacer !== undefined
-	        ? replacer.call(searchValue, O, replaceValue)
-	        : nativeReplace.call(String(O), searchValue, replaceValue);
-	    },
-	    // `RegExp.prototype[@@replace]` method
-	    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@replace
-	    function (regexp, replaceValue) {
-	      var res = maybeCallNative(nativeReplace, regexp, this, replaceValue);
-	      if (res.done) return res.value;
-
-	      var rx = anObject(regexp);
-	      var S = String(this);
-
-	      var functionalReplace = typeof replaceValue === 'function';
-	      if (!functionalReplace) replaceValue = String(replaceValue);
-
-	      var global = rx.global;
-	      if (global) {
-	        var fullUnicode = rx.unicode;
-	        rx.lastIndex = 0;
-	      }
-	      var results = [];
-	      while (true) {
-	        var result = regexpExecAbstract(rx, S);
-	        if (result === null) break;
-
-	        results.push(result);
-	        if (!global) break;
-
-	        var matchStr = String(result[0]);
-	        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
-	      }
-
-	      var accumulatedResult = '';
-	      var nextSourcePosition = 0;
-	      for (var i = 0; i < results.length; i++) {
-	        result = results[i];
-
-	        var matched = String(result[0]);
-	        var position = max$2(min$2(toInteger(result.index), S.length), 0);
-	        var captures = [];
-	        // NOTE: This is equivalent to
-	        //   captures = result.slice(1).map(maybeToString)
-	        // but for some reason `nativeSlice.call(result, 1, result.length)` (called in
-	        // the slice polyfill when slicing native arrays) "doesn't work" in safari 9 and
-	        // causes a crash (https://pastebin.com/N21QzeQA) when trying to debug it.
-	        for (var j = 1; j < result.length; j++) captures.push(maybeToString(result[j]));
-	        var namedCaptures = result.groups;
-	        if (functionalReplace) {
-	          var replacerArgs = [matched].concat(captures, position, S);
-	          if (namedCaptures !== undefined) replacerArgs.push(namedCaptures);
-	          var replacement = String(replaceValue.apply(undefined, replacerArgs));
-	        } else {
-	          replacement = getSubstitution(matched, S, position, captures, namedCaptures, replaceValue);
-	        }
-	        if (position >= nextSourcePosition) {
-	          accumulatedResult += S.slice(nextSourcePosition, position) + replacement;
-	          nextSourcePosition = position + matched.length;
-	        }
-	      }
-	      return accumulatedResult + S.slice(nextSourcePosition);
-	    }
-	  ];
-
-	  // https://tc39.github.io/ecma262/#sec-getsubstitution
-	  function getSubstitution(matched, str, position, captures, namedCaptures, replacement) {
-	    var tailPos = position + matched.length;
-	    var m = captures.length;
-	    var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
-	    if (namedCaptures !== undefined) {
-	      namedCaptures = toObject(namedCaptures);
-	      symbols = SUBSTITUTION_SYMBOLS;
-	    }
-	    return nativeReplace.call(replacement, symbols, function (match, ch) {
-	      var capture;
-	      switch (ch.charAt(0)) {
-	        case '$': return '$';
-	        case '&': return matched;
-	        case '`': return str.slice(0, position);
-	        case "'": return str.slice(tailPos);
-	        case '<':
-	          capture = namedCaptures[ch.slice(1, -1)];
-	          break;
-	        default: // \d\d?
-	          var n = +ch;
-	          if (n === 0) return match;
-	          if (n > m) {
-	            var f = floor$1(n / 10);
-	            if (f === 0) return match;
-	            if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
-	            return match;
-	          }
-	          capture = captures[n - 1];
-	      }
-	      return capture === undefined ? '' : capture;
-	    });
-	  }
-	});
-
-	var isDef = function isDef(value) {
-	  return value !== undefined && value !== null;
-	};
-	var isArray$2 = Array.isArray;
-	var isFunction$1 = function isFunction(val) {
-	  return typeof val === 'function';
-	};
-	var isObject$2 = function isObject(val) {
-	  return _typeof(val) === 'object' && val !== null;
-	};
-	var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
-	var hasOwn = function hasOwn(val, key) {
-	  return hasOwnProperty$1.call(val, key);
-	};
-	var camelizeRE = /-(\w)/g;
-	var camelize = function camelize(str) {
-	  return str.replace(camelizeRE, function (_, c) {
-	    return c ? c.toUpperCase() : '';
-	  });
-	};
-
-	var hasChanged = function hasChanged(value, oldValue) {
-	  /* eslint-disable-next-line no-self-compare */
-	  return value !== oldValue && (value === value || oldValue === oldValue);
-	};
-
 	var parsed = {};
 	function isMiniProgram() {
-	  return isObject$2(wx) || isObject$2(swan) || isObject$2(my) || /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
+	  return (typeof wx === "undefined" ? "undefined" : _typeof(wx)) === 'object' || (typeof swan === "undefined" ? "undefined" : _typeof(swan)) === 'object' || (typeof my === "undefined" ? "undefined" : _typeof(my)) === 'object' || /miniprogram/i.test(navigator.userAgent) || window && window.__wxjs_environment === 'miniprogram';
 	}
 	function parseBrowser(ua) {
 	  if (!parsed.browser) {
@@ -3662,6 +3314,41 @@
 	_export({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('map') }, {
 	  map: function map(callbackfn /* , thisArg */) {
 	    return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	  }
+	});
+
+	var SPECIES$3 = wellKnownSymbol('species');
+	var nativeSlice = [].slice;
+	var max$1 = Math.max;
+
+	// `Array.prototype.slice` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.slice
+	// fallback for not array-like ES3 strings and DOM objects
+	_export({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('slice') }, {
+	  slice: function slice(start, end) {
+	    var O = toIndexedObject(this);
+	    var length = toLength(O.length);
+	    var k = toAbsoluteIndex(start, length);
+	    var fin = toAbsoluteIndex(end === undefined ? length : end, length);
+	    // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+	    var Constructor, result, n;
+	    if (isArray(O)) {
+	      Constructor = O.constructor;
+	      // cross-realm fallback
+	      if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
+	        Constructor = undefined;
+	      } else if (isObject(Constructor)) {
+	        Constructor = Constructor[SPECIES$3];
+	        if (Constructor === null) Constructor = undefined;
+	      }
+	      if (Constructor === Array || Constructor === undefined) {
+	        return nativeSlice.call(O, k, fin);
+	      }
+	    }
+	    result = new (Constructor === undefined ? Array : Constructor)(max$1(fin - k, 0));
+	    for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
+	    result.length = n;
+	    return result;
 	  }
 	});
 
@@ -3844,6 +3531,49 @@
 	    exec(object);
 	  } catch (error) { /* empty */ }
 	  return ITERATION_SUPPORT;
+	};
+
+	var aPossiblePrototype = function (it) {
+	  if (!isObject(it) && it !== null) {
+	    throw TypeError("Can't set " + String(it) + ' as a prototype');
+	  } return it;
+	};
+
+	// `Object.setPrototypeOf` method
+	// https://tc39.github.io/ecma262/#sec-object.setprototypeof
+	// Works with __proto__ only. Old v8 can't work with null proto objects.
+	/* eslint-disable no-proto */
+	var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
+	  var CORRECT_SETTER = false;
+	  var test = {};
+	  var setter;
+	  try {
+	    setter = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set;
+	    setter.call(test, []);
+	    CORRECT_SETTER = test instanceof Array;
+	  } catch (error) { /* empty */ }
+	  return function setPrototypeOf(O, proto) {
+	    anObject(O);
+	    aPossiblePrototype(proto);
+	    if (CORRECT_SETTER) setter.call(O, proto);
+	    else O.__proto__ = proto;
+	    return O;
+	  };
+	}() : undefined);
+
+	// makes subclassing work correct for wrapped built-ins
+	var inheritIfRequired = function ($this, dummy, Wrapper) {
+	  var NewTarget, NewTargetPrototype;
+	  if (
+	    // it can work only with native `setPrototypeOf`
+	    objectSetPrototypeOf &&
+	    // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
+	    typeof (NewTarget = dummy.constructor) == 'function' &&
+	    NewTarget !== Wrapper &&
+	    isObject(NewTargetPrototype = NewTarget.prototype) &&
+	    NewTargetPrototype !== Wrapper.prototype
+	  ) objectSetPrototypeOf($this, NewTargetPrototype);
+	  return $this;
 	};
 
 	var collection = function (CONSTRUCTOR_NAME, wrapper, common, IS_MAP, IS_WEAK) {
@@ -4092,7 +3822,7 @@
 	  }
 	};
 
-	var defineProperty$4 = objectDefineProperty.f;
+	var defineProperty$3 = objectDefineProperty.f;
 
 
 
@@ -4234,7 +3964,7 @@
 	        return define(this, value = value === 0 ? 0 : value, value);
 	      }
 	    });
-	    if (descriptors) defineProperty$4(C.prototype, 'size', {
+	    if (descriptors) defineProperty$3(C.prototype, 'size', {
 	      get: function () {
 	        return getInternalState(this).size;
 	      }
@@ -4283,6 +4013,113 @@
 	var es_map = collection('Map', function (get) {
 	  return function Map() { return get(this, arguments.length ? arguments[0] : undefined); };
 	}, collectionStrong, true);
+
+	// a string of all valid unicode whitespaces
+	// eslint-disable-next-line max-len
+	var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
+
+	var whitespace = '[' + whitespaces + ']';
+	var ltrim = RegExp('^' + whitespace + whitespace + '*');
+	var rtrim = RegExp(whitespace + whitespace + '*$');
+
+	// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+	var createMethod$3 = function (TYPE) {
+	  return function ($this) {
+	    var string = String(requireObjectCoercible($this));
+	    if (TYPE & 1) string = string.replace(ltrim, '');
+	    if (TYPE & 2) string = string.replace(rtrim, '');
+	    return string;
+	  };
+	};
+
+	var stringTrim = {
+	  // `String.prototype.{ trimLeft, trimStart }` methods
+	  // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
+	  start: createMethod$3(1),
+	  // `String.prototype.{ trimRight, trimEnd }` methods
+	  // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
+	  end: createMethod$3(2),
+	  // `String.prototype.trim` method
+	  // https://tc39.github.io/ecma262/#sec-string.prototype.trim
+	  trim: createMethod$3(3)
+	};
+
+	var getOwnPropertyNames = objectGetOwnPropertyNames.f;
+	var getOwnPropertyDescriptor$2 = objectGetOwnPropertyDescriptor.f;
+	var defineProperty$4 = objectDefineProperty.f;
+	var trim$1 = stringTrim.trim;
+
+	var NUMBER = 'Number';
+	var NativeNumber = global_1[NUMBER];
+	var NumberPrototype = NativeNumber.prototype;
+
+	// Opera ~12 has broken Object#toString
+	var BROKEN_CLASSOF = classofRaw(objectCreate(NumberPrototype)) == NUMBER;
+
+	// `ToNumber` abstract operation
+	// https://tc39.github.io/ecma262/#sec-tonumber
+	var toNumber = function (argument) {
+	  var it = toPrimitive(argument, false);
+	  var first, third, radix, maxCode, digits, length, index, code;
+	  if (typeof it == 'string' && it.length > 2) {
+	    it = trim$1(it);
+	    first = it.charCodeAt(0);
+	    if (first === 43 || first === 45) {
+	      third = it.charCodeAt(2);
+	      if (third === 88 || third === 120) return NaN; // Number('+0x1') should be NaN, old V8 fix
+	    } else if (first === 48) {
+	      switch (it.charCodeAt(1)) {
+	        case 66: case 98: radix = 2; maxCode = 49; break; // fast equal of /^0b[01]+$/i
+	        case 79: case 111: radix = 8; maxCode = 55; break; // fast equal of /^0o[0-7]+$/i
+	        default: return +it;
+	      }
+	      digits = it.slice(2);
+	      length = digits.length;
+	      for (index = 0; index < length; index++) {
+	        code = digits.charCodeAt(index);
+	        // parseInt parses a string to a first unavailable symbol
+	        // but ToNumber should return NaN if a string contains unavailable symbols
+	        if (code < 48 || code > maxCode) return NaN;
+	      } return parseInt(digits, radix);
+	    }
+	  } return +it;
+	};
+
+	// `Number` constructor
+	// https://tc39.github.io/ecma262/#sec-number-constructor
+	if (isForced_1(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumber('+0x1'))) {
+	  var NumberWrapper = function Number(value) {
+	    var it = arguments.length < 1 ? 0 : value;
+	    var dummy = this;
+	    return dummy instanceof NumberWrapper
+	      // check on 1..constructor(foo) case
+	      && (BROKEN_CLASSOF ? fails(function () { NumberPrototype.valueOf.call(dummy); }) : classofRaw(dummy) != NUMBER)
+	        ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+	  };
+	  for (var keys$1 = descriptors ? getOwnPropertyNames(NativeNumber) : (
+	    // ES3:
+	    'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' +
+	    // ES2015 (in case, if modules with ES2015 Number statics required before):
+	    'EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,' +
+	    'MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger'
+	  ).split(','), j = 0, key; keys$1.length > j; j++) {
+	    if (has(NativeNumber, key = keys$1[j]) && !has(NumberWrapper, key)) {
+	      defineProperty$4(NumberWrapper, key, getOwnPropertyDescriptor$2(NativeNumber, key));
+	    }
+	  }
+	  NumberWrapper.prototype = NumberPrototype;
+	  NumberPrototype.constructor = NumberWrapper;
+	  redefine(global_1, NUMBER, NumberWrapper);
+	}
+
+	// `Number.isNaN` method
+	// https://tc39.github.io/ecma262/#sec-number.isnan
+	_export({ target: 'Number', stat: true }, {
+	  isNaN: function isNaN(number) {
+	    // eslint-disable-next-line no-self-compare
+	    return number != number;
+	  }
+	});
 
 	var propertyIsEnumerable = objectPropertyIsEnumerable.f;
 
@@ -4373,7 +4210,7 @@
 	};
 
 	var arrayPush = [].push;
-	var min$3 = Math.min;
+	var min$2 = Math.min;
 	var MAX_UINT32 = 0xFFFFFFFF;
 
 	// babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
@@ -4476,7 +4313,7 @@
 	        var e;
 	        if (
 	          z === null ||
-	          (e = min$3(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
+	          (e = min$2(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
 	        ) {
 	          q = advanceStringIndex(S, q, unicodeMatching);
 	        } else {
@@ -5224,6 +5061,169 @@
 	    request: request
 	  };
 	}
+
+	var TO_STRING = 'toString';
+	var RegExpPrototype = RegExp.prototype;
+	var nativeToString = RegExpPrototype[TO_STRING];
+
+	var NOT_GENERIC = fails(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
+	// FF44- RegExp#toString has a wrong name
+	var INCORRECT_NAME = nativeToString.name != TO_STRING;
+
+	// `RegExp.prototype.toString` method
+	// https://tc39.github.io/ecma262/#sec-regexp.prototype.tostring
+	if (NOT_GENERIC || INCORRECT_NAME) {
+	  redefine(RegExp.prototype, TO_STRING, function toString() {
+	    var R = anObject(this);
+	    var p = String(R.source);
+	    var rf = R.flags;
+	    var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? regexpFlags.call(R) : rf);
+	    return '/' + p + '/' + f;
+	  }, { unsafe: true });
+	}
+
+	var max$2 = Math.max;
+	var min$3 = Math.min;
+	var floor$1 = Math.floor;
+	var SUBSTITUTION_SYMBOLS = /\$([$&'`]|\d\d?|<[^>]*>)/g;
+	var SUBSTITUTION_SYMBOLS_NO_NAMED = /\$([$&'`]|\d\d?)/g;
+
+	var maybeToString = function (it) {
+	  return it === undefined ? it : String(it);
+	};
+
+	// @@replace logic
+	fixRegexpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, maybeCallNative) {
+	  return [
+	    // `String.prototype.replace` method
+	    // https://tc39.github.io/ecma262/#sec-string.prototype.replace
+	    function replace(searchValue, replaceValue) {
+	      var O = requireObjectCoercible(this);
+	      var replacer = searchValue == undefined ? undefined : searchValue[REPLACE];
+	      return replacer !== undefined
+	        ? replacer.call(searchValue, O, replaceValue)
+	        : nativeReplace.call(String(O), searchValue, replaceValue);
+	    },
+	    // `RegExp.prototype[@@replace]` method
+	    // https://tc39.github.io/ecma262/#sec-regexp.prototype-@@replace
+	    function (regexp, replaceValue) {
+	      var res = maybeCallNative(nativeReplace, regexp, this, replaceValue);
+	      if (res.done) return res.value;
+
+	      var rx = anObject(regexp);
+	      var S = String(this);
+
+	      var functionalReplace = typeof replaceValue === 'function';
+	      if (!functionalReplace) replaceValue = String(replaceValue);
+
+	      var global = rx.global;
+	      if (global) {
+	        var fullUnicode = rx.unicode;
+	        rx.lastIndex = 0;
+	      }
+	      var results = [];
+	      while (true) {
+	        var result = regexpExecAbstract(rx, S);
+	        if (result === null) break;
+
+	        results.push(result);
+	        if (!global) break;
+
+	        var matchStr = String(result[0]);
+	        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength(rx.lastIndex), fullUnicode);
+	      }
+
+	      var accumulatedResult = '';
+	      var nextSourcePosition = 0;
+	      for (var i = 0; i < results.length; i++) {
+	        result = results[i];
+
+	        var matched = String(result[0]);
+	        var position = max$2(min$3(toInteger(result.index), S.length), 0);
+	        var captures = [];
+	        // NOTE: This is equivalent to
+	        //   captures = result.slice(1).map(maybeToString)
+	        // but for some reason `nativeSlice.call(result, 1, result.length)` (called in
+	        // the slice polyfill when slicing native arrays) "doesn't work" in safari 9 and
+	        // causes a crash (https://pastebin.com/N21QzeQA) when trying to debug it.
+	        for (var j = 1; j < result.length; j++) captures.push(maybeToString(result[j]));
+	        var namedCaptures = result.groups;
+	        if (functionalReplace) {
+	          var replacerArgs = [matched].concat(captures, position, S);
+	          if (namedCaptures !== undefined) replacerArgs.push(namedCaptures);
+	          var replacement = String(replaceValue.apply(undefined, replacerArgs));
+	        } else {
+	          replacement = getSubstitution(matched, S, position, captures, namedCaptures, replaceValue);
+	        }
+	        if (position >= nextSourcePosition) {
+	          accumulatedResult += S.slice(nextSourcePosition, position) + replacement;
+	          nextSourcePosition = position + matched.length;
+	        }
+	      }
+	      return accumulatedResult + S.slice(nextSourcePosition);
+	    }
+	  ];
+
+	  // https://tc39.github.io/ecma262/#sec-getsubstitution
+	  function getSubstitution(matched, str, position, captures, namedCaptures, replacement) {
+	    var tailPos = position + matched.length;
+	    var m = captures.length;
+	    var symbols = SUBSTITUTION_SYMBOLS_NO_NAMED;
+	    if (namedCaptures !== undefined) {
+	      namedCaptures = toObject(namedCaptures);
+	      symbols = SUBSTITUTION_SYMBOLS;
+	    }
+	    return nativeReplace.call(replacement, symbols, function (match, ch) {
+	      var capture;
+	      switch (ch.charAt(0)) {
+	        case '$': return '$';
+	        case '&': return matched;
+	        case '`': return str.slice(0, position);
+	        case "'": return str.slice(tailPos);
+	        case '<':
+	          capture = namedCaptures[ch.slice(1, -1)];
+	          break;
+	        default: // \d\d?
+	          var n = +ch;
+	          if (n === 0) return match;
+	          if (n > m) {
+	            var f = floor$1(n / 10);
+	            if (f === 0) return match;
+	            if (f <= m) return captures[f - 1] === undefined ? ch.charAt(1) : captures[f - 1] + ch.charAt(1);
+	            return match;
+	          }
+	          capture = captures[n - 1];
+	      }
+	      return capture === undefined ? '' : capture;
+	    });
+	  }
+	});
+
+	var isDef = function isDef(value) {
+	  return value !== undefined && value !== null;
+	};
+	var isArray$2 = Array.isArray;
+	var isFunction$1 = function isFunction(val) {
+	  return typeof val === 'function';
+	};
+	var isObject$2 = function isObject(val) {
+	  return _typeof(val) === 'object' && val !== null;
+	};
+	var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
+	var hasOwn = function hasOwn(val, key) {
+	  return hasOwnProperty$1.call(val, key);
+	};
+	var camelizeRE = /-(\w)/g;
+	var camelize = function camelize(str) {
+	  return str.replace(camelizeRE, function (_, c) {
+	    return c ? c.toUpperCase() : '';
+	  });
+	};
+
+	var hasChanged = function hasChanged(value, oldValue) {
+	  /* eslint-disable-next-line no-self-compare */
+	  return value !== oldValue && (value === value || oldValue === oldValue);
+	};
 
 	var log$2 = debug('MN:Worker');
 	function createWorker(config) {
@@ -9418,7 +9418,8 @@
 	  var invite = config.invite,
 	      confirm = config.confirm,
 	      cancel = config.cancel,
-	      bye = config.bye;
+	      bye = config.bye,
+	      localstream = config.localstream;
 	  var events = createEvents(log$m); // The RTCPeerConnection instance (public attribute).
 
 	  var connection;
@@ -9433,6 +9434,8 @@
 	  var localMediaStreamLocallyGenerated = false; // Flag to indicate PeerConnection ready for new actions.
 
 	  var rtcReady = false;
+	  var startTime;
+	  var endTime; // Mute/Hold state.
 
 	  var audioMuted = false;
 	  var videoMuted = false;
@@ -9753,13 +9756,28 @@
 	            case 24:
 	              throwIfTerminated();
 
-	              if (localMediaStream) {
-	                localMediaStream.getTracks().forEach(function (track) {
-	                  connection.addTrack(track, localMediaStream);
-	                });
+	              if (!localMediaStream) {
+	                _context2.next = 34;
+	                break;
 	              }
 
-	              _context2.next = 28;
+	              localMediaStream.getTracks().forEach(function (track) {
+	                connection.addTrack(track, localMediaStream);
+	              });
+	              _context2.prev = 27;
+	              _context2.next = 30;
+	              return localstream(localMediaStream);
+
+	            case 30:
+	              _context2.next = 34;
+	              break;
+
+	            case 32:
+	              _context2.prev = 32;
+	              _context2.t0 = _context2["catch"](27);
+
+	            case 34:
+	              _context2.next = 36;
 	              return createLocalDescription('offer', rtcOfferConstraints).catch(function (error) {
 	                /* eslint-disable-next-line no-use-before-define */
 	                onFailed('local', 'WebRTC Error');
@@ -9767,31 +9785,31 @@
 	                throw error;
 	              });
 
-	            case 28:
+	            case 36:
 	              localSDP = _context2.sent;
 	              throwIfTerminated();
 	              status = STATUS.kOffered;
-	              _context2.prev = 31;
-	              _context2.next = 34;
+	              _context2.prev = 39;
+	              _context2.next = 42;
 	              return invite({
 	                sdp: localSDP
 	              });
 
-	            case 34:
+	            case 42:
 	              answer = _context2.sent;
-	              _context2.next = 42;
+	              _context2.next = 50;
 	              break;
 
-	            case 37:
-	              _context2.prev = 37;
-	              _context2.t0 = _context2["catch"](31);
+	            case 45:
+	              _context2.prev = 45;
+	              _context2.t1 = _context2["catch"](39);
 
 	              /* eslint-disable-next-line no-use-before-define */
 	              onFailed('local', 'Request Error');
-	              log$m('invite failed: %o', _context2.t0);
-	              throw _context2.t0;
+	              log$m('invite failed: %o', _context2.t1);
+	              throw _context2.t1;
 
-	            case 42:
+	            case 50:
 	              throwIfTerminated();
 	              status = STATUS.kAnswered;
 	              _answer = answer, remoteSDP = _answer.sdp;
@@ -9803,93 +9821,93 @@
 	              events.emit('sdp', desc);
 
 	              if (!(connection.signalingState === 'stable')) {
-	                _context2.next = 63;
+	                _context2.next = 71;
 	                break;
 	              }
 
-	              _context2.prev = 48;
-	              _context2.next = 51;
+	              _context2.prev = 56;
+	              _context2.next = 59;
 	              return connection.createOffer();
 
-	            case 51:
+	            case 59:
 	              offer = _context2.sent;
-	              _context2.next = 54;
+	              _context2.next = 62;
 	              return connection.setLocalDescription(offer);
 
-	            case 54:
-	              _context2.next = 63;
+	            case 62:
+	              _context2.next = 71;
 	              break;
 
-	            case 56:
-	              _context2.prev = 56;
-	              _context2.t1 = _context2["catch"](48);
+	            case 64:
+	              _context2.prev = 64;
+	              _context2.t2 = _context2["catch"](56);
 
 	              /* eslint-disable-next-line no-use-before-define */
 	              onFailed('local', 'WebRTC Error');
-	              log$m('createOff|setLocalDescription failed: %o', _context2.t1);
-	              _context2.next = 62;
+	              log$m('createOff|setLocalDescription failed: %o', _context2.t2);
+	              _context2.next = 70;
 	              return bye();
 
-	            case 62:
-	              throw _context2.t1;
+	            case 70:
+	              throw _context2.t2;
 
-	            case 63:
-	              _context2.prev = 63;
-	              _context2.next = 66;
+	            case 71:
+	              _context2.prev = 71;
+	              _context2.next = 74;
 	              return connection.setRemoteDescription({
 	                type: 'answer',
 	                sdp: desc.sdp
 	              });
 
-	            case 66:
-	              _context2.next = 76;
+	            case 74:
+	              _context2.next = 84;
 	              break;
-
-	            case 68:
-	              _context2.prev = 68;
-	              _context2.t2 = _context2["catch"](63);
-
-	              /* eslint-disable-next-line no-use-before-define */
-	              onFailed('local', 'Bad Media Description');
-	              events.emit('peerconnection:setremotedescriptionfailed', _context2.t2);
-	              log$m('setRemoteDescription failed: %o', _context2.t2);
-	              _context2.next = 75;
-	              return bye();
-
-	            case 75:
-	              throw _context2.t2;
 
 	            case 76:
 	              _context2.prev = 76;
-	              _context2.next = 79;
+	              _context2.t3 = _context2["catch"](71);
+
+	              /* eslint-disable-next-line no-use-before-define */
+	              onFailed('local', 'Bad Media Description');
+	              events.emit('peerconnection:setremotedescriptionfailed', _context2.t3);
+	              log$m('setRemoteDescription failed: %o', _context2.t3);
+	              _context2.next = 83;
+	              return bye();
+
+	            case 83:
+	              throw _context2.t3;
+
+	            case 84:
+	              _context2.prev = 84;
+	              _context2.next = 87;
 	              return confirm();
 
-	            case 79:
-	              _context2.next = 86;
+	            case 87:
+	              _context2.next = 94;
 	              break;
 
-	            case 81:
-	              _context2.prev = 81;
-	              _context2.t3 = _context2["catch"](76);
+	            case 89:
+	              _context2.prev = 89;
+	              _context2.t4 = _context2["catch"](84);
 
 	              /* eslint-disable-next-line no-use-before-define */
 	              onFailed('local', 'Request Error');
-	              log$m('confirm failed: %o', _context2.t3);
-	              throw _context2.t3;
+	              log$m('confirm failed: %o', _context2.t4);
+	              throw _context2.t4;
 
-	            case 86:
+	            case 94:
 	              status = STATUS.kAccepted;
 	              /* eslint-disable-next-line no-use-before-define */
 
 	              onAccepted('local');
 	              events.emit('connected');
 
-	            case 89:
+	            case 97:
 	            case "end":
 	              return _context2.stop();
 	          }
 	        }
-	      }, _callee2, null, [[31, 37], [48, 56], [63, 68], [76, 81]]);
+	      }, _callee2, null, [[27, 32], [39, 45], [56, 64], [71, 76], [84, 89]]);
 	    }));
 	    return _connect.apply(this, arguments);
 	  }
@@ -9973,11 +9991,10 @@
 	        log$m('error closing RTCPeerConnection %o', error);
 	      }
 	    }
+	    /* eslint-disable-next-line no-use-before-define */
 
-	    if (localMediaStream && localMediaStreamLocallyGenerated) {
-	      closeMediaStream(localMediaStream);
-	    }
 
+	    maybeCloseLocalMediaStream();
 	    localMediaStream = undefined;
 	    localMediaStreamLocallyGenerated = false;
 	    rtcStats.clear();
@@ -10021,6 +10038,14 @@
 	    toggleMuteVideo(!enableVideo);
 	  }
 
+	  function maybeCloseLocalMediaStream() {
+	    if (localMediaStream && localMediaStreamLocallyGenerated) {
+	      closeMediaStream(localMediaStream);
+	      localMediaStream = undefined;
+	      localMediaStreamLocallyGenerated = false;
+	    }
+	  }
+
 	  function onProgress(originator, message) {
 	    log$m('channel progress');
 	    events.emit('progress', {
@@ -10035,10 +10060,12 @@
 	      originator: originator,
 	      message: message
 	    });
+	    startTime = new Date();
 	  }
 
 	  function onEnded(originator, message) {
 	    log$m('channel ended');
+	    endTime = new Date();
 	    close();
 	    events.emit('ended', {
 	      originator: originator,
@@ -10274,11 +10301,29 @@
 	              throw _context6.t0;
 
 	            case 21:
+	              _context6.prev = 21;
+	              _context6.next = 24;
+	              return confirm();
+
+	            case 24:
+	              _context6.next = 31;
+	              break;
+
+	            case 26:
+	              _context6.prev = 26;
+	              _context6.t1 = _context6["catch"](21);
+
+	              /* eslint-disable-next-line no-use-before-define */
+	              onFailed('local', 'Request Error');
+	              log$m('confirm failed: %o', _context6.t1);
+	              throw _context6.t1;
+
+	            case 31:
 	            case "end":
 	              return _context6.stop();
 	          }
 	        }
-	      }, _callee6, null, [[13, 17]]);
+	      }, _callee6, null, [[13, 17], [21, 26]]);
 	    }));
 	    return _renegotiate.apply(this, arguments);
 	  }
@@ -10380,40 +10425,6 @@
 	    return stream;
 	  }
 
-	  function addLocalStream(stream) {
-	    log$m('addLocalStream()');
-	    if (!stream) return;
-
-	    if (connection.addTrack) {
-	      stream.getTracks().forEach(function (track) {
-	        connection.addTrack(track, stream);
-	      });
-	    } else if (connection.addStream) {
-	      connection.addStream(stream);
-	    }
-	  }
-
-	  function removeLocalStream() {
-	    log$m('removeLocalStream()');
-
-	    if (connection.getSenders && connection.removeTrack) {
-	      connection.getSenders().forEach(function (sender) {
-	        if (sender.track) {
-	          sender.track.stop();
-	        }
-
-	        connection.removeTrack(sender);
-	      });
-	    } else if (connection.getLocalStreams && connection.removeStream) {
-	      connection.getLocalStreams().forEach(function (stream) {
-	        stream.getTracks().forEach(function (track) {
-	          track.stop();
-	        });
-	        connection.removeStream(stream);
-	      });
-	    }
-	  }
-
 	  function getLocalStream() {
 	    log$m('getLocalStream()');
 	    var stream;
@@ -10434,9 +10445,31 @@
 	    return stream;
 	  }
 
-	  function setLocalStream(stream) {
-	    removeLocalStream();
-	    addLocalStream(stream);
+	  function addLocalStream(stream) {
+	    log$m('addLocalStream()');
+	    if (!stream) return;
+
+	    if (connection.addTrack) {
+	      stream.getTracks().forEach(function (track) {
+	        connection.addTrack(track, stream);
+	      });
+	    } else if (connection.addStream) {
+	      connection.addStream(stream);
+	    }
+	  }
+
+	  function removeLocalStream() {
+	    log$m('removeLocalStream()');
+
+	    if (connection.getSenders && connection.removeTrack) {
+	      connection.getSenders().forEach(function (sender) {
+	        connection.removeTrack(sender);
+	      });
+	    } else if (connection.getLocalStreams && connection.removeStream) {
+	      connection.getLocalStreams().forEach(function (stream) {
+	        connection.removeStream(stream);
+	      });
+	    }
 	  }
 
 	  function replaceLocalStream(_x4) {
@@ -10446,7 +10479,7 @@
 	  function _replaceLocalStream() {
 	    _replaceLocalStream = _asyncToGenerator(
 	    /*#__PURE__*/
-	    regeneratorRuntime.mark(function _callee8(stream) {
+	    regeneratorRuntime.mark(function _callee9(stream) {
 	      var renegotiation,
 	          audioTrack,
 	          videoTrack,
@@ -10455,12 +10488,12 @@
 	          peerHasAudio,
 	          peerHasVideo,
 	          shimReplaceTrack,
-	          _args8 = arguments;
-	      return regeneratorRuntime.wrap(function _callee8$(_context8) {
+	          _args9 = arguments;
+	      return regeneratorRuntime.wrap(function _callee9$(_context9) {
 	        while (1) {
-	          switch (_context8.prev = _context8.next) {
+	          switch (_context9.prev = _context9.next) {
 	            case 0:
-	              shimReplaceTrack = function _ref(sender) {
+	              shimReplaceTrack = function _ref2(sender) {
 	                sender.replaceTrack =
 	                /*#__PURE__*/
 	                function () {
@@ -10506,7 +10539,7 @@
 	                }();
 	              };
 
-	              renegotiation = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : false;
+	              renegotiation = _args9.length > 1 && _args9[1] !== undefined ? _args9[1] : false;
 	              log$m('replaceLocalStream()');
 	              audioTrack = stream ? stream.getAudioTracks()[0] : null;
 	              videoTrack = stream ? stream.getVideoTracks()[0] : null;
@@ -10522,6 +10555,9 @@
 	                  peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
 	                });
 	                renegotiationNeeded = Boolean(audioTrack) !== peerHasAudio || Boolean(videoTrack) !== peerHasVideo || renegotiation;
+	                /* eslint-disable-next-line no-use-before-define */
+
+	                maybeCloseLocalMediaStream();
 
 	                if (renegotiationNeeded) {
 	                  removeLocalStream();
@@ -10551,15 +10587,46 @@
 	                }
 	              }
 
-	              _context8.next = 12;
-	              return Promise.all(queue);
+	              _context9.next = 12;
+	              return Promise.all(queue).finally(
+	              /*#__PURE__*/
+	              _asyncToGenerator(
+	              /*#__PURE__*/
+	              regeneratorRuntime.mark(function _callee8() {
+	                return regeneratorRuntime.wrap(function _callee8$(_context8) {
+	                  while (1) {
+	                    switch (_context8.prev = _context8.next) {
+	                      case 0:
+	                        localMediaStream = getLocalStream();
+	                        localMediaStreamLocallyGenerated = false;
+
+	                      case 2:
+	                      case "end":
+	                        return _context8.stop();
+	                    }
+	                  }
+	                }, _callee8);
+	              })));
 
 	            case 12:
+	              _context9.prev = 12;
+	              _context9.next = 15;
+	              return localstream(localMediaStream);
+
+	            case 15:
+	              _context9.next = 19;
+	              break;
+
+	            case 17:
+	              _context9.prev = 17;
+	              _context9.t0 = _context9["catch"](12);
+
+	            case 19:
 	            case "end":
-	              return _context8.stop();
+	              return _context9.stop();
 	          }
 	        }
-	      }, _callee8);
+	      }, _callee9, null, [[12, 17]]);
 	    }));
 	    return _replaceLocalStream.apply(this, arguments);
 	  }
@@ -10588,11 +10655,11 @@
 	  function _adjustBandWidth() {
 	    _adjustBandWidth = _asyncToGenerator(
 	    /*#__PURE__*/
-	    regeneratorRuntime.mark(function _callee9(options) {
+	    regeneratorRuntime.mark(function _callee10(options) {
 	      var audio, video, queue;
-	      return regeneratorRuntime.wrap(function _callee9$(_context9) {
+	      return regeneratorRuntime.wrap(function _callee10$(_context10) {
 	        while (1) {
-	          switch (_context9.prev = _context9.next) {
+	          switch (_context10.prev = _context10.next) {
 	            case 0:
 	              log$m('adjustBandWidth()');
 	              audio = options.audio, video = options.video;
@@ -10689,15 +10756,15 @@
 	                }));
 	              }
 
-	              _context9.next = 6;
+	              _context10.next = 6;
 	              return Promise.all(queue);
 
 	            case 6:
 	            case "end":
-	              return _context9.stop();
+	              return _context10.stop();
 	          }
 	        }
-	      }, _callee9);
+	      }, _callee10);
 	    }));
 	    return _adjustBandWidth.apply(this, arguments);
 	  }
@@ -10709,11 +10776,11 @@
 	  function _applyConstraints() {
 	    _applyConstraints = _asyncToGenerator(
 	    /*#__PURE__*/
-	    regeneratorRuntime.mark(function _callee10(options) {
+	    regeneratorRuntime.mark(function _callee11(options) {
 	      var audio, video, queue;
-	      return regeneratorRuntime.wrap(function _callee10$(_context10) {
+	      return regeneratorRuntime.wrap(function _callee11$(_context11) {
 	        while (1) {
-	          switch (_context10.prev = _context10.next) {
+	          switch (_context11.prev = _context11.next) {
 	            case 0:
 	              log$m('applyConstraints()');
 	              audio = options.audio, video = options.video;
@@ -10735,15 +10802,15 @@
 	                });
 	              }
 
-	              _context10.next = 6;
+	              _context11.next = 6;
 	              return Promise.all(queue);
 
 	            case 6:
 	            case "end":
-	              return _context10.stop();
+	              return _context11.stop();
 	          }
 	        }
-	      }, _callee10);
+	      }, _callee11);
 	    }));
 	    return _applyConstraints.apply(this, arguments);
 	  }
@@ -10755,25 +10822,25 @@
 	  function _getStats() {
 	    _getStats = _asyncToGenerator(
 	    /*#__PURE__*/
-	    regeneratorRuntime.mark(function _callee11() {
+	    regeneratorRuntime.mark(function _callee12() {
 	      var stats;
-	      return regeneratorRuntime.wrap(function _callee11$(_context11) {
+	      return regeneratorRuntime.wrap(function _callee12$(_context12) {
 	        while (1) {
-	          switch (_context11.prev = _context11.next) {
+	          switch (_context12.prev = _context12.next) {
 	            case 0:
 	              log$m('getStats()');
 
 	              if (!(connection.signalingState === 'stable')) {
-	                _context11.next = 14;
+	                _context12.next = 14;
 	                break;
 	              }
 
 	              if (!browser$1.chrome) {
-	                _context11.next = 8;
+	                _context12.next = 8;
 	                break;
 	              }
 
-	              _context11.next = 5;
+	              _context12.next = 5;
 	              return new Promise(function (resolve) {
 	                connection.getStats(function (stats) {
 	                  resolve(stats.result());
@@ -10781,34 +10848,34 @@
 	              });
 
 	            case 5:
-	              stats = _context11.sent;
-	              _context11.next = 11;
+	              stats = _context12.sent;
+	              _context12.next = 11;
 	              break;
 
 	            case 8:
-	              _context11.next = 10;
+	              _context12.next = 10;
 	              return connection.getStats();
 
 	            case 10:
-	              stats = _context11.sent;
+	              stats = _context12.sent;
 
 	            case 11:
 	              rtcStats.update(stats);
-	              _context11.next = 15;
+	              _context12.next = 15;
 	              break;
 
 	            case 14:
 	              log$m('update rtc stats failed since connection is unstable.');
 
 	            case 15:
-	              return _context11.abrupt("return", rtcStats);
+	              return _context12.abrupt("return", rtcStats);
 
 	            case 16:
 	            case "end":
-	              return _context11.stop();
+	              return _context12.stop();
 	          }
 	        }
-	      }, _callee11);
+	      }, _callee12);
 	    }));
 	    return _getStats.apply(this, arguments);
 	  }
@@ -10820,6 +10887,14 @@
 
 	    get connection() {
 	      return connection;
+	    },
+
+	    get startTime() {
+	      return startTime;
+	    },
+
+	    get endTime() {
+	      return endTime;
 	    },
 
 	    isInProgress: isInProgress,
@@ -10835,10 +10910,7 @@
 	    hold: hold,
 	    unhold: unhold,
 	    getRemoteStream: getRemoteStream,
-	    addLocalStream: addLocalStream,
-	    removeLocalStream: removeLocalStream,
 	    getLocalStream: getLocalStream,
-	    setLocalStream: setLocalStream,
 	    replaceLocalStream: replaceLocalStream,
 	    adjustBandWidth: adjustBandWidth,
 	    applyConstraints: applyConstraints,
@@ -11296,14 +11368,16 @@
 	  var callId;
 	  var request;
 	  var icetimmeout;
-	  var localstream;
+
+	  var _localstream;
+
 	  var remotestream;
 	  var channel = createChannel({
 	    invite: function () {
 	      var _invite = _asyncToGenerator(
 	      /*#__PURE__*/
 	      regeneratorRuntime.mark(function _callee(offer) {
-	        var sdp, apiName, response, _response$data$data;
+	        var sdp, apiName, response, _response$data$data, _response$data$data$m, _response$data$data$m2;
 
 	        return regeneratorRuntime.wrap(function _callee$(_context) {
 	          while (1) {
@@ -11323,14 +11397,16 @@
 	                response = _context.sent;
 	                _response$data$data = response.data.data;
 	                sdp = _response$data$data.sdp;
-	                mediaVersion = _response$data$data['media-version'];
-	                callId = _response$data$data['mcu-callid'];
+	                _response$data$data$m = _response$data$data['media-version'];
+	                mediaVersion = _response$data$data$m === void 0 ? mediaVersion : _response$data$data$m;
+	                _response$data$data$m2 = _response$data$data['mcu-callid'];
+	                callId = _response$data$data$m2 === void 0 ? callId : _response$data$data$m2;
 	                log$o('MCU call-id: %s', callId);
 	                return _context.abrupt("return", {
 	                  sdp: sdp
 	                });
 
-	              case 13:
+	              case 15:
 	              case "end":
 	                return _context.stop();
 	            }
@@ -11346,17 +11422,20 @@
 	    }(),
 	    confirm: function confirm() {
 	      log$o('confirm()');
-	      request = undefined;
-	      localstream = channel.getLocalStream();
-	      channel.emit('localstream', localstream); // send confirm
+	      request = undefined; // send confirm
 	    },
 	    cancel: function cancel() {
 	      log$o('cancel()');
 	      request && request.cancel();
+	      request = undefined;
 	    },
 	    bye: function bye() {
 	      log$o('bye()');
 	      request = undefined;
+	    },
+	    localstream: function localstream(stream) {
+	      _localstream = stream;
+	      channel.emit('localstream', _localstream);
 	    }
 	  });
 	  channel.on('sdp', createModifier().content(type).prefer('h264').build());
@@ -11372,6 +11451,7 @@
 	    });
 	    pc.addEventListener('negotiationneeded', function () {
 	      log$o('peerconnection:negotiationneeded');
+	      channel.emit('negotiationneeded');
 	    });
 	    pc.addEventListener('track', function (event) {
 	      log$o('peerconnection:track: %o', event);
@@ -11413,6 +11493,14 @@
 
 	    get connection() {
 	      return channel.connection;
+	    },
+
+	    get startTime() {
+	      return channel.startTime;
+	    },
+
+	    get endTime() {
+	      return channel.endTime;
 	    },
 
 	    get version() {
@@ -11975,8 +12063,8 @@
 	              options.url = data.data.url;
 
 	            case 16:
-	              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ", "1.0.0-beta"));
-	              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ", "1.0.0-beta")); // join focus
+	              useragent = CONFIG.get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ", "1.0.1-beta"));
+	              clientinfo = CONFIG.get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ", "1.0.1-beta")); // join focus
 
 	              apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 	              request = api.request(apiName).data({
@@ -12796,7 +12884,7 @@
 	}
 
 	var log$t = debug('MN');
-	var version$1 = "1.0.0-beta"; // global setup
+	var version$1 = "1.0.1-beta"; // global setup
 
 	function setup$1(config) {
 	  setupConfig(config);
