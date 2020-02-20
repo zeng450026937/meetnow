@@ -128,11 +128,7 @@ declare namespace MeetNow {
     unhold(): void;
 
     getRemoteStream(): MediaStream | undefined;
-
-    addLocalStream(): void;
-    removeLocalStream(): void;
     getLocalStream(): MediaStream | undefined;
-    setLocalStream(): void;
 
     replaceLocalStream(stream?: MediaStream, renegotiation?: boolean): Promise<void>;
 

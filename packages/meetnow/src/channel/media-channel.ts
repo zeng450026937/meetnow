@@ -48,8 +48,8 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
       ({
         sdp,
-        'media-version': mediaVersion,
-        'mcu-callid': callId,
+        'media-version': mediaVersion = mediaVersion,
+        'mcu-callid': callId = callId,
       } = response.data.data);
 
       log('MCU call-id: %s', callId);
@@ -61,20 +61,24 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
       request = undefined;
 
-      localstream = channel.getLocalStream();
-
-      channel.emit('localstream', localstream);
       // send confirm
     },
     cancel : () => {
       log('cancel()');
 
       request && request.cancel();
+      request = undefined;
     },
     bye : () => {
       log('bye()');
 
       request = undefined;
+    },
+
+    localstream : (stream) => {
+      localstream = stream;
+
+      channel.emit('localstream', localstream);
     },
   });
 
@@ -101,6 +105,8 @@ export function createMediaChannel(config: MediaChannelConfigs) {
 
     pc.addEventListener('negotiationneeded', () => {
       log('peerconnection:negotiationneeded');
+
+      channel.emit('negotiationneeded');
     });
 
     pc.addEventListener('track', (event) => {
@@ -149,6 +155,13 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     },
     get connection() {
       return channel.connection;
+    },
+
+    get startTime() {
+      return channel.startTime;
+    },
+    get endTime() {
+      return channel.endTime;
     },
 
     get version() {

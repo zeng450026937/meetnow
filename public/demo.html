@@ -170,17 +170,15 @@
             users = conf.users;
           });
 
-          conf.mediaChannel.on('localstream', () => {
+          conf.mediaChannel.on('localstream', (stream) => {
             console.warn('localstream');
+            const localVideo = document.querySelector('.local-video');
+            localVideo.srcObject = stream;
           });
-          conf.mediaChannel.on('remotestream', () => {
+          conf.mediaChannel.on('remotestream', (stream) => {
             console.warn('remotestream');
-            // const { video } = this.$refs;
             const remoteVideo = document.querySelector('.remote-video');
-
-            const mediaStream = conf.mediaChannel.getRemoteStream();
-
-            remoteVideo.srcObject = mediaStream;
+            remoteVideo.srcObject = stream;
           });
         });
 

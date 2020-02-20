@@ -27,6 +27,7 @@ export interface ChannelConfigs {
   confirm: () => void | Promise<void>;
   cancel: (reason?: string) => void | Promise<void>;
   bye: (reason?: string) => void | Promise<void>;
+  localstream: (stream?: MediaStream) => void | Promise<void>;
 }
 
 export interface ConnectOptions {
@@ -54,6 +55,7 @@ export function createChannel(config: ChannelConfigs) {
     confirm,
     cancel,
     bye,
+    localstream,
   } = config;
   const events = createEvents(log);
 
@@ -303,6 +305,12 @@ export function createChannel(config: ChannelConfigs) {
       localMediaStream.getTracks().forEach((track) => {
         connection!.addTrack(track, localMediaStream!);
       });
+
+      try {
+        await localstream(localMediaStream);
+      } catch (error) {
+        // ignore error
+      }
     }
 
     const localSDP = await createLocalDescription('offer', rtcOfferConstraints)
@@ -447,9 +455,8 @@ export function createChannel(config: ChannelConfigs) {
       }
     }
 
-    if (localMediaStream && localMediaStreamLocallyGenerated) {
-      closeMediaStream(localMediaStream);
-    }
+    /* eslint-disable-next-line no-use-before-define */
+    maybeCloseLocalMediaStream();
 
     localMediaStream = undefined;
     localMediaStreamLocallyGenerated = false;
@@ -494,6 +501,15 @@ export function createChannel(config: ChannelConfigs) {
 
     toggleMuteAudio(!enableAudio);
     toggleMuteVideo(!enableVideo);
+  }
+
+  function maybeCloseLocalMediaStream() {
+    if (localMediaStream && localMediaStreamLocallyGenerated) {
+      closeMediaStream(localMediaStream);
+
+      localMediaStream = undefined;
+      localMediaStreamLocallyGenerated = false;
+    }
   }
 
   function onProgress(originator: Originator, message?: string) {
@@ -677,6 +693,17 @@ export function createChannel(config: ChannelConfigs) {
       events.emit('peerconnection:setremotedescriptionfailed', error);
       throw error;
     }
+
+    try {
+      await confirm();
+    } catch (error) {
+      /* eslint-disable-next-line no-use-before-define */
+      onFailed('local', 'Request Error');
+
+      log('confirm failed: %o', error);
+
+      throw error;
+    }
   }
 
   function mangleOffer(offer: string) {
@@ -750,46 +777,6 @@ export function createChannel(config: ChannelConfigs) {
 
     return stream;
   }
-
-  function addLocalStream(stream?: MediaStream) {
-    log('addLocalStream()');
-
-    if (!stream) return;
-
-    if (connection!.addTrack) {
-      stream
-        .getTracks()
-        .forEach((track) => {
-          connection!.addTrack(track, stream);
-        });
-    } else if ((connection as any).addStream) {
-      (connection as any).addStream(stream);
-    }
-  }
-  function removeLocalStream() {
-    log('removeLocalStream()');
-
-    if (connection!.getSenders && connection!.removeTrack) {
-      connection!.getSenders().forEach((sender) => {
-        if (sender.track) {
-          sender.track.stop();
-        }
-        connection!.removeTrack(sender);
-      });
-    } else if ((connection as any).getLocalStreams && (connection as any).removeStream) {
-      (connection as any)
-        .getLocalStreams()
-        .forEach((stream: MediaStream) => {
-          stream
-            .getTracks()
-            .forEach((track) => {
-              track.stop();
-            });
-
-          (connection as any).removeStream(stream);
-        });
-    }
-  }
   function getLocalStream() {
     log('getLocalStream()');
 
@@ -812,9 +799,36 @@ export function createChannel(config: ChannelConfigs) {
 
     return stream;
   }
-  function setLocalStream(stream?: MediaStream) {
-    removeLocalStream();
-    addLocalStream(stream);
+
+  function addLocalStream(stream?: MediaStream) {
+    log('addLocalStream()');
+
+    if (!stream) return;
+
+    if (connection!.addTrack) {
+      stream
+        .getTracks()
+        .forEach((track) => {
+          connection!.addTrack(track, stream);
+        });
+    } else if ((connection as any).addStream) {
+      (connection as any).addStream(stream);
+    }
+  }
+  function removeLocalStream() {
+    log('removeLocalStream()');
+
+    if (connection!.getSenders && connection!.removeTrack) {
+      connection!.getSenders().forEach((sender) => {
+        connection!.removeTrack(sender);
+      });
+    } else if ((connection as any).getLocalStreams && (connection as any).removeStream) {
+      (connection as any)
+        .getLocalStreams()
+        .forEach((stream: MediaStream) => {
+          (connection as any).removeStream(stream);
+        });
+    }
   }
 
   async function replaceLocalStream(stream?: MediaStream, renegotiation: boolean = false) {
@@ -839,6 +853,9 @@ export function createChannel(config: ChannelConfigs) {
       renegotiationNeeded = (Boolean(audioTrack) !== peerHasAudio)
                              || (Boolean(videoTrack) !== peerHasVideo)
                              || renegotiation;
+
+      /* eslint-disable-next-line no-use-before-define */
+      maybeCloseLocalMediaStream();
 
       if (renegotiationNeeded) {
         removeLocalStream();
@@ -892,7 +909,17 @@ export function createChannel(config: ChannelConfigs) {
       };
     }
 
-    await Promise.all(queue);
+    await Promise.all(queue)
+      .finally(async () => {
+        localMediaStream = getLocalStream();
+        localMediaStreamLocallyGenerated = false;
+      });
+
+    try {
+      await localstream(localMediaStream);
+    } catch (error) {
+      // ignore error
+    }
   }
 
   function replaceSSRCs(currentDescription: string, newDescription: string) {
@@ -1073,6 +1100,13 @@ export function createChannel(config: ChannelConfigs) {
       return connection;
     },
 
+    get startTime() {
+      return startTime;
+    },
+    get endTime() {
+      return endTime;
+    },
+
     isInProgress,
     isEstablished,
     isEnded,
@@ -1092,11 +1126,7 @@ export function createChannel(config: ChannelConfigs) {
     unhold,
 
     getRemoteStream,
-
-    addLocalStream,
-    removeLocalStream,
     getLocalStream,
-    setLocalStream,
 
     replaceLocalStream,
 
