@@ -7,6 +7,8 @@
           :class="{'video-content--disconnected': !connected && !mediaConnected}"
           ref="video"
           autoplay
+          playsinline
+          muted
           loop="loop"
           :style="{ objectFit }"
         ></video>
@@ -24,6 +26,7 @@
           class="video-content"
           ref="remoteVideo"
           autoplay
+          playsinline
           loop="loop"
         ></video>
       </div>
@@ -36,6 +39,8 @@
           :class="{'video-content--disconnected': !connected}"
           ref="localVideo"
           autoplay
+          playsinline
+          muted
           loop="loop"
         ></video>
         <img
