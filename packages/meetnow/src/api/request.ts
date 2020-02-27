@@ -7,10 +7,10 @@ const log = debug('MN:Api:Request');
 
 export const { isCancel } = axios;
 
-export interface RequestResult {
+export interface RequestResult<T extends Record<string, any>> {
   ret: number;
   bizCode: number;
-  data: { [K: string]: any };
+  data: T;
   error?: { msg: string; errorCode: number };
   statusCode?: number;
 }
@@ -19,12 +19,13 @@ export interface Request<
   RequestData = any,
   RequestParams = any,
   RequestHeader = any,
+  RequestResultData = any,
 > {
   config: AxiosRequestConfig;
   header: (header: RequestHeader) => Request<RequestData, RequestParams, RequestHeader>;
   params: (params: RequestParams) => Request<RequestData, RequestParams, RequestHeader>;
   data: (data: RequestData) => Request<RequestData, RequestParams, RequestHeader>;
-  send: () => AxiosPromise<RequestResult>;
+  send: () => AxiosPromise<RequestResult<RequestResultData>>;
   cancel: () => void;
 }
 
@@ -32,12 +33,17 @@ export function createRequest<
   RequestData = any,
   RequestParams = any,
   RequestHeader = any,
->(config: AxiosRequestConfig, delegate?: AxiosInstance): Request<RequestData, RequestParams, RequestHeader>;
+  RequestResultData = any,
+>(
+  config: AxiosRequestConfig,
+  delegate?: AxiosInstance,
+): Request<RequestData, RequestParams, RequestHeader, RequestResultData>;
 
 export function createRequest<
   RequestData = any,
   RequestParams = any,
   RequestHeader = any,
+  RequestResultData = any,
 >(config: AxiosRequestConfig, delegate: AxiosInstance = axios) {
   let source: CancelTokenSource | undefined;
   let request: Request;
@@ -54,7 +60,7 @@ export function createRequest<
     config.data = data;
     return request;
   }
-  function send(): AxiosPromise<RequestResult> {
+  function send(): AxiosPromise<RequestResult<RequestResultData>> {
     log('send()');
 
     source = axios.CancelToken.source();

@@ -32,8 +32,25 @@ export interface ApiParamsMap {
 
 export interface ApiDataMap {
   [apiName: string]: any;
+
+  'login': {
+    'principle': string;
+    'mobileCode'?: string;
+    'credential': string;
+    'number'?: string;
+    'accountType'?: '0' | '1' | '9';
+  };
+  'selectAccount': {};
+  'logout': {};
+  'refreshToken': {};
+  'sendMobileLoginVerifyCode': {
+    'mobileNo': string;
+    'mobileCode'?: string;
+  };
+
   'polling': CtrlApiData & { 'version': number };
   'keepalive': CtrlApiData;
+
   'rejectLobbyUserAll': CtrlApiData;
   'acceptLobbyUserAll': CtrlApiData;
   'acceptLobbyUser': CtrlApiData & { 'user-entity': string };
@@ -201,6 +218,27 @@ export const configs = {
   getVirtualJWT : {
     method : RequestMethod.GET,
     url    : `${ baseURL.usermgr }external/virtualJwt/party`,
+  },
+
+  login : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.usermgr }login/login`,
+  },
+  selectAccount : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.usermgr }login/selectAccount`,
+  },
+  logout : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.usermgr }logout`,
+  },
+  refreshToken : {
+    method : RequestMethod.GET,
+    url    : `${ baseURL.usermgr }current/user/refreshToken`,
+  },
+  sendMobileLoginVerifyCode : {
+    method : RequestMethod.POST,
+    url    : `${ baseURL.usermgr }sendMobileLoginVerifyCode`,
   },
 
   // info
