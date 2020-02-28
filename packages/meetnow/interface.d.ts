@@ -26,10 +26,23 @@ declare namespace MeetNow {
     readonly token?: string;
     invalid: () => Promise<void>;
   };
+  type Identity = {
+    party: any;
+    subject: any;
+    cloudAccount: any;
+
+    token: string;
+    seeded: boolean;
+    lastLogin: boolean;
+
+    readonly account: any;
+    readonly auth: Authentication;
+
+    confirm: () => Promise<Authentication>;
+  };
   type Verification = {
     account: { [key: string]: any };
-    tokens: { token: string }[];
-    confirm: (token: string) => Promise<Authentication>;
+    identities: Identity[];
   };
 
   const bootstrap: (auth: AuthInfo) => Promise<Verification>;

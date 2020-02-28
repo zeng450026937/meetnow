@@ -971,6 +971,7 @@ const RequestMethod = {
 const baseURL = {
     ctrl: '/conference-ctrl/api/v1/ctrl/',
     usermgr: '/user-manager/api/v1/',
+    confmgr: '/conference-manager/api/v1/',
 };
 const configs = {
     // user manager
@@ -997,6 +998,11 @@ const configs = {
     sendMobileLoginVerifyCode: {
         method: RequestMethod.POST,
         url: `${baseURL.usermgr}sendMobileLoginVerifyCode`,
+    },
+    // conference manager
+    getConferenceInfo: {
+        method: RequestMethod.GET,
+        url: `${baseURL.confmgr}external/conference/info`,
     },
     // info
     getURL: {
@@ -1273,6 +1279,7 @@ function createApi(config = {}) {
             return delegate.interceptors;
         },
         request,
+        delegate,
     };
 }
 
@@ -1359,9 +1366,7 @@ function createWorker(config) {
 }
 
 async function createDigestAuth(selection) {
-    let token = isObject$1(selection)
-        ? selection.token
-        : selection;
+    let token = selection;
     // create api
     const api = createUserApi(() => token);
     // try auth
@@ -1432,12 +1437,11 @@ async function createTempAuth(partyId) {
     };
 }
 
-var AuthType;
 (function (AuthType) {
     AuthType["email"] = "0";
     AuthType["mobile"] = "1";
     AuthType["verifycode"] = "9";
-})(AuthType || (AuthType = {}));
+})(exports.AuthType || (exports.AuthType = {}));
 async function bootstrap(auth) {
     const api = createUserApi();
     const response = await api.request('login')
@@ -1450,15 +1454,63 @@ async function bootstrap(auth) {
     })
         .send();
     const { account, tokens } = response.data.data;
-    async function confirm(token) {
-        /* eslint-disable-next-line no-return-await */
-        return await createDigestAuth(token);
-    }
+    const identities = tokens.map(token => {
+        const identityToken = token.token;
+        let identityAuth;
+        return Object.spread({}, token,
+            {get account() {
+                return account;
+            },
+            get auth() {
+                return identityAuth;
+            },
+            async confirm() {
+                if (!identityAuth) {
+                    identityAuth = await createDigestAuth(identityToken);
+                }
+                return identityAuth;
+            }});
+    });
     return {
         account,
-        tokens,
-        confirm,
+        identities,
     };
+}
+async function fetchControlUrl(identity, number, baseurl) {
+    const { auth, party } = identity;
+    const { api, token } = auth;
+    const { number: partyNumber } = party;
+    const response = await api.request('getConferenceInfo')
+        .params({
+        conferenceNo: number,
+        searchNotStartedScheduledConference: false,
+    })
+        .send();
+    const { conferenceNo, domain, vmr, scheduledConference, } = response.data.data;
+    const shortNo = conferenceNo.split('.')[1];
+    let planId = '';
+    let sequence = 1;
+    if (vmr) {
+        ({ vmrId: planId } = vmr);
+    }
+    if (scheduledConference) {
+        ({ planId, sequence } = scheduledConference);
+    }
+    const encode = window.btoa;
+    const source = 'WEBUSER';
+    const parts = [
+        `source=${source}`,
+        // TODO base64
+        `conference=${encode(`${shortNo}@${domain}`)}`,
+        `sequence=${sequence}`,
+        `id=${planId}`,
+        // TODO base64
+        `client=${encode(`${partyNumber}@${domain}`)}`,
+        `t=${encode(token)}`,
+    ];
+    baseurl = baseurl || api.delegate.defaults.baseURL;
+    const url = `${baseurl}?${parts.join('&')}`;
+    return url;
 }
 
 function createContext(delegate) {
@@ -5776,5 +5828,7 @@ exports.adapter = mpAdapter;
 exports.bootstrap = bootstrap;
 exports.connect = connect;
 exports.createUA = createUA;
+exports.createUserApi = createUserApi;
+exports.fetchControlUrl = fetchControlUrl;
 exports.setup = setup$1;
 exports.version = version;

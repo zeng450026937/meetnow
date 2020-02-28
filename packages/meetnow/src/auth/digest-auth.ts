@@ -1,14 +1,11 @@
 import { createUserApi } from './user-api';
 import { createWorker } from '../utils/worker';
 import { Authentication } from './interface';
-import { isObject } from '../utils';
 
 export async function createDigestAuth(
-  selection: string | { token: string },
+  selection: string,
 ): Promise<Authentication> {
-  let token: string | undefined = isObject(selection)
-    ? selection.token
-    : selection;
+  let token: string | undefined = selection;
 
   // create api
   const api = createUserApi(() => token);

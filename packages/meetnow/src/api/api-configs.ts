@@ -4,6 +4,7 @@ import { RequestMethod } from './request-method';
 export const baseURL = {
   ctrl    : '/conference-ctrl/api/v1/ctrl/',
   usermgr : '/user-manager/api/v1/',
+  confmgr : '/conference-manager/api/v1/',
 };
 
 export interface ApiConfigs {
@@ -27,7 +28,14 @@ export interface ApiHeaderMap {
 
 export interface ApiParamsMap {
   [apiName: string]: any;
-  'getVirtualJWT': { id: string }
+
+  'getVirtualJWT': { id: string };
+
+  'getConferenceInfo': {
+    conferenceNo: string;
+    searchNotStartedScheduledConference?: boolean;
+    filterByRegionInfo?: boolean;
+  };
 }
 
 export interface ApiDataMap {
@@ -239,6 +247,12 @@ export const configs = {
   sendMobileLoginVerifyCode : {
     method : RequestMethod.POST,
     url    : `${ baseURL.usermgr }sendMobileLoginVerifyCode`,
+  },
+
+  // conference manager
+  getConferenceInfo : {
+    method : RequestMethod.GET,
+    url    : `${ baseURL.confmgr }external/conference/info`,
   },
 
   // info

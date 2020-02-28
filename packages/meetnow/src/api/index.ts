@@ -63,6 +63,7 @@ export function createApi(config: AxiosRequestConfig = {}) {
       return delegate.interceptors;
     },
     request,
+    delegate,
   };
 }
 

@@ -1,6 +1,8 @@
 import md5 from 'md5';
 import { createUserApi } from './user-api';
 import { createDigestAuth } from './digest-auth';
+import { Api } from '../api';
+import { Authentication } from './interface';
 
 export * from './interface';
 export * from './user-api';
@@ -24,6 +26,21 @@ export interface AuthInfo {
   'authtype'?: AuthType;
 }
 
+export interface Identity {
+  party: any;
+  subject: any;
+  cloudAccount: any;
+
+  token: string;
+  seeded: boolean;
+  lastLogin: boolean;
+
+  readonly account: any;
+  readonly auth: Authentication;
+
+  confirm: () => Promise<Authentication>;
+}
+
 export async function bootstrap(auth: AuthInfo) {
   const api = createUserApi();
 
@@ -39,15 +56,88 @@ export async function bootstrap(auth: AuthInfo) {
 
   const { account, tokens } = response.data.data;
 
-  async function confirm(token: string) {
-    /* eslint-disable-next-line no-return-await */
-    return await createDigestAuth(token);
-  }
+  const identities: Identity[] = tokens.map(token => {
+    const identityToken = token.token;
+    let identityAuth;
+
+    return {
+      ...token,
+
+      get account() {
+        return account;
+      },
+      get auth() {
+        return identityAuth;
+      },
+
+      async confirm() {
+        if (!identityAuth) {
+          identityAuth = await createDigestAuth(identityToken);
+        }
+        return identityAuth;
+      },
+    } as Identity;
+  });
 
   return {
     account,
-    tokens,
-
-    confirm,
+    identities,
   };
+}
+
+export async function fetchControlUrl(
+  identity: any,
+  number: string,
+  baseurl?: string,
+) {
+  const { auth, party } = identity;
+  const { api, token } = auth;
+  const { number: partyNumber } = party;
+
+  const response = await (api as Api).request('getConferenceInfo')
+    .params({
+      conferenceNo                        : number,
+      searchNotStartedScheduledConference : false,
+    })
+    .send();
+
+  const {
+    conferenceNo,
+    domain,
+    vmr,
+    scheduledConference,
+  } = response.data.data;
+
+  const shortNo = (conferenceNo as string).split('.')[1];
+
+  let planId = '';
+  let sequence = 1;
+
+  if (vmr) {
+    ({ vmrId: planId } = vmr);
+  }
+  if (scheduledConference) {
+    ({ planId, sequence } = scheduledConference);
+  }
+
+  const encode = window.btoa;
+
+  const source = 'WEBUSER';
+
+  const parts = [
+    `source=${ source }`,
+    // TODO base64
+    `conference=${ encode(`${ shortNo }@${ domain }`) }`,
+    `sequence=${ sequence }`,
+    `id=${ planId }`,
+    // TODO base64
+    `client=${ encode(`${ partyNumber }@${ domain }`) }`,
+    `t=${ encode(token) }`,
+  ];
+
+  baseurl = baseurl || api.delegate.defaults.baseURL;
+
+  const url = `${ baseurl }?${ parts.join('&') }`;
+
+  return url;
 }

@@ -7,9 +7,21 @@ import axios from 'axios';
 import adapter from './adapter';
 
 import { isMiniProgram } from './browser';
-import { CONFIG, MeetnowConfig, setupConfig } from './config';
-import { ConnectOptions, createUA } from './user-agent';
-import { bootstrap } from './auth';
+import {
+  CONFIG,
+  MeetnowConfig,
+  setupConfig,
+} from './config';
+import {
+  AuthType,
+  bootstrap,
+  createUserApi,
+  fetchControlUrl,
+} from './auth';
+import {
+  ConnectOptions,
+  createUA,
+} from './user-agent';
 
 export {
   debug,
@@ -40,8 +52,11 @@ export function setup(config?: MeetnowConfig) {
 }
 
 export {
+  AuthType,
   bootstrap,
+  createUserApi,
   createUA,
+  fetchControlUrl,
 };
 
 export async function connect(options: ConnectOptions) {

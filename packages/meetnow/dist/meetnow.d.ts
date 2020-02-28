@@ -220,6 +220,11 @@ declare interface ApiParamsMap {
     'getVirtualJWT': {
         id: string;
     };
+    'getConferenceInfo': {
+        conferenceNo: string;
+        searchNotStartedScheduledConference?: boolean;
+        filterByRegionInfo?: boolean;
+    };
 }
 
 declare type Authentication = {
@@ -237,7 +242,7 @@ declare interface AuthInfo {
     'authtype'?: AuthType;
 }
 
-declare enum AuthType {
+export declare enum AuthType {
     email = "0",
     mobile = "1",
     verifycode = "9"
@@ -246,8 +251,7 @@ export { axios }
 
 export declare function bootstrap(auth: AuthInfo): Promise<{
     account: any;
-    tokens: any;
-    confirm: (token: string) => Promise<import("./interface").Authentication>;
+    identities: Identity[];
 }>;
 
 export declare function connect(options: ConnectOptions): Promise<{
@@ -256,7 +260,8 @@ export declare function connect(options: ConnectOptions): Promise<{
             request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
             response: import("axios").AxiosInterceptorManager<import("axios").AxiosResponse<any>>;
         };
-        request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./api/request").Request<import("./api/api-configs").ApiDataMap[T], import("./api/api-configs").ApiParamsMap[T], any, any>;
+        request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./api/request").Request<import("./api/api-configs").ApiDataMap[T], import("./api/api-configs").ApiParamsMap[T], any, any>;
+        delegate: import("axios").AxiosInstance;
     };
     url: string | undefined;
     uuid: string | undefined;
@@ -3984,7 +3989,8 @@ declare function createApi(config?: AxiosRequestConfig): {
         request: import("axios").AxiosInterceptorManager<AxiosRequestConfig>;
         response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
     };
-    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./request").Request<ApiDataMap[T], ApiParamsMap[T], any, any>;
+    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./request").Request<ApiDataMap[T], ApiParamsMap[T], any, any>;
+    delegate: import("axios").AxiosInstance;
 };
 
 export declare function createUA(config?: UAConfigs): {
@@ -7721,6 +7727,14 @@ export declare function createUA(config?: UAConfigs): {
     }>;
 };
 
+export declare function createUserApi(token?: string | (() => string | undefined)): {
+    readonly interceptors: {
+        request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
+        response: import("axios").AxiosInterceptorManager<import("axios").AxiosResponse<any>>;
+    };
+    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("../api/request").Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any, any>;
+};
+
 declare function createWorker(config: WorkerConfig): {
     config: WorkerConfig;
     readonly running: boolean;
@@ -7734,6 +7748,20 @@ declare interface CtrlApiData {
     [key: string]: any;
 }
 export { debug }
+
+export declare function fetchControlUrl(identity: any, number: string, baseurl?: string): Promise<string>;
+
+declare interface Identity {
+    party: any;
+    subject: any;
+    cloudAccount: any;
+    token: string;
+    seeded: boolean;
+    lastLogin: boolean;
+    readonly account: any;
+    readonly auth: Authentication;
+    confirm: () => Promise<Authentication>;
+}
 
 declare interface JoinOptions {
     url?: string;
