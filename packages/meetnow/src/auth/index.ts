@@ -36,7 +36,7 @@ export interface Identity {
   lastLogin: boolean;
 
   readonly account: any;
-  readonly auth: Authentication;
+  readonly auth?: Authentication;
 
   confirm: () => Promise<Authentication>;
 }
@@ -86,12 +86,18 @@ export async function bootstrap(auth: AuthInfo) {
 }
 
 export async function fetchControlUrl(
-  identity: any,
+  identity: Identity,
   number: string,
   baseurl?: string,
 ) {
   const { auth, party } = identity;
-  const { api, token } = auth;
+
+  // check identity
+  if (!auth) {
+    await identity.confirm();
+  }
+
+  const { api, token } = auth!;
   const { number: partyNumber } = party;
 
   const response = await (api as Api).request('getConferenceInfo')
@@ -132,7 +138,7 @@ export async function fetchControlUrl(
     `id=${ planId }`,
     // TODO base64
     `client=${ encode(`${ partyNumber }@${ domain }`) }`,
-    `t=${ encode(token) }`,
+    `t=${ encode(token!) }`,
   ];
 
   baseurl = baseurl || api.delegate.defaults.baseURL;

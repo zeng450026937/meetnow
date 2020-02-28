@@ -7749,7 +7749,7 @@ declare interface CtrlApiData {
 }
 export { debug }
 
-export declare function fetchControlUrl(identity: any, number: string, baseurl?: string): Promise<string>;
+export declare function fetchControlUrl(identity: Identity, number: string, baseurl?: string): Promise<string>;
 
 declare interface Identity {
     party: any;
@@ -7759,7 +7759,7 @@ declare interface Identity {
     seeded: boolean;
     lastLogin: boolean;
     readonly account: any;
-    readonly auth: Authentication;
+    readonly auth?: Authentication;
     confirm: () => Promise<Authentication>;
 }
 

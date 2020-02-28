@@ -36,7 +36,7 @@ declare namespace MeetNow {
     lastLogin: boolean;
 
     readonly account: any;
-    readonly auth: Authentication;
+    readonly auth?: Authentication;
 
     confirm: () => Promise<Authentication>;
   };
@@ -45,6 +45,9 @@ declare namespace MeetNow {
     identities: Identity[];
   };
 
+  /*
+   * 登录
+   */
   const bootstrap: (auth: AuthInfo) => Promise<Verification>;
   /**
    * 连接会议
@@ -57,6 +60,11 @@ declare namespace MeetNow {
     auth?: Authentication;
   }
   const createUA: (config?: UAConfig) => UserAgent;
+
+  /*
+   * 通过会议号码获取会议控制页面URL
+   */
+  const fetchControlUrl: (identity: Identity, number: string, baseurl?: string) => Promise<string>;
 
   class ApiError extends Error {
     bizCode: number;

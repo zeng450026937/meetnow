@@ -1476,6 +1476,10 @@ async function bootstrap(auth) {
 }
 async function fetchControlUrl(identity, number, baseurl) {
     const { auth, party } = identity;
+    // check identity
+    if (!auth) {
+        await identity.confirm();
+    }
     const { api, token } = auth;
     const { number: partyNumber } = party;
     const response = await api.request('getConferenceInfo')
