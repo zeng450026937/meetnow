@@ -4,8 +4,8 @@ import { isFunction } from '.';
 const log = debug('MN:Worker');
 
 export interface WorkerConfig {
-  work: (times: number) => Promise<void> | void;
-  cancel?: () => void;
+  work: (times: number) => Promise<any> | any;
+  cancel?: () => any;
   interval?: number | (() => number);
 }
 

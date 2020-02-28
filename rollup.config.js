@@ -6,7 +6,7 @@ import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
 import noderesolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-// import buble from '@rollup/plugin-buble';
+import buble from '@rollup/plugin-buble';
 import babel from 'rollup-plugin-babel';
 
 if (!process.env.TARGET) {
@@ -47,9 +47,9 @@ const outputConfigs = {
     file   : resolve(`dist/${ name }.global.js`),
     format : 'iife',
   },
-  'global-compat' : {
-    file   : resolve(`dist/${ name }.global-compat.js`),
-    format : 'iife',
+  umd : {
+    file   : resolve(`dist/${ name }.umd.js`),
+    format : 'umd',
   },
   esm : {
     file   : resolve(`dist/${ name }.esm.js`),
@@ -69,7 +69,7 @@ if (process.env.NODE_ENV === 'production') {
     if (format === 'cjs' && packageOptions.prod !== false) {
       packageConfigs.push(createProductionConfig(format));
     }
-    if (format === 'global' || format === 'global-compat' || format === 'esm') {
+    if (format === 'global' || format === 'umd' || format === 'esm') {
       packageConfigs.push(createMinifiedConfig(format));
     }
   });
@@ -86,14 +86,14 @@ function createConfig(format, output, plugins = []) {
   output.externalLiveBindings = false;
 
   const isProductionBuild = process.env.__DEV__ === 'false' || /\.prod\.js$/.test(output.file);
-  const isGlobalBuild = format === 'global';
+  const isGlobalBuild = format === 'global' || format === 'umd';
   const isRawESMBuild = format === 'esm';
   const isBundlerESMBuild = /esm-bundler/.test(format);
   const isRuntimeCompileBuild = /meetnow\./.test(output.file);
   const isCompatBuild = /compat/.test(format);
 
   if (isGlobalBuild) {
-    output.name = packageOptions.name;
+    output.name = packageOptions.name || name;
   }
 
   const shouldEmitDeclarations = process.env.TYPES != null
@@ -119,22 +119,22 @@ function createConfig(format, output, plugins = []) {
 
   const entryFile = format === 'esm-bundler-runtime' ? 'src/runtime.ts' : 'src/index.ts';
 
-  const compatPlugin = isCompatBuild
-    ? babel({
-      extensions     : ['.js', '.ts'],
-      exclude        : 'node_modules/**',
-      babelrc        : false,
-      configFile     : path.resolve(__dirname, 'babel.config.js'),
-      runtimeHelpers : true,
-    })
-    : null;
-    // : buble({
-    //   target     : { chrome: 70 },
-    //   transforms : {
-    //     objectRestSpread : true,
-    //   },
-    //   objectAssign : true,
-    // });
+  // babel({
+  //   extensions     : ['.js', '.ts'],
+  //   exclude        : 'node_modules/**',
+  //   babelrc        : false,
+  //   configFile     : path.resolve(__dirname, 'babel.config.js'),
+  //   runtimeHelpers : true,
+  // })
+
+  // only transform object-rest-spread
+  const compatPlugin = buble({
+    target     : { chrome: 70 },
+    transforms : {
+      objectRestSpread : true,
+    },
+    objectAssign : 'Object.spread',
+  });
 
   return {
     input    : resolve(entryFile),
@@ -187,17 +187,16 @@ function createReplacePlugin(
       : // hard coded dev/prod builds
       !isProduction,
     // this is only used during tests
-    __TEST__             : isBundlerESMBuild ? '(process.env.NODE_ENV === \'test\')' : false,
+    __TEST__            : isBundlerESMBuild ? '(process.env.NODE_ENV === \'test\')' : false,
     // If the build is expected to run directly in the browser (global / esm builds)
-    __BROWSER__          : isBrowserBuild,
+    __BROWSER__         : isBrowserBuild,
     // is targeting bundlers?
-    __BUNDLER__          : isBundlerESMBuild,
+    __BUNDLER__         : isBundlerESMBuild,
     // support compile in browser?
-    __RUNTIME_COMPILE__  : isRuntimeCompileBuild,
+    __RUNTIME_COMPILE__ : isRuntimeCompileBuild,
     // support options?
     // the lean build drops options related code with buildOptions.lean: true
-    __FEATURE_OPTIONS__  : !packageOptions.lean && !process.env.LEAN,
-    __FEATURE_SUSPENSE__ : true,
+    __FEATURE_OPTIONS__ : !packageOptions.lean && !process.env.LEAN,
   };
   // allow inline overrides like
   // __RUNTIME_COMPILE__=true yarn build runtime-core

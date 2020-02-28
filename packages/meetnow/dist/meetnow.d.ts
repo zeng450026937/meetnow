@@ -11,6 +11,20 @@ declare type Api = ReturnType<typeof createApi>;
 
 declare interface ApiDataMap {
     [apiName: string]: any;
+    'login': {
+        'principle': string;
+        'mobileCode'?: string;
+        'credential': string;
+        'number'?: string;
+        'accountType'?: '0' | '1' | '9';
+    };
+    'selectAccount': {};
+    'logout': {};
+    'refreshToken': {};
+    'sendMobileLoginVerifyCode': {
+        'mobileNo': string;
+        'mobileCode'?: string;
+    };
     'polling': CtrlApiData & {
         'version': number;
     };
@@ -212,7 +226,34 @@ declare interface ApiParamsMap {
 declare interface ApplicationSharer extends Partialable {
     'user': ConferenceUser;
 }
+
+declare type Authentication = {
+    readonly token?: string;
+    api: Api;
+    worker: Worker;
+    invalid: () => Promise<void>;
+};
+
+declare interface AuthInfo {
+    'principle': string;
+    'credential': string;
+    'enterprise'?: string;
+    'areacode'?: string;
+    'authtype'?: AuthType;
+}
+
+declare enum AuthType {
+    email = "0",
+    mobile = "1",
+    verifycode = "9"
+}
 export { axios }
+
+export declare function bootstrap(auth: AuthInfo): Promise<{
+    account: any;
+    tokens: any;
+    comfirm: (token: string) => Promise<import("./interface").Authentication>;
+}>;
 
 declare interface ConfereceUri {
     'entity': 'focus' | 'audio-video' | 'applicationsharing';
@@ -363,7 +404,7 @@ declare function connect(options: ConnectOptions): Promise<{
             request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
             response: import("axios").AxiosInterceptorManager<import("axios").AxiosResponse<any>>;
         };
-        request: <T extends "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./api/request").Request<import("./api/api-configs").ApiDataMap[T], import("./api/api-configs").ApiParamsMap[T], any>;
+        request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./api/request").Request<import("./api/api-configs").ApiDataMap[T], import("./api/api-configs").ApiParamsMap[T], any, any>;
     };
     url: string | undefined;
     uuid: string | undefined;
@@ -3848,6 +3889,8 @@ declare function connect(options: ConnectOptions): Promise<{
     mediaChannel: {
         status: import("./channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        startTime: Date | undefined;
+        endTime: Date | undefined;
         version: number;
         callId: string;
         isInProgress: () => boolean;
@@ -3875,10 +3918,7 @@ declare function connect(options: ConnectOptions): Promise<{
         hold: () => Promise<void>;
         unhold: () => Promise<void>;
         getRemoteStream: () => MediaStream | undefined;
-        addLocalStream: (stream?: MediaStream | undefined) => void;
-        removeLocalStream: () => void;
         getLocalStream: () => MediaStream | undefined;
-        setLocalStream: (stream?: MediaStream | undefined) => void;
         replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
         adjustBandWidth: (options: {
             audio?: number | undefined;
@@ -3923,6 +3963,8 @@ declare function connect(options: ConnectOptions): Promise<{
     shareChannel: {
         status: import("./channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        startTime: Date | undefined;
+        endTime: Date | undefined;
         version: number;
         callId: string;
         isInProgress: () => boolean;
@@ -3950,10 +3992,7 @@ declare function connect(options: ConnectOptions): Promise<{
         hold: () => Promise<void>;
         unhold: () => Promise<void>;
         getRemoteStream: () => MediaStream | undefined;
-        addLocalStream: (stream?: MediaStream | undefined) => void;
-        removeLocalStream: () => void;
         getLocalStream: () => MediaStream | undefined;
-        setLocalStream: (stream?: MediaStream | undefined) => void;
         replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
         adjustBandWidth: (options: {
             audio?: number | undefined;
@@ -4100,7 +4139,7 @@ declare function createApi(config?: AxiosRequestConfig): {
         request: import("axios").AxiosInterceptorManager<AxiosRequestConfig>;
         response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
     };
-    request: <T extends "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./request").Request<ApiDataMap[T], ApiParamsMap[T], any>;
+    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./request").Request<ApiDataMap[T], ApiParamsMap[T], any, any>;
 };
 
 export declare function createConference(config: ConferenceConfigs): {
@@ -4109,7 +4148,7 @@ export declare function createConference(config: ConferenceConfigs): {
             request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
             response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
         };
-        request: <T extends "getURL" | "getVirtualJWT" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getURL" | "getVirtualJWT" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any>;
+        request: <T extends "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any, any>;
     };
     url: string | undefined;
     uuid: string | undefined;
@@ -7594,6 +7633,8 @@ export declare function createConference(config: ConferenceConfigs): {
     mediaChannel: {
         status: import("../channel/channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        startTime: Date | undefined;
+        endTime: Date | undefined;
         version: number;
         callId: string;
         isInProgress: () => boolean;
@@ -7621,10 +7662,7 @@ export declare function createConference(config: ConferenceConfigs): {
         hold: () => Promise<void>;
         unhold: () => Promise<void>;
         getRemoteStream: () => MediaStream | undefined;
-        addLocalStream: (stream?: MediaStream | undefined) => void;
-        removeLocalStream: () => void;
         getLocalStream: () => MediaStream | undefined;
-        setLocalStream: (stream?: MediaStream | undefined) => void;
         replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
         adjustBandWidth: (options: {
             audio?: number | undefined;
@@ -7669,6 +7707,8 @@ export declare function createConference(config: ConferenceConfigs): {
     shareChannel: {
         status: import("../channel/channel").STATUS;
         connection: RTCPeerConnection | undefined;
+        startTime: Date | undefined;
+        endTime: Date | undefined;
         version: number;
         callId: string;
         isInProgress: () => boolean;
@@ -7696,10 +7736,7 @@ export declare function createConference(config: ConferenceConfigs): {
         hold: () => Promise<void>;
         unhold: () => Promise<void>;
         getRemoteStream: () => MediaStream | undefined;
-        addLocalStream: (stream?: MediaStream | undefined) => void;
-        removeLocalStream: () => void;
         getLocalStream: () => MediaStream | undefined;
-        setLocalStream: (stream?: MediaStream | undefined) => void;
         replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
         adjustBandWidth: (options: {
             audio?: number | undefined;
@@ -7843,7 +7880,6 @@ export declare function createMedia(): {};
 export declare function createReactive(data?: object, events?: Events): object;
 
 export declare function createUA(config?: UAConfigs): {
-    stop: () => void;
     fetch: (number: string) => Promise<{
         partyId: string;
         number: string;
@@ -7856,7 +7892,7 @@ export declare function createUA(config?: UAConfigs): {
                 request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
                 response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
             };
-            request: <T extends "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("../api/request").Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any>;
+            request: <T extends "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("../api/request").Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any, any>;
         };
         url: string | undefined;
         uuid: string | undefined;
@@ -11341,6 +11377,8 @@ export declare function createUA(config?: UAConfigs): {
         mediaChannel: {
             status: import("../channel").STATUS;
             connection: RTCPeerConnection | undefined;
+            startTime: Date | undefined;
+            endTime: Date | undefined;
             version: number;
             callId: string;
             isInProgress: () => boolean;
@@ -11368,10 +11406,7 @@ export declare function createUA(config?: UAConfigs): {
             hold: () => Promise<void>;
             unhold: () => Promise<void>;
             getRemoteStream: () => MediaStream | undefined;
-            addLocalStream: (stream?: MediaStream | undefined) => void;
-            removeLocalStream: () => void;
             getLocalStream: () => MediaStream | undefined;
-            setLocalStream: (stream?: MediaStream | undefined) => void;
             replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
             adjustBandWidth: (options: {
                 audio?: number | undefined;
@@ -11416,6 +11451,8 @@ export declare function createUA(config?: UAConfigs): {
         shareChannel: {
             status: import("../channel").STATUS;
             connection: RTCPeerConnection | undefined;
+            startTime: Date | undefined;
+            endTime: Date | undefined;
             version: number;
             callId: string;
             isInProgress: () => boolean;
@@ -11443,10 +11480,7 @@ export declare function createUA(config?: UAConfigs): {
             hold: () => Promise<void>;
             unhold: () => Promise<void>;
             getRemoteStream: () => MediaStream | undefined;
-            addLocalStream: (stream?: MediaStream | undefined) => void;
-            removeLocalStream: () => void;
             getLocalStream: () => MediaStream | undefined;
-            setLocalStream: (stream?: MediaStream | undefined) => void;
             replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
             adjustBandWidth: (options: {
                 audio?: number | undefined;
@@ -11579,6 +11613,13 @@ export declare function createUA(config?: UAConfigs): {
     }>;
 };
 
+declare function createWorker(config: WorkerConfig): {
+    config: WorkerConfig;
+    readonly running: boolean;
+    start: (immediate?: boolean) => Promise<void>;
+    stop: () => void;
+};
+
 declare interface CtrlApiData {
     'conference-uuid'?: string;
     'conference-user-id'?: number;
@@ -11587,10 +11628,11 @@ declare interface CtrlApiData {
 export { debug }
 
 declare const _default: {
-    version: string;
-    createUA: typeof createUA;
     setup: typeof setup;
     connect: typeof connect;
+    bootstrap: typeof bootstrap;
+    createUA: typeof createUA;
+    version: string;
 };
 export default _default;
 
@@ -11689,21 +11731,19 @@ declare interface Partialable {
     [key: string]: any;
 }
 
-declare interface Request<RequestData = any, RequestParams = any, RequestHeader = any> {
+declare interface Request<RequestData = any, RequestParams = any, RequestHeader = any, RequestResultData = any> {
     config: AxiosRequestConfig;
     header: (header: RequestHeader) => Request<RequestData, RequestParams, RequestHeader>;
     params: (params: RequestParams) => Request<RequestData, RequestParams, RequestHeader>;
     data: (data: RequestData) => Request<RequestData, RequestParams, RequestHeader>;
-    send: () => AxiosPromise<RequestResult>;
+    send: () => AxiosPromise<RequestResult<RequestResultData>>;
     cancel: () => void;
 }
 
-declare interface RequestResult {
+declare interface RequestResult<T extends Record<string, any> = any> {
     ret: number;
     bizCode: number;
-    data: {
-        [K: string]: any;
-    };
+    data: T;
     error?: {
         msg: string;
         errorCode: number;
@@ -11896,6 +11936,7 @@ export declare type UA = ReturnType<typeof createUA>;
 
 export declare interface UAConfigs {
     language?: string;
+    auth?: Authentication;
 }
 
 export declare function urlToNumber(url: string): string;
@@ -11920,6 +11961,14 @@ declare interface UserMedia {
 
 declare interface UserRole {
     'role': 'attendee' | 'presenter' | 'castviewer' | 'organizer';
+}
+
+declare type Worker = ReturnType<typeof createWorker>;
+
+declare interface WorkerConfig {
+    work: (times: number) => Promise<any> | any;
+    cancel?: () => any;
+    interval?: number | (() => number);
 }
 
 export declare function write(session: any, opts?: any): string;

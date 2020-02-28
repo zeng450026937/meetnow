@@ -1,9 +1,14 @@
+// object spread poly-fill
+// needed for wechat platform
+import './utils/object-spread';
+
 import debug from 'debug';
 import axios from 'axios';
 import adapter from './adapter';
 import { isMiniProgram } from './browser';
 import { CONFIG, MeetnowConfig, setupConfig } from './config';
 import { ConnectOptions, createUA } from './user-agent';
+import { bootstrap } from './auth';
 
 export { debug, axios, adapter };
 export * from './user-agent';
@@ -12,6 +17,7 @@ export * from './media';
 export * from './events';
 export * from './reactive';
 export * from './sdp-transform';
+export { bootstrap };
 
 const log = debug('MN');
 
@@ -42,10 +48,11 @@ async function connect(options: ConnectOptions) {
 }
 
 export default {
-  version,
-
-  createUA,
-
   setup,
   connect,
+
+  bootstrap,
+  createUA,
+
+  version,
 };

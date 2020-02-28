@@ -222,7 +222,7 @@ export const configs = {
 
   login : {
     method : RequestMethod.POST,
-    url    : `${ baseURL.usermgr }login/login`,
+    url    : `${ baseURL.usermgr }login`,
   },
   selectAccount : {
     method : RequestMethod.POST,

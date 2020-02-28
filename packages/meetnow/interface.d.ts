@@ -9,6 +9,30 @@ declare namespace MeetNow {
    * 初始化
    */
   const setup: () => void;
+
+  enum AuthType {
+    email = '0',
+    mobile = '1',
+    verifycode = '9'
+  }
+  interface AuthInfo {
+    'principle': string;
+    'credential': string;
+    'enterprise'?: string;
+    'areacode'?: string;
+    'authtype'?: AuthType;
+  }
+  type Authentication = {
+    readonly token?: string;
+    invalid: () => Promise<void>;
+  };
+  type Verification = {
+    account: { [key: string]: any };
+    tokens: { token: string }[];
+    comfirm: (token: string) => Promise<Authentication>;
+  };
+
+  const bootstrap: (auth: AuthInfo) => Promise<Verification>;
   /**
    * 连接会议
    */
@@ -16,7 +40,10 @@ declare namespace MeetNow {
   /**
    * 创建用户
    */
-  const createUA: () => UserAgent;
+  interface UAConfig {
+    auth?: Authentication;
+  }
+  const createUA: (config?: UAConfig) => UserAgent;
 
   class ApiError extends Error {
     bizCode: number;

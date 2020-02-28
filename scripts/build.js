@@ -16,12 +16,15 @@ module.exports = (api, options) => {
 
       api.chainWebpack((config) => {
         /* eslint-disable-next-line */
-        const masterVersion = require(api.resolve('./package.json')).version;
+        const pkg = require(api.resolve('./package.json'));
+        const masterVersion = pkg.version;
+        const packageOptions = pkg.buildOptions;
 
         config.plugin('define')
           .tap((opts) => {
             opts[0].__DEV__ = process.env.NODE_ENV === 'development';
             opts[0].__VERSION__ = `"${ masterVersion }"`;
+            opts[0].__FEATURE_OPTIONS__ = !packageOptions.lean && !process.env.LEAN;
             return opts;
           });
       });

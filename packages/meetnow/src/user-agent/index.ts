@@ -1,10 +1,9 @@
 import debug from 'debug';
 import { AxiosResponse } from 'axios';
-import { Api, createApi } from '../api';
+import { Api } from '../api';
 import { RequestResult } from '../api/request';
-import { createWorker, Worker } from '../utils/worker';
+import { Authentication, createTempAuth, createUserApi } from '../auth';
 import { createConference, JoinOptions } from '../conference';
-import { CONFIG } from '../config';
 
 const log = debug('MN:UA');
 
@@ -12,6 +11,7 @@ export interface ConnectOptions extends JoinOptions {}
 
 export interface UAConfigs {
   language?: string;
+  auth?: Authentication;
 }
 
 export function urlToNumber(url: string) {
@@ -21,62 +21,16 @@ export function urlToNumber(url: string) {
   return `${ number }.${ enterprise }`;
 }
 
-export function createUA(config?: UAConfigs) {
-  let api: Api;
-  let worker: Worker;
-  let token: string | undefined;
-  let partyId: string | undefined;
-  let url: string | undefined;
+export function createUA(config: UAConfigs = {}) {
+  let { auth } = config;
+  let api: Api | undefined;
 
-  function createUserApi(auth = true) {
-    const api = createApi({
-      baseURL : CONFIG.get(
-        'baseurl',
-        __DEV__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/',
-      ),
-    });
-
-    api.interceptors.request.use((config) => {
-      if (auth && token) {
-        config.headers = config.headers || {};
-        config.headers.token = token;
-      }
-      return config;
-    });
-
-    return api;
+  if (auth) {
+    ({ api } = auth);
   }
 
-  async function auth() {
-    log('auth()');
 
-    if (!partyId) {
-      throw new Error('Authorization Error');
-    }
-
-    const response = await api
-      .request('getVirtualJWT')
-      .params({ id: partyId })
-      .send();
-
-    ({ token } = response.data.data);
-
-    if (!token) {
-      throw new Error('Authorization Error');
-    }
-  }
-
-  function stop() {
-    log('stop()');
-
-    if (worker) {
-      worker.stop();
-    }
-
-    // clear token will break all api request
-    token = undefined;
-  }
-
+  // fetch conference basic info
   async function fetch(number: string) {
     log('fetch()');
 
@@ -87,7 +41,7 @@ export function createUA(config?: UAConfigs) {
     let url: string;
 
     if (!api) {
-      api = createUserApi(false);
+      api = createUserApi();
     }
 
     // get conference url
@@ -133,29 +87,21 @@ export function createUA(config?: UAConfigs) {
 
     return {
       partyId,
-      number,
+      number, // long-number
       url,
       info,
     };
   }
 
-  // currently, we don't support connect multiple conference for authenticate reason
   async function connect(options: ConnectOptions) {
     log('connect()');
 
+    let partyId: string | undefined;
+    let url: string | undefined;
+
     // create user api
     if (!api) {
-      api = createUserApi(false);
-    }
-
-    // creat auth() worker
-    if (!worker) {
-      worker = createWorker({
-        interval : 5 * 60 * 1000,
-        work     : async () => {
-          await auth();
-        },
-      });
+      api = createUserApi();
     }
 
     if (!options.number) {
@@ -174,9 +120,21 @@ export function createUA(config?: UAConfigs) {
     /* eslint-disable-next-line prefer-const */
     ({ 'party-id': partyId, url } = data.data);
 
-    await worker.start();
+    if (!partyId) {
+      throw new TypeError('Invalid Number');
+    }
 
-    const conference = createConference({ api: createUserApi() });
+    let isTempAuthLocallyGenerated = false;
+    // temp auth
+    if (!auth) {
+      auth = await createTempAuth(partyId);
+      ({ api } = auth);
+      isTempAuthLocallyGenerated = true;
+    }
+
+    // create stand alone user api for conference.
+    // auth is required
+    const conference = createConference({ api });
 
     // hack join method
     const { join } = conference;
@@ -188,15 +146,14 @@ export function createUA(config?: UAConfigs) {
       });
     };
 
-    // stop auth worker as we can only connect one conference
-    conference.once('disconnected', stop);
+    if (isTempAuthLocallyGenerated) {
+      conference.once('disconnected', auth.invalid);
+    }
 
     return conference;
   }
 
   return {
-    stop,
-
     fetch,
     connect,
   };
