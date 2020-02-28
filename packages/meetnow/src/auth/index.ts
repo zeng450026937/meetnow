@@ -39,7 +39,7 @@ export async function bootstrap(auth: AuthInfo) {
 
   const { account, tokens } = response.data.data;
 
-  async function comfirm(token: string) {
+  async function confirm(token: string) {
     /* eslint-disable-next-line no-return-await */
     return await createDigestAuth(token);
   }
@@ -48,6 +48,6 @@ export async function bootstrap(auth: AuthInfo) {
     account,
     tokens,
 
-    comfirm,
+    confirm,
   };
 }

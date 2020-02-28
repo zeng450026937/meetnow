@@ -1,5 +1,5 @@
 import 'webrtc-adapter';
-import mod from './index';
+import * as mod from './index';
 
 export default mod;
 export * from './index';

@@ -13,14 +13,14 @@ declare const wx: Window & typeof globalThis;
 
 export function setupConfig(config?: MeetnowConfig) {
   const win = isMiniProgram() ? wx : window;
-  const MeetNow = (win as any).MeetNow = (win as any).MeetNow || { config };
+  const MeetNow = (win as any).MeetNow = (win as any).MeetNow || {};
 
-  // create the Ionic.config from raw config object (if it exists)
-  // and convert Ionic.config into a ConfigApi that has a get() fn
+  // create the Meetnow.config from raw config object (if it exists)
+  // and convert Meetnow.config into a ConfigApi that has a get() fn
   const configObj = {
     ...configFromSession(win),
     persistent : false,
-    ...MeetNow.config,
+    ...(config || MeetNow.config),
     ...configFromURL(win),
   };
 
@@ -30,9 +30,6 @@ export function setupConfig(config?: MeetnowConfig) {
     saveConfig(win, configObj);
   }
 
-  // first see if the mode was set as an attribute on <html>
-  // which could have been set by the user, or by pre-rendering
-  // otherwise get the mode via config settings, and fallback to md
   MeetNow.config = CONFIG;
 
   if (CONFIG.getBoolean('testing')) {

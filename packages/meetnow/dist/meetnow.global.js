@@ -2528,20 +2528,17 @@ var MeetNow = (function (exports) {
 
   function setupConfig(config) {
       const win = isMiniProgram() ? wx : window;
-      const MeetNow = win.MeetNow = win.MeetNow || { config };
-      // create the Ionic.config from raw config object (if it exists)
-      // and convert Ionic.config into a ConfigApi that has a get() fn
+      const MeetNow = win.MeetNow = win.MeetNow || {};
+      // create the Meetnow.config from raw config object (if it exists)
+      // and convert Meetnow.config into a ConfigApi that has a get() fn
       const configObj = Object.spread({}, configFromSession(win),
           {persistent: false},
-          MeetNow.config,
+          (config || MeetNow.config),
           configFromURL(win));
       CONFIG.reset(configObj);
       if (CONFIG.getBoolean('persistent')) {
           saveConfig(win, configObj);
       }
-      // first see if the mode was set as an attribute on <html>
-      // which could have been set by the user, or by pre-rendering
-      // otherwise get the mode via config settings, and fallback to md
       MeetNow.config = CONFIG;
       if (CONFIG.getBoolean('testing')) {
           CONFIG.set('debug', 'MN:*');
@@ -3199,7 +3196,7 @@ var MeetNow = (function (exports) {
 
   function createUserApi(token) {
       const api = createApi({
-          baseURL: CONFIG.get('baseurl',  '/webapp/' ),
+          baseURL: CONFIG.get('baseurl',  'https://meetings.ylyun.com/webapp/'),
       });
       api.interceptors.request.use((config) => {
           if (token) {
@@ -3353,14 +3350,14 @@ var MeetNow = (function (exports) {
       })
           .send();
       const { account, tokens } = response.data.data;
-      async function comfirm(token) {
+      async function confirm(token) {
           /* eslint-disable-next-line no-return-await */
           return await createDigestAuth(token);
       }
       return {
           account,
           tokens,
-          comfirm,
+          confirm,
       };
   }
 
@@ -5290,58 +5287,6 @@ var MeetNow = (function (exports) {
       session.media = media; // link it up
       return session;
   }
-  function paramReducer(acc, expr) {
-      const s = expr.split(/=(.+)/, 2);
-      if (s.length === 2) {
-          acc[s[0]] = toIntIfInt(s[1]);
-      }
-      return acc;
-  }
-  function parseParams(str) {
-      return str.split(/\;\s?/).reduce(paramReducer, {});
-  }
-  // For backward compatibility - alias will be removed in 3.0.0
-  const parseFmtpConfig = parseParams;
-  function parsePayloads(str) {
-      return str.split(' ').map(Number);
-  }
-  function parseRemoteCandidates(str) {
-      const candidates = [];
-      const parts = str.split(' ').map(toIntIfInt);
-      for (let i = 0; i < parts.length; i += 3) {
-          candidates.push({
-              component: parts[i],
-              ip: parts[i + 1],
-              port: parts[i + 2],
-          });
-      }
-      return candidates;
-  }
-  function parseImageAttributes(str) {
-      return str.split(' ').map((item) => {
-          return item.substring(1, item.length - 1).split(',')
-              .reduce(paramReducer, {});
-      });
-  }
-  function parseSimulcastStreamList(str) {
-      return str.split(';').map((stream) => {
-          return stream.split(',').map((format) => {
-              let scid;
-              let paused = false;
-              if (format[0] !== '~') {
-                  scid = toIntIfInt(format);
-              }
-              else {
-                  scid = toIntIfInt(format.substring(1, format.length));
-                  paused = true;
-              }
-              return {
-                  scid,
-                  paused,
-              };
-          });
-      });
-  }
 
   // customized util.format - discards excess arguments and can void middle ones
   const formatRegExp = /%[sdv%]/g;
@@ -7222,13 +7167,14 @@ var MeetNow = (function (exports) {
   const log$r = browser('MN:Conference');
   const miniprogram = isMiniProgram();
   const browser$4 = getBrowser();
+  var STATUS$1;
   (function (STATUS) {
       STATUS[STATUS["kNull"] = 0] = "kNull";
       STATUS[STATUS["kConnecting"] = 1] = "kConnecting";
       STATUS[STATUS["kConnected"] = 2] = "kConnected";
       STATUS[STATUS["kDisconnecting"] = 3] = "kDisconnecting";
       STATUS[STATUS["kDisconnected"] = 4] = "kDisconnected";
-  })(exports.STATUS || (exports.STATUS = {}));
+  })(STATUS$1 || (STATUS$1 = {}));
   function createConference(config) {
       const { api } = config;
       const events = createEvents(log$r);
@@ -7241,7 +7187,7 @@ var MeetNow = (function (exports) {
       let shareChannel;
       let chatChannel;
       let user; // current user
-      let status = exports.STATUS.kNull;
+      let status = STATUS$1.kNull;
       let uuid;
       let userId; // as conference entity
       let url;
@@ -7271,26 +7217,26 @@ var MeetNow = (function (exports) {
       }
       function onConnecting() {
           log$r('conference connecting');
-          status = exports.STATUS.kConnecting;
+          status = STATUS$1.kConnecting;
           events.emit('connecting');
       }
       function onConnected() {
           log$r('conference connected');
           /* eslint-disable-next-line no-use-before-define */
           setup();
-          status = exports.STATUS.kConnected;
+          status = STATUS$1.kConnected;
           events.emit('connected');
       }
       function onDisconnecting() {
           log$r('conference disconnecting');
-          status = exports.STATUS.kDisconnecting;
+          status = STATUS$1.kDisconnecting;
           events.emit('disconnecting');
       }
       function onDisconnected(data) {
           log$r('conference disconnected');
           /* eslint-disable-next-line no-use-before-define */
           cleanup();
-          status = exports.STATUS.kDisconnected;
+          status = STATUS$1.kDisconnected;
           events.emit('disconnected', data);
       }
       async function maybeChat() {
@@ -7302,11 +7248,11 @@ var MeetNow = (function (exports) {
       }
       async function join(options = {}) {
           log$r('join()');
-          throwIfNotStatus(exports.STATUS.kNull);
+          throwIfNotStatus(STATUS$1.kNull);
           if (!options.url && !options.number) {
               throw new TypeError('Invalid Number');
           }
-          status = exports.STATUS.kConnecting;
+          status = STATUS$1.kConnecting;
           onConnecting();
           let response;
           let data;
@@ -7320,8 +7266,8 @@ var MeetNow = (function (exports) {
               // extract url
               ({ url: options.url } = data.data);
           }
-          const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.1-beta"}`);
-          const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.1-beta"}`);
+          const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.0-beta"}`);
+          const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.0-beta"}`);
           // join focus
           const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
           request = api
@@ -7398,15 +7344,15 @@ var MeetNow = (function (exports) {
           return conference;
       }
       async function leave() {
-          throwIfStatus(exports.STATUS.kDisconnecting);
-          throwIfStatus(exports.STATUS.kDisconnected);
+          throwIfStatus(STATUS$1.kDisconnecting);
+          throwIfStatus(STATUS$1.kDisconnected);
           switch (status) {
-              case exports.STATUS.kNull:
+              case STATUS$1.kNull:
                   // nothing to do
                   break;
-              case exports.STATUS.kConnecting:
-              case exports.STATUS.kConnected:
-                  if (status === exports.STATUS.kConnected) {
+              case STATUS$1.kConnecting:
+              case STATUS$1.kConnected:
+                  if (status === STATUS$1.kConnected) {
                       onDisconnecting();
                       await api
                           .request('leave')
@@ -7418,13 +7364,13 @@ var MeetNow = (function (exports) {
                       onDisconnected();
                   }
                   break;
-              case exports.STATUS.kDisconnecting:
-              case exports.STATUS.kDisconnected:
+              case STATUS$1.kDisconnecting:
+              case STATUS$1.kDisconnected:
           }
           return conference;
       }
       async function end() {
-          throwIfNotStatus(exports.STATUS.kConnected);
+          throwIfNotStatus(STATUS$1.kConnected);
           await leave();
           await api
               .request('end')
@@ -7465,7 +7411,7 @@ var MeetNow = (function (exports) {
               },
               onQuit: (data) => {
                   log$r('receive quit: %o', data);
-                  if (status === exports.STATUS.kDisconnecting || status === exports.STATUS.kDisconnected)
+                  if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected)
                       { return; }
                   // bizCode = 901314 ended by presenter
                   // bizCode = 901320 kicked by presenter
@@ -7513,7 +7459,7 @@ var MeetNow = (function (exports) {
           request = undefined;
       }
       async function share(options) {
-          throwIfNotStatus(exports.STATUS.kConnected);
+          throwIfNotStatus(STATUS$1.kConnected);
           if (!shareChannel.isInProgress() && !shareChannel.isEstablished()) {
               await shareChannel.connect(options);
           }
@@ -7523,14 +7469,14 @@ var MeetNow = (function (exports) {
               .send();
       }
       async function setSharing(enable = true) {
-          throwIfNotStatus(exports.STATUS.kConnected);
+          throwIfNotStatus(STATUS$1.kConnected);
           await api
               .request('switchShare')
               .data({ share: enable })
               .send();
       }
       async function sendMessage(msg, target) {
-          throwIfNotStatus(exports.STATUS.kConnected);
+          throwIfNotStatus(STATUS$1.kConnected);
           if (!chatChannel || !chatChannel.ready)
               { throw new Error('Not Ready'); }
           await chatChannel.sendMessage(msg, target);
@@ -7597,12 +7543,6 @@ var MeetNow = (function (exports) {
   }
 
   const log$s = browser('MN:UA');
-  function urlToNumber(url) {
-      const parts = url.split('@');
-      const number = parts[0];
-      const enterprise = parts[1].split('.')[0];
-      return `${number}.${enterprise}`;
-  }
   function createUA(config = {}) {
       let { auth } = config;
       let api;
@@ -7712,13 +7652,9 @@ var MeetNow = (function (exports) {
       };
   }
 
-  function createMedia() {
-      return {};
-  }
-
   // object spread poly-fill
   const log$t = browser('MN');
-  const version = "1.0.1-beta";
+  const version = "1.1.0-beta";
   // global setup
   function setup$2(config) {
       setupConfig(config);
@@ -7733,35 +7669,15 @@ var MeetNow = (function (exports) {
       const conference = await ua.connect(options);
       return conference;
   }
-  var index = {
-      setup: setup$2,
-      connect,
-      bootstrap,
-      createUA,
-      version,
-  };
 
   exports.adapter = mpAdapter;
   exports.axios = axios$1;
   exports.bootstrap = bootstrap;
-  exports.createConference = createConference;
-  exports.createEvents = createEvents;
-  exports.createMedia = createMedia;
-  exports.createReactive = createReactive;
+  exports.connect = connect;
   exports.createUA = createUA;
   exports.debug = browser;
-  exports.default = index;
-  exports.paramReducer = paramReducer;
-  exports.parse = parse$1;
-  exports.parseFmtpConfig = parseFmtpConfig;
-  exports.parseImageAttributes = parseImageAttributes;
-  exports.parseParams = parseParams;
-  exports.parsePayloads = parsePayloads;
-  exports.parseReg = parseReg;
-  exports.parseRemoteCandidates = parseRemoteCandidates;
-  exports.parseSimulcastStreamList = parseSimulcastStreamList;
-  exports.urlToNumber = urlToNumber;
-  exports.write = write;
+  exports.setup = setup$2;
+  exports.version = version;
 
   return exports;
 

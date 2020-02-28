@@ -89,8 +89,6 @@ function createConfig(format, output, plugins = []) {
   const isGlobalBuild = format === 'global' || format === 'umd';
   const isRawESMBuild = format === 'esm';
   const isBundlerESMBuild = /esm-bundler/.test(format);
-  const isRuntimeCompileBuild = /meetnow\./.test(output.file);
-  const isCompatBuild = /compat/.test(format);
 
   if (isGlobalBuild) {
     output.name = packageOptions.name || name;
@@ -154,11 +152,10 @@ function createConfig(format, output, plugins = []) {
       }),
       tsPlugin,
       createReplacePlugin(
-        isProductionBuild || isCompatBuild,
+        isProductionBuild,
         isBundlerESMBuild,
         (isGlobalBuild || isRawESMBuild || isBundlerESMBuild)
           && !packageOptions.enableNonBrowserBranches,
-        isRuntimeCompileBuild,
       ),
       compatPlugin,
       ...plugins,
@@ -176,7 +173,6 @@ function createReplacePlugin(
   isProduction,
   isBundlerESMBuild,
   isBrowserBuild,
-  isRuntimeCompileBuild,
 ) {
   const replacements = {
     __COMMIT__  : `"${ process.env.COMMIT }"`,
@@ -192,8 +188,6 @@ function createReplacePlugin(
     __BROWSER__         : isBrowserBuild,
     // is targeting bundlers?
     __BUNDLER__         : isBundlerESMBuild,
-    // support compile in browser?
-    __RUNTIME_COMPILE__ : isRuntimeCompileBuild,
     // support options?
     // the lean build drops options related code with buildOptions.lean: true
     __FEATURE_OPTIONS__ : !packageOptions.lean && !process.env.LEAN,

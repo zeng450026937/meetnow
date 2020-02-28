@@ -29,7 +29,7 @@ declare namespace MeetNow {
   type Verification = {
     account: { [key: string]: any };
     tokens: { token: string }[];
-    comfirm: (token: string) => Promise<Authentication>;
+    confirm: (token: string) => Promise<Authentication>;
   };
 
   const bootstrap: (auth: AuthInfo) => Promise<Verification>;

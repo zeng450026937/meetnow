@@ -2525,20 +2525,17 @@ const configFromURL = (win) => {
 
 function setupConfig(config) {
     const win = isMiniProgram() ? wx : window;
-    const MeetNow = win.MeetNow = win.MeetNow || { config };
-    // create the Ionic.config from raw config object (if it exists)
-    // and convert Ionic.config into a ConfigApi that has a get() fn
+    const MeetNow = win.MeetNow = win.MeetNow || {};
+    // create the Meetnow.config from raw config object (if it exists)
+    // and convert Meetnow.config into a ConfigApi that has a get() fn
     const configObj = Object.spread({}, configFromSession(win),
         {persistent: false},
-        MeetNow.config,
+        (config || MeetNow.config),
         configFromURL(win));
     CONFIG.reset(configObj);
     if (CONFIG.getBoolean('persistent')) {
         saveConfig(win, configObj);
     }
-    // first see if the mode was set as an attribute on <html>
-    // which could have been set by the user, or by pre-rendering
-    // otherwise get the mode via config settings, and fallback to md
     MeetNow.config = CONFIG;
     if (CONFIG.getBoolean('testing')) {
         CONFIG.set('debug', 'MN:*');
@@ -3196,7 +3193,7 @@ const hasChanged = (value, oldValue) => {
 
 function createUserApi(token) {
     const api = createApi({
-        baseURL: CONFIG.get('baseurl',  '/webapp/' ),
+        baseURL: CONFIG.get('baseurl',  'https://meetings.ylyun.com/webapp/'),
     });
     api.interceptors.request.use((config) => {
         if (token) {
@@ -3350,14 +3347,14 @@ async function bootstrap(auth) {
     })
         .send();
     const { account, tokens } = response.data.data;
-    async function comfirm(token) {
+    async function confirm(token) {
         /* eslint-disable-next-line no-return-await */
         return await createDigestAuth(token);
     }
     return {
         account,
         tokens,
-        comfirm,
+        confirm,
     };
 }
 
@@ -5286,58 +5283,6 @@ function parse$1(sdp) {
     });
     session.media = media; // link it up
     return session;
-}
-function paramReducer(acc, expr) {
-    const s = expr.split(/=(.+)/, 2);
-    if (s.length === 2) {
-        acc[s[0]] = toIntIfInt(s[1]);
-    }
-    return acc;
-}
-function parseParams(str) {
-    return str.split(/\;\s?/).reduce(paramReducer, {});
-}
-// For backward compatibility - alias will be removed in 3.0.0
-const parseFmtpConfig = parseParams;
-function parsePayloads(str) {
-    return str.split(' ').map(Number);
-}
-function parseRemoteCandidates(str) {
-    const candidates = [];
-    const parts = str.split(' ').map(toIntIfInt);
-    for (let i = 0; i < parts.length; i += 3) {
-        candidates.push({
-            component: parts[i],
-            ip: parts[i + 1],
-            port: parts[i + 2],
-        });
-    }
-    return candidates;
-}
-function parseImageAttributes(str) {
-    return str.split(' ').map((item) => {
-        return item.substring(1, item.length - 1).split(',')
-            .reduce(paramReducer, {});
-    });
-}
-function parseSimulcastStreamList(str) {
-    return str.split(';').map((stream) => {
-        return stream.split(',').map((format) => {
-            let scid;
-            let paused = false;
-            if (format[0] !== '~') {
-                scid = toIntIfInt(format);
-            }
-            else {
-                scid = toIntIfInt(format.substring(1, format.length));
-                paused = true;
-            }
-            return {
-                scid,
-                paused,
-            };
-        });
-    });
 }
 
 // customized util.format - discards excess arguments and can void middle ones
@@ -7318,8 +7263,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.1-beta"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.1-beta"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.0-beta"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.0-beta"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -7595,12 +7540,6 @@ function createConference(config) {
 }
 
 const log$s = browser('MN:UA');
-function urlToNumber(url) {
-    const parts = url.split('@');
-    const number = parts[0];
-    const enterprise = parts[1].split('.')[0];
-    return `${number}.${enterprise}`;
-}
 function createUA(config = {}) {
     let { auth } = config;
     let api;
@@ -7710,13 +7649,9 @@ function createUA(config = {}) {
     };
 }
 
-function createMedia() {
-    return {};
-}
-
 // object spread poly-fill
 const log$t = browser('MN');
-const version = "1.0.1-beta";
+const version = "1.1.0-beta";
 // global setup
 function setup$2(config) {
     setupConfig(config);
@@ -7731,13 +7666,5 @@ async function connect(options) {
     const conference = await ua.connect(options);
     return conference;
 }
-var index = {
-    setup: setup$2,
-    connect,
-    bootstrap,
-    createUA,
-    version,
-};
 
-export default index;
-export { STATUS$1 as STATUS, mpAdapter as adapter, axios$1 as axios, bootstrap, createConference, createEvents, createMedia, createReactive, createUA, browser as debug, paramReducer, parse$1 as parse, parseFmtpConfig, parseImageAttributes, parseParams, parsePayloads, parseReg, parseRemoteCandidates, parseSimulcastStreamList, urlToNumber, write };
+export { mpAdapter as adapter, axios$1 as axios, bootstrap, connect, createUA, browser as debug, setup$2 as setup, version };

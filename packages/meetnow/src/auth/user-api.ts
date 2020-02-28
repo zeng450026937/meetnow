@@ -8,7 +8,7 @@ export function createUserApi(
   const api = createApi({
     baseURL : CONFIG.get(
       'baseurl',
-      __DEV__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/',
+      __TEST__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/',
     ),
   });
 
