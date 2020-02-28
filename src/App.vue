@@ -10,10 +10,11 @@
 import 'webrtc-adapter';
 
 import Vue from 'vue';
-import meetnow from '@meetnow/meetnow';
+import * as MeetNow from '@meetnow/meetnow';
 import MainContent from './components/main-content.vue';
 
-console.log(meetnow);
+console.log(MeetNow);
+(window as any).MeetNow = MeetNow;
 
 export default Vue.extend({
   name : 'app',
@@ -29,9 +30,9 @@ export default Vue.extend({
   },
 
   async created() {
-    meetnow.setup();
+    MeetNow.setup();
 
-    const ua = meetnow.createUA();
+    const ua = MeetNow.createUA();
     this.ua = ua;
     // const conf = await ua.connect({ number: '666666.66666' });
     // const conf = await ua.connect({ number: '220461.10001' });

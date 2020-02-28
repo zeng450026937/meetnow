@@ -1,4 +1,6 @@
 module.exports = (api, options) => {
+  process.env.NODE_ENV = 'test';
+
   api.registerCommand(
     'build:meetnow',
     {
