@@ -3411,6 +3411,7 @@ async function fetchControlUrl(identity, number, baseurl) {
         `t=${encode(token)}`,
     ];
     baseurl = baseurl || api.delegate.defaults.baseURL;
+    baseurl = baseurl.replace('webapp', 'control');
     const url = `${baseurl}?${parts.join('&')}`;
     return url;
 }
