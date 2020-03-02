@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/meetnow",
-  "version": "1.0.0-alpha",
+  "version": "1.1.1-beta",
   "description": "Yealink Meeting via WebRTC.",
   "main": "index.js",
   "module": "dist/meetnow.esm-bundler.js",
