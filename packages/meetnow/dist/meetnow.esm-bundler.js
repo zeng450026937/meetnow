@@ -1497,7 +1497,7 @@ async function fetchControlUrl(identity, number, baseurl) {
     if (scheduledConference) {
         ({ planId, sequence } = scheduledConference);
     }
-    const encode = window.btoa;
+    const encode = btoa;
     const source = 'WEBUSER';
     const parts = [
         `source=${source}`,
@@ -5420,8 +5420,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.0-beta"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.0-beta"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.1-beta"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.1-beta"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -5808,7 +5808,7 @@ function createUA(config = {}) {
 
 // object spread poly-fill
 const log$t = debug('MN');
-const version = "1.1.0-beta";
+const version = "1.1.1-beta";
 // global setup
 function setup$1(config) {
     setupConfig(config);

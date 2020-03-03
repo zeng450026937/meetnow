@@ -1,4 +1,5 @@
 import md5 from 'md5';
+import btoa from '../adapter/btoa';
 import { createUserApi } from './user-api';
 import { createDigestAuth } from './digest-auth';
 import { Api } from '../api';
@@ -126,7 +127,7 @@ export async function fetchControlUrl(
     ({ planId, sequence } = scheduledConference);
   }
 
-  const encode = window.btoa;
+  const encode = btoa;
 
   const source = 'WEBUSER';
 

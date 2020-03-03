@@ -3400,7 +3400,7 @@ var MeetNow = (function (exports) {
       if (scheduledConference) {
           ({ planId, sequence } = scheduledConference);
       }
-      const encode = window.btoa;
+      const encode = btoa$1;
       const source = 'WEBUSER';
       const parts = [
           `source=${source}`,
@@ -7323,8 +7323,8 @@ var MeetNow = (function (exports) {
               // extract url
               ({ url: options.url } = data.data);
           }
-          const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.0-beta"}`);
-          const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.0-beta"}`);
+          const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.1.1-beta"}`);
+          const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.1.1-beta"}`);
           // join focus
           const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
           request = api
@@ -7711,7 +7711,7 @@ var MeetNow = (function (exports) {
 
   // object spread poly-fill
   const log$t = browser('MN');
-  const version = "1.1.0-beta";
+  const version = "1.1.1-beta";
   // global setup
   function setup$2(config) {
       setupConfig(config);
