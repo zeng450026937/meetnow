@@ -118,6 +118,11 @@ export function createConference(config: ConferenceConfigs) {
     status = STATUS.kDisconnected;
     events.emit('disconnected', data);
   }
+  function onAccepted() {
+    log('conference accepted');
+
+    events.emit('accepted');
+  }
 
   async function maybeChat() {
     if (!chatChannel) return;
@@ -200,6 +205,8 @@ export function createConference(config: ConferenceConfigs) {
     } = data.data);
 
     trtc = miniprogram ? data.data : {};
+
+    onAccepted();
 
     if (!userId || !uuid) {
       log('internal error');
