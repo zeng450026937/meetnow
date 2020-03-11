@@ -91,17 +91,15 @@ export async function fetchControlUrl(
   number: string,
   baseurl?: string,
 ) {
-  const { auth, party } = identity;
-
   // check identity
-  if (!auth) {
+  if (!identity.auth) {
     await identity.confirm();
   }
-
+  const { auth, party } = identity;
   const { api, token } = auth!;
   const { number: partyNumber } = party;
 
-  const response = await (api as Api).request('getConferenceInfo')
+  const response = await api.request('getConferenceInfo')
     .params({
       conferenceNo                        : number,
       searchNotStartedScheduledConference : false,

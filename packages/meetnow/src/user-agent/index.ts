@@ -126,7 +126,7 @@ export function createUA(config: UAConfigs = {}) {
 
     let isTempAuthLocallyGenerated = false;
     // temp auth
-    if (!auth) {
+    if (!auth || !auth.token) {
       auth = await createTempAuth(partyId);
       ({ api } = auth);
       isTempAuthLocallyGenerated = true;
