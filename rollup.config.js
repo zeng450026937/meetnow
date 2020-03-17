@@ -6,8 +6,6 @@ import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
 import noderesolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import buble from '@rollup/plugin-buble';
-import babel from 'rollup-plugin-babel';
 
 if (!process.env.TARGET) {
   throw new Error('TARGET package must be specified via --environment flag.');
@@ -91,7 +89,7 @@ function createConfig(format, output, plugins = []) {
   const isBundlerESMBuild = /esm-bundler/.test(format);
 
   if (isGlobalBuild) {
-    output.name = packageOptions.name || name;
+    output.name = packageOptions.name;
   }
 
   const shouldEmitDeclarations = process.env.TYPES != null
@@ -117,23 +115,6 @@ function createConfig(format, output, plugins = []) {
 
   const entryFile = format === 'esm-bundler-runtime' ? 'src/runtime.ts' : 'src/index.ts';
 
-  // babel({
-  //   extensions     : ['.js', '.ts'],
-  //   exclude        : 'node_modules/**',
-  //   babelrc        : false,
-  //   configFile     : path.resolve(__dirname, 'babel.config.js'),
-  //   runtimeHelpers : true,
-  // })
-
-  // only transform object-rest-spread
-  const compatPlugin = buble({
-    target     : { chrome: 70 },
-    transforms : {
-      objectRestSpread : true,
-    },
-    objectAssign : 'Object.spread',
-  });
-
   return {
     input    : resolve(entryFile),
     // Global and Browser ESM builds inlines everything so that they can be
@@ -146,7 +127,7 @@ function createConfig(format, output, plugins = []) {
       noderesolve({
         browser : true,
       }),
-      commonjs({}),
+      commonjs(),
       json({
         namedExports : false,
       }),
@@ -157,7 +138,6 @@ function createConfig(format, output, plugins = []) {
         (isGlobalBuild || isRawESMBuild || isBundlerESMBuild)
           && !packageOptions.enableNonBrowserBranches,
       ),
-      compatPlugin,
       ...plugins,
     ],
     output,

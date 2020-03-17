@@ -1,7 +1,3 @@
-// object spread poly-fill
-// needed for wechat platform
-import './utils/object-spread';
-
 import debug from 'debug';
 import axios from 'axios';
 import adapter from './adapter';

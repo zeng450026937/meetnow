@@ -82,13 +82,6 @@ declare namespace MeetNow {
 
   class UserAgent {
     /**
-     * 停止保活并清除用户鉴权
-     *
-     * @memberof UserAgent
-     */
-    stop(): void;
-
-    /**
      * 获取会议信息
      *
      * @memberof UserAgent

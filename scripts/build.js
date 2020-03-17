@@ -1,6 +1,4 @@
 module.exports = (api, options) => {
-  process.env.NODE_ENV = 'test';
-
   api.registerCommand(
     'build:meetnow',
     {
@@ -13,14 +11,14 @@ module.exports = (api, options) => {
       args.filename = 'meetnow';
       args.target = 'lib';
       args.entry = './packages/meetnow/src/index.ts';
-      args.dest = './packages/meetnow/dist';
+      args.dest = './packages/meetnow/dist-es5';
       args.formats = 'umd,umd-min';
 
       api.chainWebpack((config) => {
         /* eslint-disable-next-line */
-        const pkg = require(api.resolve('./package.json'));
+        const pkg = require(api.resolve('./packages/meetnow/package.json'));
         const masterVersion = pkg.version;
-        const packageOptions = pkg.buildOptions;
+        const packageOptions = pkg.buildOptions || {};
 
         config.plugin('define')
           .tap((opts) => {
