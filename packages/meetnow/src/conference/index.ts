@@ -183,9 +183,9 @@ export function createConference(config: ConferenceConfigs) {
         'is-webrtc'           : !miniprogram && hasMedia,
         'is-wechat'           : miniprogram,
         'video-session-info'  : miniprogram && {
-          bitrate        : 600 * 1024,
-          'video-width'  : 640,
-          'video-height' : 480,
+          bitrate        : 1200 * 1024,
+          'video-width'  : 1280,
+          'video-height' : 720,
           'frame-rate'   : 15,
         } as any,
       });
