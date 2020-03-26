@@ -3377,11 +3377,11 @@ var MeetNow = (function (exports) {
       };
   }
   async function fetchControlUrl(identity, number, baseurl) {
-      const { auth, party } = identity;
       // check identity
-      if (!auth) {
+      if (!identity.auth) {
           await identity.confirm();
       }
+      const { auth, party } = identity;
       const { api, token } = auth;
       const { number: partyNumber } = party;
       const response = await api.request('getConferenceInfo')
@@ -7296,6 +7296,10 @@ var MeetNow = (function (exports) {
           status = STATUS$1.kDisconnected;
           events.emit('disconnected', data);
       }
+      function onAccepted() {
+          log$r('conference accepted');
+          events.emit('accepted');
+      }
       async function maybeChat() {
           if (!chatChannel)
               { return; }
@@ -7346,7 +7350,7 @@ var MeetNow = (function (exports) {
               'video-session-info': miniprogram && {
                   bitrate: 600 * 1024,
                   'video-width': 640,
-                  'video-height': 480,
+                  'video-height': 360,
                   'frame-rate': 15,
               },
           });
@@ -7363,6 +7367,7 @@ var MeetNow = (function (exports) {
               'conference-uuid': uuid,
           } = data.data);
           trtc = miniprogram ? data.data : {};
+          onAccepted();
           if (!userId || !uuid) {
               log$r('internal error');
               throw new Error('Internal Error');
@@ -7468,14 +7473,20 @@ var MeetNow = (function (exports) {
               },
               onQuit: (data) => {
                   log$r('receive quit: %o', data);
-                  if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected)
-                      { return; }
+                  if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected) {
+                      log$r('receive quit while disconnecting, ignore it');
+                      return;
+                  }
                   // bizCode = 901314 ended by presenter
                   // bizCode = 901320 kicked by presenter
                   onDisconnected(data);
               },
               onError: (data) => {
-                  log$r('polling error, about to leave...');
+                  log$r('polling error: %o', data);
+                  if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected) {
+                      log$r('polling error while disconnecting, ignore it');
+                      return;
+                  }
                   events.emit('error', data);
                   // there are some problems with polling
                   // leave conference
@@ -7683,7 +7694,7 @@ var MeetNow = (function (exports) {
           }
           let isTempAuthLocallyGenerated = false;
           // temp auth
-          if (!auth) {
+          if (!auth || !auth.token) {
               auth = await createTempAuth(partyId);
               ({ api } = auth);
               isTempAuthLocallyGenerated = true;

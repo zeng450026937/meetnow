@@ -183,9 +183,9 @@ export function createConference(config: ConferenceConfigs) {
         'is-webrtc'           : !miniprogram && hasMedia,
         'is-wechat'           : miniprogram,
         'video-session-info'  : miniprogram && {
-          bitrate        : 1200 * 1024,
-          'video-width'  : 1280,
-          'video-height' : 720,
+          bitrate        : 600 * 1024,
+          'video-width'  : 640,
+          'video-height' : 360,
           'frame-rate'   : 15,
         } as any,
       });
@@ -352,17 +352,24 @@ export function createConference(config: ConferenceConfigs) {
       onQuit : (data: any) => {
         log('receive quit: %o', data);
 
-        if (status === STATUS.kDisconnecting || status === STATUS.kDisconnected) return;
+        if (status === STATUS.kDisconnecting || status === STATUS.kDisconnected) {
+          log('receive quit while disconnecting, ignore it');
+          return;
+        }
         // bizCode = 901314 ended by presenter
         // bizCode = 901320 kicked by presenter
         onDisconnected(data);
       },
 
       onError : (data: ApiError) => {
-        log('polling error, about to leave...');
+        log('polling error: %o', data);
+
+        if (status === STATUS.kDisconnecting || status === STATUS.kDisconnected) {
+          log('polling error while disconnecting, ignore it');
+          return;
+        }
 
         events.emit('error', data);
-
         // there are some problems with polling
         // leave conference
         //
