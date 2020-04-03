@@ -22,6 +22,7 @@ const preId = args.preid || semver.prerelease(currentVersion)[0] || 'alpha';
 const isDryRun = args.dry;
 const { skipTests = true } = args;
 const { skipBuild } = args;
+const { skipTsd = true } = args;
 const { skipPublish = true } = args;
 const packages = fs
   .readdirSync(path.resolve(__dirname, '../packages'))
@@ -102,9 +103,11 @@ async function main() {
   step('\nBuilding all packages...');
   if (!skipBuild && !isDryRun) {
     await run('yarn', ['build', '--release']);
-    // test generated dts files
-    step('\nVerifying type declarations...');
-    await run(bin('tsd'));
+    if (!skipTsd) {
+      // test generated dts files
+      step('\nVerifying type declarations...');
+      await run(bin('tsd'));
+    }
   } else {
     console.log('(skipped)');
   }

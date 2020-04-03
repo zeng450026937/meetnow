@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/stylelint-config",
-  "version": "1.0.0",
+  "version": "1.1.2-beta",
   "description": "stylelint config of meetnow.",
   "main": "index.yml",
   "private": true,

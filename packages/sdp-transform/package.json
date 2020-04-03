@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/sdp-transform",
-  "version": "1.0.0",
+  "version": "1.1.2-beta",
   "description": "SDP Transform for meetnow",
   "main": "index.js",
   "module": "dist/sdp-transform.esm-bundler.js",
@@ -16,8 +16,7 @@
   "private": true,
   "license": "MIT",
   "sideEffects": false,
-  "dependencies": {
-  },
+  "dependencies": {},
   "buildOptions": {
     "name": "Browser",
     "formats": [

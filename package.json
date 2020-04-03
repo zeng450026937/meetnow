@@ -1,22 +1,24 @@
 {
   "name": "meetnow",
-  "version": "1.1.1-beta",
+  "version": "1.1.2-beta",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
+    "bootstrap": "node scripts/bootstrap.js",
     "serve": "vue-cli-service serve",
     "build": "node scripts/build-rollup.js meetnow --types && yarn build:umd --no-clean",
     "build:umd": "vue-cli-service build:meetnow",
-    "bootstrap": "node scripts/bootstrap.js",
+    "release": "node scripts/release.js",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "sideEffects": false,
   "dependencies": {
     "core-js": "^3.3.2",
-    "vue": "^2.6.10"
+    "vue": "1.1.2-beta"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.7.0",
