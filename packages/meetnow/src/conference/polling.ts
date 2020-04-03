@@ -11,7 +11,7 @@ const log = debug('MN:Polling');
 export const DEFAULT_INTERVAL = 100;
 export const MIN_INTERVAL = 2;
 export const MAX_INTERVAL = 30;
-export const MAX_ATTEMPTS = 15;
+export const MAX_ATTEMPTS = 5;
 
 export interface PollingConfigs {
   api: Api;

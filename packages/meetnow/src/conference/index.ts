@@ -273,7 +273,10 @@ export function createConference(config: ConferenceConfigs) {
 
           await api
             .request('leave')
-            .send();
+            .send()
+            .catch(error => {
+              log('leave error: ', error);
+            });
 
           onDisconnected();
         } else if (request) {
@@ -366,6 +369,11 @@ export function createConference(config: ConferenceConfigs) {
 
         if (status === STATUS.kDisconnecting || status === STATUS.kDisconnected) {
           log('polling error while disconnecting, ignore it');
+          return;
+        }
+
+        if (data.message === 'Network Error') {
+          log('polling error while network error');
           return;
         }
 
