@@ -20,13 +20,14 @@ const execa = require('execa');
 
 const preId = args.preid || semver.prerelease(currentVersion)[0] || 'alpha';
 const isDryRun = args.dry;
-const { skipTests } = args;
+const { skipTests = true } = args;
 const { skipBuild } = args;
+const { skipPublish = true } = args;
 const packages = fs
   .readdirSync(path.resolve(__dirname, '../packages'))
   .filter(p => !p.endsWith('.ts') && !p.startsWith('.'));
 
-const skippedPackages = ['server-renderer'];
+const skippedPackages = [];
 
 const versionIncrements = [
   'patch',
@@ -122,8 +123,12 @@ async function main() {
 
   // publish packages
   step('\nPublishing packages...');
-  for (const pkg of packages) {
-    await publishPackage(pkg, targetVersion, runIfNotDry);
+  if (!skipPublish && !isDryRun) {
+    for (const pkg of packages) {
+      await publishPackage(pkg, targetVersion, runIfNotDry);
+    }
+  } else {
+    console.log('(skipped)');
   }
 
   // push to GitHub

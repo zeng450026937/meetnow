@@ -67,6 +67,7 @@ export interface ConferenceState extends Partialable {
   'locked': boolean;
   'applicationsharer': ApplicationSharer;
   'speech-user-entity'?: string;
+  'coopshare-state'?: string | 'coopshare';
 }
 
 // Conference View

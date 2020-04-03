@@ -313,10 +313,17 @@ export function createConference(config: ConferenceConfigs) {
     const { state, users } = information!;
 
     state.on('sharingUserEntityChanged', (val: string) => {
-      events.emit('sharinguser', users.getUser(val));
+      // in some cases, eg. whitebord sharing
+      // sharing use entity is an new unique id, which can not be find in user list
+      // use the second param the help making sharing detection strategy
+      // 1. no user & no entity => no sharing
+      // 2. no user & has entity => sharing
+      // 3. has user => sharing
+      events.emit('sharinguser', users.getUser(val), val);
     });
     state.on('speechUserEntityChanged', (val: string) => {
-      events.emit('speechuser', users.getUser(val));
+      // just in case, for the same reason with sharing use entity
+      events.emit('speechuser', users.getUser(val), val);
     });
 
     users.on('user:added', (...args: any[]) => events.emit('user:added', ...args));

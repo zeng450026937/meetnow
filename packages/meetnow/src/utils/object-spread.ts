@@ -1,6 +1,6 @@
 /* eslint-disable prefer-spread, prefer-rest-params */
 
-function ownKeys(object: any, enumerableOnly?: boolean) {
+export function ownKeys(object: any, enumerableOnly?: boolean) {
   const keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
     let symbols = Object.getOwnPropertySymbols(object);
@@ -14,7 +14,7 @@ function ownKeys(object: any, enumerableOnly?: boolean) {
   return keys;
 }
 
-function objectSpread(target) {
+export function objectSpread(target) {
   for (let index = 1; index < arguments.length; index++) {
     const nextSource = arguments[index];
     if (nextSource !== null && nextSource !== undefined) {
@@ -30,10 +30,12 @@ function objectSpread(target) {
   return target;
 }
 
-if (typeof (Object as any).spread !== 'function') {
-  Object.defineProperty(Object, 'spread', {
-    value        : objectSpread,
-    writable     : true,
-    configurable : true,
-  });
+export function polyfill() {
+  if (typeof (Object as any).spread !== 'function') {
+    Object.defineProperty(Object, 'spread', {
+      value        : objectSpread,
+      writable     : true,
+      configurable : true,
+    });
+  }
 }

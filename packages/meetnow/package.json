@@ -8,6 +8,7 @@
   "unpkg": "dist/meetnow.global.js",
   "files": [
     "index.js",
+    "interface.d.ts",
     "dist",
     "docs",
     "README.md"

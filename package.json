@@ -7,7 +7,8 @@
   ],
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "node scripts/build-rollup.js meetnow --types",
+    "build": "node scripts/build-rollup.js meetnow --types && yarn build:umd --no-clean",
+    "build:umd": "vue-cli-service build:meetnow",
     "bootstrap": "node scripts/bootstrap.js",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"

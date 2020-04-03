@@ -8,24 +8,24 @@ module.exports = (api, options) => {
     },
     async (args, rawArgs) => {
       args.name = 'MeetNow';
-      args.filename = 'meetnow';
+      args.filename = 'meetnow.es5';
       args.target = 'lib';
       args.entry = './packages/meetnow/src/index.ts';
-      args.dest = './packages/meetnow/dist-es5';
+      args.dest = './packages/meetnow/dist';
       args.formats = 'umd,umd-min';
+
+      options.productionSourceMap = false;
 
       api.chainWebpack((config) => {
         /* eslint-disable-next-line */
         const pkg = require(api.resolve('./packages/meetnow/package.json'));
         const masterVersion = pkg.version;
-        const packageOptions = pkg.buildOptions || {};
 
         config.plugin('define')
           .tap((opts) => {
             opts[0].__DEV__ = process.env.NODE_ENV === 'development';
             opts[0].__TEST__ = process.env.NODE_ENV === 'test';
             opts[0].__VERSION__ = `"${ masterVersion }"`;
-            opts[0].__FEATURE_OPTIONS__ = !packageOptions.lean && !process.env.LEAN;
             return opts;
           });
       });
