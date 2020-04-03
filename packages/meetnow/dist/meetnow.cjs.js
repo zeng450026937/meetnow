@@ -8,6 +8,44 @@ var debug = _interopDefault(require('debug'));
 var axios = _interopDefault(require('axios'));
 var md5 = _interopDefault(require('md5'));
 
+/* eslint-disable prefer-spread, prefer-rest-params */
+function ownKeys(object, enumerableOnly) {
+    const keys = Object.keys(object);
+    if (Object.getOwnPropertySymbols) {
+        let symbols = Object.getOwnPropertySymbols(object);
+        if (enumerableOnly) {
+            symbols = symbols.filter((sym) => {
+                return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+            });
+        }
+        keys.push.apply(keys, symbols);
+    }
+    return keys;
+}
+function objectSpread(target) {
+    for (let index = 1; index < arguments.length; index++) {
+        const nextSource = arguments[index];
+        if (nextSource !== null && nextSource !== undefined) {
+            if (Object.getOwnPropertyDescriptors) {
+                Object.defineProperties(target, Object.getOwnPropertyDescriptors(nextSource));
+            }
+            else {
+                ownKeys(Object(nextSource)).forEach((key) => {
+                    Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(nextSource, key));
+                });
+            }
+        }
+    }
+    return target;
+}
+if (typeof Object.spread !== 'function') {
+    Object.defineProperty(Object, 'spread', {
+        value: objectSpread,
+        writable: true,
+        configurable: true,
+    });
+}
+
 var bind = function bind(fn, thisArg) {
   return function wrap() {
     var args = new Array(arguments.length);
@@ -565,7 +603,7 @@ function createRequestDelegate() {
     return {
         send(options) {
             if (!delegate)
-                return;
+                { return; }
             task = delegate(options);
         },
         abort() {
@@ -584,9 +622,8 @@ function createRequest(config) {
     const delegate = createRequestDelegate();
     return {
         send(options) {
-            delegate.send({
-                ...options,
-                success: (response) => {
+            delegate.send(Object.spread({}, options,
+                {success: (response) => {
                     // normalize data
                     const headers = response.header || response.headers;
                     const status = response.statusCode || response.status || 200;
@@ -641,8 +678,7 @@ function createRequest(config) {
                         clearTimeout(timer);
                         timer = undefined;
                     }
-                },
-            });
+                }}));
             if (timeout) {
                 timer = setTimeout(() => {
                     ontimeout && ontimeout(createError(`timeout of ${config.timeout || 0}ms exceeded`, config, 'ECONNABORTED', ''));
@@ -700,7 +736,7 @@ function mpAdapter(config) {
             // Handle cancellation
             cancelToken.promise.then((cancel) => {
                 if (!request)
-                    return;
+                    { return; }
                 request.abort();
                 reject(cancel);
                 request = null;
@@ -713,13 +749,13 @@ function mpAdapter(config) {
         };
         request.onabort = function handleAbort(error) {
             if (!request)
-                return;
+                { return; }
             reject(error);
             request = null;
         };
         request.onerror = function handleError(error) {
             if (!request)
-                return;
+                { return; }
             reject(error);
             request = null;
         };
@@ -913,12 +949,10 @@ function setupConfig(config) {
     const MeetNow = win.MeetNow = win.MeetNow || {};
     // create the Meetnow.config from raw config object (if it exists)
     // and convert Meetnow.config into a ConfigApi that has a get() fn
-    const configObj = {
-        ...configFromSession(win),
-        persistent: false,
-        ...(config || MeetNow.config),
-        ...configFromURL(win),
-    };
+    const configObj = Object.spread({}, configFromSession(win),
+        {persistent: false},
+        (config || MeetNow.config),
+        configFromURL(win));
     CONFIG.reset(configObj);
     if (CONFIG.getBoolean('persistent')) {
         saveConfig(win, configObj);
@@ -1215,19 +1249,17 @@ const log$1 = debug('MN:Api');
 const DEFAULT_TIMEOUT = 35 * 1000;
 function createApi(config = {}) {
     log$1('createApi()');
-    const delegate = axios.create({
-        baseURL: '/',
-        timeout: DEFAULT_TIMEOUT,
-        ...config,
-    });
+    const delegate = axios.create(Object.spread({}, {baseURL: '/',
+        timeout: DEFAULT_TIMEOUT},
+        config));
     delegate.interceptors.response.use((response) => {
         const { ret, bizCode, error, data, } = response.data;
         if (ret < 0)
-            throw new ApiError(bizCode, error);
+            { throw new ApiError(bizCode, error); }
         // should not go here
         // server impl error
         if (ret === 0 && error)
-            throw new ApiError(bizCode, error);
+            { throw new ApiError(bizCode, error); }
         log$1('request success: %o', data);
         // TBD
         // replace response data with actual data. eg. response.data = data;
@@ -1240,7 +1272,7 @@ function createApi(config = {}) {
     });
     function request(apiName) {
         log$1(`request() "${apiName}"`);
-        return createRequest$1({ ...CONFIGS[apiName] }, delegate);
+        return createRequest$1(Object.spread({}, CONFIGS[apiName]), delegate);
     }
     return {
         get interceptors() {
@@ -1298,7 +1330,7 @@ function createWorker(config) {
             working = false;
         }
         if (!running)
-            return;
+            { return; }
         interval = isFunction$1(nextInterval) ? nextInterval() : nextInterval;
         // schedule next
         timeout = setTimeout(job, interval);
@@ -1306,14 +1338,14 @@ function createWorker(config) {
     async function start(immediate = true) {
         log$2('start()');
         if (running)
-            return;
+            { return; }
         running = true;
         await job(immediate);
     }
     function stop() {
         log$2('stop()');
         if (!running)
-            return;
+            { return; }
         if (timeout) {
             clearTimeout(timeout);
             timeout = undefined;
@@ -1425,9 +1457,8 @@ async function bootstrap(auth) {
     const identities = tokens.map(token => {
         const identityToken = token.token;
         let identityAuth;
-        return {
-            ...token,
-            get account() {
+        return Object.spread({}, token,
+            {get account() {
                 return account;
             },
             get auth() {
@@ -1438,8 +1469,7 @@ async function bootstrap(auth) {
                     identityAuth = await createDigestAuth(identityToken);
                 }
                 return identityAuth;
-            },
-        };
+            }});
     });
     return {
         account,
@@ -1521,7 +1551,7 @@ function createEvents(scopedlog = log$3) {
         }
         const callbacks = events[event];
         if (!callbacks)
-            return;
+            { return; }
         if (!fn) {
             events[event] = null;
             return;
@@ -1557,7 +1587,7 @@ function createEvents(scopedlog = log$3) {
         scopedlog(`emit() "${event}"`);
         let callbacks = events[event];
         if (!callbacks)
-            return;
+            { return; }
         callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
         for (const callback of callbacks) {
             try {
@@ -1624,7 +1654,7 @@ function createKeepAlive(config) {
             error = e;
             canceled = isCancel(e);
             if (canceled)
-                return;
+                { return; }
             // if request failed by network or server error,
             // increase next request timeout
             attempts++;
@@ -1636,7 +1666,7 @@ function createKeepAlive(config) {
             config.onError && config.onError(new Error('Max Attempts'), attempts);
         }
         if (error)
-            return;
+            { return; }
         const { bizCode, data = {
             interval,
         }, } = response.data;
@@ -1650,10 +1680,8 @@ function createKeepAlive(config) {
         interval: () => interval,
         cancel: () => request.cancel(),
     });
-    return {
-        ...worker,
-        keepalive,
-    };
+    return Object.spread({}, worker,
+        {keepalive});
 }
 
 const log$5 = debug('MN:Polling');
@@ -1681,7 +1709,7 @@ function createPolling(config) {
     let version = 0;
     function analyze(data) {
         if (!data)
-            return;
+            { return; }
         const { version: newVersion, category, body } = data;
         if (!isDef(newVersion) || newVersion <= version) {
             log$5(`illegal version: ${newVersion}, current version: ${version}.`);
@@ -1720,11 +1748,11 @@ function createPolling(config) {
             error = e;
             canceled = isCancel(e);
             if (canceled)
-                return;
+                { return; }
             // polling timeout
             timeouted = !!error && [900408, 901323].includes(error.bizCode);
             if (timeouted)
-                return;
+                { return; }
             // if request failed by network or server error,
             // increase next polling timeout
             attempts++;
@@ -1736,7 +1764,7 @@ function createPolling(config) {
             config.onError && config.onError(new Error('Max Attempts'), attempts);
         }
         if (error)
-            return;
+            { return; }
         const { bizCode, data } = response.data;
         // TODO
         // check bizCode
@@ -1753,11 +1781,9 @@ function createPolling(config) {
         interval: () => interval,
         cancel: () => request.cancel(),
     });
-    return {
-        ...worker,
-        poll,
-        analyze,
-    };
+    return Object.spread({}, worker,
+        {poll,
+        analyze});
 }
 
 const log$6 = debug('MN:Reactive');
@@ -1830,9 +1856,8 @@ function createDescription(data, context) {
     function isLocked() {
         return getLock().admissionPolicy !== 'anonymous';
     }
-    return description = {
-        ...events,
-        get data() {
+    return description = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get subject() {
@@ -1846,8 +1871,7 @@ function createDescription(data, context) {
         setLock,
         lock,
         unlock,
-        isLocked,
-    };
+        isLocked});
 }
 
 const log$8 = debug('MN:Information:State');
@@ -1879,9 +1903,8 @@ function createState(data, context) {
         const { 'speech-user-entity': speechUserEntity } = data;
         return speechUserEntity;
     }
-    return description = {
-        ...events,
-        get data() {
+    return description = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
@@ -1889,8 +1912,7 @@ function createState(data, context) {
         },
         update,
         getSharingUserEntity,
-        getSpeechUserEntity,
-    };
+        getSpeechUserEntity});
 }
 
 const log$9 = debug('MN:Information:Layout');
@@ -1967,10 +1989,8 @@ function createDanmakuCtrl(api) {
     let lastConfig = DANMAKU_CONFIGS;
     async function setDanmaku(config) {
         log$a('setDanmaku()');
-        const finalConfig = {
-            ...lastConfig,
-            config,
-        };
+        const finalConfig = Object.spread({}, lastConfig,
+            {config});
         const { type, position, displayTime, repeatCount, repeatInterval, rollDirection, } = finalConfig;
         await api
             .request('setTitle')
@@ -2035,22 +2055,20 @@ function createView(data, context) {
     function getDanmaku() {
         return getVideoView().title;
     }
-    return view = {
-        ...events,
-        get data() {
+    return view = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
             return data[key];
-        },
-        ...layout,
-        ...danmaku,
-        update,
+        }},
+        layout,
+        danmaku,
+        {update,
         getVideoView,
         getLayout,
         getFocusUserEntity,
-        getDanmaku,
-    };
+        getDanmaku});
 }
 
 const log$c = debug('MN:Information:Camera');
@@ -2346,9 +2364,8 @@ function createUser(data, context) {
             await chatChannel.sendMessage(msg, [entity]);
         }
     }
-    return user = {
-        ...events,
-        get data() {
+    return user = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
@@ -2396,8 +2413,7 @@ function createUser(data, context) {
         reject,
         sendMessage,
         // camera ctrl
-        camera,
-    };
+        camera});
 }
 
 const log$e = debug('MN:Information:Lobby');
@@ -2585,16 +2601,15 @@ function createUsers(data, context) {
             .request('unmuteAll')
             .send();
     }
-    return users = {
-        ...events,
-        get data() {
+    return users = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
             return data[key];
-        },
-        ...lobby,
-        update,
+        }},
+        lobby,
+        {update,
         getUserList,
         getUser,
         hasUser,
@@ -2614,8 +2629,7 @@ function createUsers(data, context) {
         invite,
         kick,
         mute,
-        unmute,
-    };
+        unmute});
 }
 
 const log$g = debug('MN:Information:RTMP');
@@ -2698,7 +2712,7 @@ function createRTMP(data, context) {
     function getDetail(entity) {
         const userdata = getUser(entity);
         if (!userdata)
-            return undefined;
+            { return undefined; }
         const { 'rtmp-status': status, 'rtmp-last-start-time': lastStartTime, 'rtmp-last-stop-duration': lastStopDuration, reason, } = userdata;
         return {
             reason,
@@ -2707,9 +2721,8 @@ function createRTMP(data, context) {
             lastStopDuration,
         };
     }
-    return rtmp = {
-        ...events,
-        get data() {
+    return rtmp = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
@@ -2719,10 +2732,9 @@ function createRTMP(data, context) {
         getEnable,
         getStatus,
         getReason,
-        getDetail,
+        getDetail},
         // rtmp ctrl
-        ...ctrl,
-    };
+        ctrl);
 }
 
 const log$i = debug('MN:Information:Record');
@@ -2803,9 +2815,8 @@ function createRecord(data, context) {
             lastStopDuration,
         };
     }
-    return record = {
-        ...events,
-        get data() {
+    return record = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get(key) {
@@ -2814,10 +2825,9 @@ function createRecord(data, context) {
         update,
         getStatus,
         getReason,
-        getDetail,
+        getDetail},
         // record ctrl
-        ...ctrl,
-    };
+        ctrl);
 }
 
 const log$k = debug('MN:Information:Item');
@@ -2993,9 +3003,8 @@ function createInformation(data, context) {
         });
         events.emit('updated', information);
     }
-    return information = {
-        ...events,
-        get data() {
+    return information = Object.spread({}, events,
+        {get data() {
             return data;
         },
         get version() {
@@ -3022,8 +3031,7 @@ function createInformation(data, context) {
         get record() {
             return record;
         },
-        update,
-    };
+        update});
 }
 
 /* eslint-disable no-useless-escape */
@@ -3544,7 +3552,7 @@ function write(session, opts) {
 
 function closeMediaStream(stream) {
     if (!stream)
-        return;
+        { return; }
     // Latest spec states that MediaStream has no stop() method and instead must
     // call stop() on every MediaStreamTrack.
     try {
@@ -3915,18 +3923,18 @@ function createChannel(config) {
     const remoteHold = false;
     function throwIfStatus(condition, message) {
         if (status !== condition)
-            return;
+            { return; }
         throw new Error(message || 'Invalid State');
     }
     function throwIfNotStatus(condition, message) {
         if (status === condition)
-            return;
+            { return; }
         throw new Error(message || 'Invalid State');
     }
     function throwIfTerminated() {
         const message = 'Terminated';
         if (canceled)
-            throw new Error(message);
+            { throw new Error(message); }
         throwIfStatus(STATUS.kTerminated, message);
     }
     function isInProgress() {
@@ -3969,7 +3977,7 @@ function createChannel(config) {
         connection = new RTCPeerConnection(rtcConstraints);
         connection.addEventListener('iceconnectionstatechange', () => {
             if (!connection)
-                return;
+                { return; }
             const { iceConnectionState: state, } = connection;
             if (state === 'failed') {
                 events.emit('peerconnection:connectionfailed');
@@ -4206,7 +4214,7 @@ function createChannel(config) {
     function close() {
         log$m('close()');
         if (status === STATUS.kTerminated)
-            return;
+            { return; }
         if (connection) {
             try {
                 connection.close();
@@ -4413,7 +4421,7 @@ function createChannel(config) {
         log$m('mangleOffer()');
         // nothing to do
         if (!localHold && !remoteHold)
-            return offer;
+            { return offer; }
         const sdp = parse(offer);
         // Local hold.
         if (localHold && !remoteHold) {
@@ -4485,7 +4493,7 @@ function createChannel(config) {
     function addLocalStream(stream) {
         log$m('addLocalStream()');
         if (!stream)
-            return;
+            { return; }
         if (connection.addTrack) {
             stream
                 .getTracks()
@@ -4523,7 +4531,7 @@ function createChannel(config) {
         if (connection.getSenders) {
             connection.getSenders().forEach((sender) => {
                 if (!sender.track)
-                    return;
+                    { return; }
                 peerHasAudio = sender.track.kind === 'audio' || peerHasAudio;
                 peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
             });
@@ -4540,7 +4548,7 @@ function createChannel(config) {
             else {
                 connection.getSenders().forEach((sender) => {
                     if (!sender.track)
-                        return;
+                        { return; }
                     if (!sender.replaceTrack
                         && !(sender.prototype && sender.prototype.replaceTrack)) {
                         /* eslint-disable-next-line no-use-before-define */
@@ -4607,7 +4615,7 @@ function createChannel(config) {
             && 'setParameters' in window.RTCRtpSender.prototype) {
             connection.getSenders().forEach((sender) => {
                 if (sender.track)
-                    return;
+                    { return; }
                 const parameters = sender.getParameters();
                 if (typeof audio !== 'undefined' && sender.track.kind === 'audio') {
                     if (audio === 0) {
@@ -4727,9 +4735,8 @@ function createChannel(config) {
         }
         return rtcStats;
     }
-    return {
-        ...events,
-        get status() {
+    return Object.spread({}, events,
+        {get status() {
             return status;
         },
         get connection() {
@@ -4758,8 +4765,7 @@ function createChannel(config) {
         replaceLocalStream,
         adjustBandWidth,
         applyConstraints,
-        getStats,
-    };
+        getStats});
 }
 
 const log$n = debug('MN:SDP');
@@ -4920,9 +4926,9 @@ function createModifier() {
                             const rtp = m.rtp.find((r) => r.payload === Number(p));
                             const fmtp = m.fmtp.find((f) => f.payload === Number(p));
                             if (rtp)
-                                rtps.push(rtp);
+                                { rtps.push(rtp); }
                             if (fmtp)
-                                fmtps.push(fmtp);
+                                { fmtps.push(fmtp); }
                         });
                         m.rtp = rtps;
                         m.fmtp = fmtps;
@@ -5122,9 +5128,8 @@ function createMediaChannel(config) {
             }, 3000);
         }
     });
-    return {
-        ...channel,
-        get status() {
+    return Object.spread({}, channel,
+        {get status() {
             return channel.status;
         },
         get connection() {
@@ -5141,8 +5146,7 @@ function createMediaChannel(config) {
         },
         get callId() {
             return callId;
-        },
-    };
+        }});
 }
 
 var MessageStatus;
@@ -5169,7 +5173,7 @@ function createMessage(config) {
     async function send(message, target) {
         log$p('send()');
         if (direction === 'incoming')
-            throw new Error('Invalid Status');
+            { throw new Error('Invalid Status'); }
         status = MessageStatus.kSending;
         request = api
             .request('pushMessage')
@@ -5199,7 +5203,7 @@ function createMessage(config) {
     async function retry() {
         log$p('retry()');
         if (!content)
-            throw new Error('Invalid Message');
+            { throw new Error('Invalid Message'); }
         await send(content, receiver);
     }
     function cancel() {
@@ -5264,7 +5268,7 @@ function createChatChannel(config) {
     async function connect(count = 2000) {
         log$q('connect()');
         if (ready)
-            return;
+            { return; }
         request = api.request('pullMessage').data({ count });
         const response = await request.send();
         const { data } = response.data;
@@ -5307,16 +5311,14 @@ function createChatChannel(config) {
         messages.push(message);
         return message;
     }
-    return {
-        ...events,
-        get ready() {
+    return Object.spread({}, events,
+        {get ready() {
             return ready;
         },
         connect,
         terminate,
         sendMessage,
-        incoming,
-    };
+        incoming});
 }
 
 const log$r = debug('MN:Conference');
@@ -5362,12 +5364,12 @@ function createConference(config) {
     }
     function throwIfStatus(condition, message) {
         if (status !== condition)
-            return;
+            { return; }
         throw new Error(message || 'Invalid State');
     }
     function throwIfNotStatus(condition, message) {
         if (status === condition)
-            return;
+            { return; }
         throw new Error(message || 'Invalid State');
     }
     function onConnecting() {
@@ -5400,9 +5402,9 @@ function createConference(config) {
     }
     async function maybeChat() {
         if (!chatChannel)
-            return;
+            { return; }
         if (chatChannel.ready)
-            return;
+            { return; }
         await chatChannel.connect().catch(() => { });
     }
     async function join(options = {}) {
@@ -5448,7 +5450,7 @@ function createConference(config) {
             'video-session-info': miniprogram && {
                 bitrate: 600 * 1024,
                 'video-width': 640,
-                'video-height': 480,
+                'video-height': 360,
                 'frame-rate': 15,
             },
         });
@@ -5478,11 +5480,9 @@ function createConference(config) {
             .request
             .use((config) => {
             if (/conference-ctrl/.test(config.url) && config.method === 'post') {
-                config.data = {
-                    'conference-user-id': userId,
-                    'conference-uuid': uuid,
-                    ...config.data,
-                };
+                config.data = Object.spread({}, {'conference-user-id': userId,
+                    'conference-uuid': uuid},
+                    config.data);
             }
             return config;
         });
@@ -5573,14 +5573,20 @@ function createConference(config) {
             },
             onQuit: (data) => {
                 log$r('receive quit: %o', data);
-                if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected)
+                if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected) {
+                    log$r('receive quit while disconnecting, ignore it');
                     return;
+                }
                 // bizCode = 901314 ended by presenter
                 // bizCode = 901320 kicked by presenter
                 onDisconnected(data);
             },
             onError: (data) => {
-                log$r('polling error, about to leave...');
+                log$r('polling error: %o', data);
+                if (status === STATUS$1.kDisconnecting || status === STATUS$1.kDisconnected) {
+                    log$r('polling error while disconnecting, ignore it');
+                    return;
+                }
                 events.emit('error', data);
                 // there are some problems with polling
                 // leave conference
@@ -5640,12 +5646,11 @@ function createConference(config) {
     async function sendMessage(msg, target) {
         throwIfNotStatus(STATUS$1.kConnected);
         if (!chatChannel || !chatChannel.ready)
-            throw new Error('Not Ready');
+            { throw new Error('Not Ready'); }
         await chatChannel.sendMessage(msg, target);
     }
-    return conference = {
-        ...events,
-        get api() {
+    return conference = Object.spread({}, events,
+        {get api() {
             return api;
         },
         get url() {
@@ -5702,8 +5707,7 @@ function createConference(config) {
         end,
         share,
         setSharing,
-        sendMessage,
-    };
+        sendMessage});
 }
 
 const log$s = debug('MN:UA');
@@ -5801,11 +5805,9 @@ function createUA(config = {}) {
         // hack join method
         const { join } = conference;
         conference.join = (additional) => {
-            return join({
-                url,
-                ...options,
-                ...additional,
-            });
+            return join(Object.spread({}, {url},
+                options,
+                additional));
         };
         if (isTempAuthLocallyGenerated) {
             conference.once('disconnected', auth.invalid);
@@ -5818,6 +5820,7 @@ function createUA(config = {}) {
     };
 }
 
+// object spread poly-fill
 const log$t = debug('MN');
 const version = "1.1.1-beta";
 // global setup
