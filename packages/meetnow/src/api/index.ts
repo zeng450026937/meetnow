@@ -8,15 +8,11 @@ import { createRequest, RequestResult } from './request';
 
 const log = debug('MN:Api');
 
-// long polling timeout within 30 seconds
-const DEFAULT_TIMEOUT = 35 * 1000;
-
 export function createApi(config: AxiosRequestConfig = {}) {
   log('createApi()');
 
   const delegate = axios.create({
     baseURL : '/',
-    timeout : DEFAULT_TIMEOUT,
     ...config,
   });
 

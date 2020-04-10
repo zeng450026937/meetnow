@@ -10,6 +10,7 @@ export function createUserApi(
       'baseurl',
       __TEST__ ? '/webapp/' : 'https://meetings.ylyun.com/webapp/',
     ),
+    timeout : CONFIG.get('timeout', 0),
   });
 
   api.interceptors.request.use((config) => {

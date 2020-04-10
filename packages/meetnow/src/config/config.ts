@@ -5,6 +5,7 @@ export interface MeetnowConfig {
   debug?: string;
   persistent?: boolean;
   testing?: boolean;
+  timeout?: number
 }
 
 const startsWith = (input: string, search: string): boolean => {
