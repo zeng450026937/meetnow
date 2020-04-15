@@ -1,3 +1,17 @@
+## [1.1.3-beta](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.1.2-beta...v1.1.3-beta) (2020-04-15)
+
+
+### Bug Fixes
+
+* **conference-info:** get sharing type from conference state ([f5eaa43](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/f5eaa43046e1d1ff6b11b09091a75ff9273f6875))
+
+
+### Features
+
+* **timeout:** change to config item ([ad70251](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/ad702510ea03aa282bd5ded88820959bf8da2946))
+
+
+
 ## 1.1.2-beta (2020-04-03)
 
 
