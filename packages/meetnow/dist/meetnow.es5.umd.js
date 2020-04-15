@@ -11270,15 +11270,12 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 
 
-var log = browser_default()('MN:Api'); // long polling timeout within 30 seconds
-
-var DEFAULT_TIMEOUT = 35 * 1000;
+var log = browser_default()('MN:Api');
 function createApi() {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   log('createApi()');
   var delegate = axios_default.a.create(_objectSpread({
-    baseURL: '/',
-    timeout: DEFAULT_TIMEOUT
+    baseURL: '/'
   }, config));
   delegate.interceptors.response.use(function (response) {
     var _response$data = response.data,
@@ -11328,7 +11325,8 @@ var utils = __webpack_require__("04c9");
 
 function createUserApi(token) {
   var api = createApi({
-    baseURL: config_config["a" /* CONFIG */].get('baseurl',  false ? undefined : 'https://meetings.ylyun.com/webapp/')
+    baseURL: config_config["a" /* CONFIG */].get('baseurl',  false ? undefined : 'https://meetings.ylyun.com/webapp/'),
+    timeout: config_config["a" /* CONFIG */].get('timeout', 0)
   });
   api.interceptors.request.use(function (config) {
     if (token) {
@@ -12612,6 +12610,11 @@ function createState(data, context) {
     return speechUserEntity;
   }
 
+  function getSharingType() {
+    var applicationsharer = data.applicationsharer;
+    return applicationsharer.user && applicationsharer.user['share-type'];
+  }
+
   return description = state_objectSpread({}, events, {
     get data() {
       return data;
@@ -12622,7 +12625,8 @@ function createState(data, context) {
     },
     update: update,
     getSharingUserEntity: getSharingUserEntity,
-    getSpeechUserEntity: getSpeechUserEntity
+    getSpeechUserEntity: getSpeechUserEntity,
+    getSharingType: getSharingType
   });
 }
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
@@ -19496,6 +19500,10 @@ function createUA() {
 
 
 
+
+
+
+if (false) {}
 
 var src_log = browser_default()('MN');
 var src_version = "1.1.2-beta"; // global setup

@@ -6,6 +6,8 @@ import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
 import noderesolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import buble from '@rollup/plugin-buble';
+// import babel from 'rollup-plugin-babel';
 
 if (!process.env.TARGET) {
   throw new Error('TARGET package must be specified via --environment flag.');
@@ -115,6 +117,23 @@ function createConfig(format, output, plugins = []) {
 
   const entryFile = format === 'esm-bundler-runtime' ? 'src/runtime.ts' : 'src/index.ts';
 
+  // const compatPlugin = babel({
+  //   extensions     : ['.js', '.ts'],
+  //   exclude        : 'node_modules/**',
+  //   babelrc        : false,
+  //   configFile     : path.resolve(__dirname, 'babel.config.js'),
+  //   runtimeHelpers : true,
+  // });
+
+  // only transform object-rest-spread
+  const compatPlugin = buble({
+    target     : { chrome: 70 },
+    transforms : {
+      objectRestSpread : true,
+    },
+    objectAssign : 'Object.spread',
+  });
+
   return {
     input    : resolve(entryFile),
     // Global and Browser ESM builds inlines everything so that they can be
@@ -138,6 +157,7 @@ function createConfig(format, output, plugins = []) {
         (isGlobalBuild || isRawESMBuild || isBundlerESMBuild)
           && !packageOptions.enableNonBrowserBranches,
       ),
+      compatPlugin,
       ...plugins,
     ],
     output,
@@ -163,14 +183,12 @@ function createReplacePlugin(
       : // hard coded dev/prod builds
       !isProduction,
     // this is only used during tests
-    __TEST__            : isBundlerESMBuild ? '(process.env.NODE_ENV === \'test\')' : false,
+    __TEST__        : isBundlerESMBuild ? '(process.env.NODE_ENV === \'test\')' : false,
     // If the build is expected to run directly in the browser (global / esm builds)
-    __BROWSER__         : isBrowserBuild,
+    __BROWSER__     : isBrowserBuild,
     // is targeting bundlers?
-    __BUNDLER__         : isBundlerESMBuild,
-    // support options?
-    // the lean build drops options related code with buildOptions.lean: true
-    __FEATURE_OPTIONS__ : !packageOptions.lean && !process.env.LEAN,
+    __BUNDLER__     : isBundlerESMBuild,
+    __FEATURE_ES5__ : false,
   };
   // allow inline overrides like
   // __RUNTIME_COMPILE__=true yarn build runtime-core

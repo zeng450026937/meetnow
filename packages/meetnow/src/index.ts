@@ -1,6 +1,7 @@
 import debug from 'debug';
 import axios from 'axios';
 import adapter from './adapter';
+import { polyfill } from './utils/object-spread';
 
 import { isMiniProgram } from './browser';
 import {
@@ -24,6 +25,10 @@ export {
   axios,
   adapter,
 };
+
+if (!__FEATURE_ES5__) {
+  polyfill();
+}
 
 const log = debug('MN');
 

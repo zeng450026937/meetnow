@@ -396,6 +396,7 @@ export declare function connect(options: ConnectOptions): Promise<{
             update: (diff?: import("./conference/conference-info").ConferenceState | undefined) => void;
             getSharingUserEntity: () => string;
             getSpeechUserEntity: () => string | undefined;
+            getSharingType: () => "applicationsharing" | "coopshare";
             on(event: string | string[], fn: Function): {
                 on(event: string | string[], fn: Function): any;
                 off(event: string | string[], fn?: Function | undefined): any;
@@ -2103,6 +2104,7 @@ export declare function connect(options: ConnectOptions): Promise<{
         update: (diff?: import("./conference/conference-info").ConferenceState | undefined) => void;
         getSharingUserEntity: () => string;
         getSpeechUserEntity: () => string | undefined;
+        getSharingType: () => "applicationsharing" | "coopshare";
         on(event: string | string[], fn: Function): {
             on(event: string | string[], fn: Function): any;
             off(event: string | string[], fn?: Function | undefined): any;
@@ -4142,6 +4144,7 @@ export declare function createUA(config?: UAConfigs): {
                 update: (diff?: import("../conference/conference-info").ConferenceState | undefined) => void;
                 getSharingUserEntity: () => string;
                 getSpeechUserEntity: () => string | undefined;
+                getSharingType: () => "applicationsharing" | "coopshare";
                 on(event: string | string[], fn: Function): {
                     on(event: string | string[], fn: Function): any;
                     off(event: string | string[], fn?: Function | undefined): any;
@@ -5849,6 +5852,7 @@ export declare function createUA(config?: UAConfigs): {
             update: (diff?: import("../conference/conference-info").ConferenceState | undefined) => void;
             getSharingUserEntity: () => string;
             getSpeechUserEntity: () => string | undefined;
+            getSharingType: () => "applicationsharing" | "coopshare";
             on(event: string | string[], fn: Function): {
                 on(event: string | string[], fn: Function): any;
                 off(event: string | string[], fn?: Function | undefined): any;
@@ -7779,6 +7783,7 @@ declare interface MeetnowConfig {
     debug?: string;
     persistent?: boolean;
     testing?: boolean;
+    timeout?: number;
 }
 
 export declare function setup(config?: MeetnowConfig): void;

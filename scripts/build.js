@@ -26,6 +26,7 @@ module.exports = (api, options) => {
             opts[0].__DEV__ = process.env.NODE_ENV === 'development';
             opts[0].__TEST__ = process.env.NODE_ENV === 'test';
             opts[0].__VERSION__ = `"${ masterVersion }"`;
+            opts[0].__FEATURE_ES5__ = true;
             return opts;
           });
       });

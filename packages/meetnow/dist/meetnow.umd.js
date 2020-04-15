@@ -2150,7 +2150,7 @@
 	    return {
 	        send(options) {
 	            if (!delegate)
-	                return;
+	                { return; }
 	            task = delegate(options);
 	        },
 	        abort() {
@@ -2169,9 +2169,8 @@
 	    const delegate = createRequestDelegate();
 	    return {
 	        send(options) {
-	            delegate.send({
-	                ...options,
-	                success: (response) => {
+	            delegate.send(Object.spread({}, options,
+	                {success: (response) => {
 	                    // normalize data
 	                    const headers = response.header || response.headers;
 	                    const status = response.statusCode || response.status || 200;
@@ -2226,8 +2225,7 @@
 	                        clearTimeout(timer);
 	                        timer = undefined;
 	                    }
-	                },
-	            });
+	                }}));
 	            if (timeout) {
 	                timer = setTimeout(() => {
 	                    ontimeout && ontimeout(createError(`timeout of ${config.timeout || 0}ms exceeded`, config, 'ECONNABORTED', ''));
@@ -2285,7 +2283,7 @@
 	            // Handle cancellation
 	            cancelToken.promise.then((cancel) => {
 	                if (!request)
-	                    return;
+	                    { return; }
 	                request.abort();
 	                reject(cancel);
 	                request = null;
@@ -2298,13 +2296,13 @@
 	        };
 	        request.onabort = function handleAbort(error) {
 	            if (!request)
-	                return;
+	                { return; }
 	            reject(error);
 	            request = null;
 	        };
 	        request.onerror = function handleError(error) {
 	            if (!request)
-	                return;
+	                { return; }
 	            reject(error);
 	            request = null;
 	        };
@@ -2314,6 +2312,46 @@
 	        };
 	        request.send(options);
 	    });
+	}
+
+	/* eslint-disable prefer-spread, prefer-rest-params */
+	function ownKeys(object, enumerableOnly) {
+	    const keys = Object.keys(object);
+	    if (Object.getOwnPropertySymbols) {
+	        let symbols = Object.getOwnPropertySymbols(object);
+	        if (enumerableOnly) {
+	            symbols = symbols.filter((sym) => {
+	                return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+	            });
+	        }
+	        keys.push.apply(keys, symbols);
+	    }
+	    return keys;
+	}
+	function objectSpread(target) {
+	    for (let index = 1; index < arguments.length; index++) {
+	        const nextSource = arguments[index];
+	        if (nextSource !== null && nextSource !== undefined) {
+	            if (Object.getOwnPropertyDescriptors) {
+	                Object.defineProperties(target, Object.getOwnPropertyDescriptors(nextSource));
+	            }
+	            else {
+	                ownKeys(Object(nextSource)).forEach((key) => {
+	                    Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(nextSource, key));
+	                });
+	            }
+	        }
+	    }
+	    return target;
+	}
+	function polyfill() {
+	    if (typeof Object.spread !== 'function') {
+	        Object.defineProperty(Object, 'spread', {
+	            value: objectSpread,
+	            writable: true,
+	            configurable: true,
+	        });
+	    }
 	}
 
 	const commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
@@ -2498,12 +2536,10 @@
 	    const MeetNow = win.MeetNow = win.MeetNow || {};
 	    // create the Meetnow.config from raw config object (if it exists)
 	    // and convert Meetnow.config into a ConfigApi that has a get() fn
-	    const configObj = {
-	        ...configFromSession(win),
-	        persistent: false,
-	        ...(config || MeetNow.config),
-	        ...configFromURL(win),
-	    };
+	    const configObj = Object.spread({}, configFromSession(win),
+	        {persistent: false},
+	        (config || MeetNow.config),
+	        configFromURL(win));
 	    CONFIG.reset(configObj);
 	    if (CONFIG.getBoolean('persistent')) {
 	        saveConfig(win, configObj);
@@ -2539,28 +2575,28 @@
 
 	      // Else, assume array and swap all items
 	      for (var i = 0; i < n.length; i++)
-	        n[i] = crypt.endian(n[i]);
+	        { n[i] = crypt.endian(n[i]); }
 	      return n;
 	    },
 
 	    // Generate an array of any length of random bytes
 	    randomBytes: function(n) {
 	      for (var bytes = []; n > 0; n--)
-	        bytes.push(Math.floor(Math.random() * 256));
+	        { bytes.push(Math.floor(Math.random() * 256)); }
 	      return bytes;
 	    },
 
 	    // Convert a byte array to big-endian 32-bit words
 	    bytesToWords: function(bytes) {
 	      for (var words = [], i = 0, b = 0; i < bytes.length; i++, b += 8)
-	        words[b >>> 5] |= bytes[i] << (24 - b % 32);
+	        { words[b >>> 5] |= bytes[i] << (24 - b % 32); }
 	      return words;
 	    },
 
 	    // Convert big-endian 32-bit words to a byte array
 	    wordsToBytes: function(words) {
 	      for (var bytes = [], b = 0; b < words.length * 32; b += 8)
-	        bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
+	        { bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF); }
 	      return bytes;
 	    },
 
@@ -2576,7 +2612,7 @@
 	    // Convert a hex string to a byte array
 	    hexToBytes: function(hex) {
 	      for (var bytes = [], c = 0; c < hex.length; c += 2)
-	        bytes.push(parseInt(hex.substr(c, 2), 16));
+	        { bytes.push(parseInt(hex.substr(c, 2), 16)); }
 	      return bytes;
 	    },
 
@@ -2585,10 +2621,10 @@
 	      for (var base64 = [], i = 0; i < bytes.length; i += 3) {
 	        var triplet = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
 	        for (var j = 0; j < 4; j++)
-	          if (i * 8 + j * 6 <= bytes.length * 8)
-	            base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F));
+	          { if (i * 8 + j * 6 <= bytes.length * 8)
+	            { base64.push(base64map.charAt((triplet >>> 6 * (3 - j)) & 0x3F)); }
 	          else
-	            base64.push('=');
+	            { base64.push('='); } }
 	      }
 	      return base64.join('');
 	    },
@@ -2600,7 +2636,7 @@
 
 	      for (var bytes = [], i = 0, imod4 = 0; i < base64.length;
 	          imod4 = ++i % 4) {
-	        if (imod4 == 0) continue;
+	        if (imod4 == 0) { continue; }
 	        bytes.push(((base64map.indexOf(base64.charAt(i - 1))
 	            & (Math.pow(2, -2 * imod4 + 8) - 1)) << (imod4 * 2))
 	            | (base64map.indexOf(base64.charAt(i)) >>> (6 - imod4 * 2)));
@@ -2632,14 +2668,14 @@
 	    // Convert a string to a byte array
 	    stringToBytes: function(str) {
 	      for (var bytes = [], i = 0; i < str.length; i++)
-	        bytes.push(str.charCodeAt(i) & 0xFF);
+	        { bytes.push(str.charCodeAt(i) & 0xFF); }
 	      return bytes;
 	    },
 
 	    // Convert a byte array to a string
 	    bytesToString: function(bytes) {
 	      for (var str = [], i = 0; i < bytes.length; i++)
-	        str.push(String.fromCharCode(bytes[i]));
+	        { str.push(String.fromCharCode(bytes[i])); }
 	      return str.join('');
 	    }
 	  }
@@ -2680,14 +2716,14 @@
 	  md5 = function (message, options) {
 	    // Convert to byte array
 	    if (message.constructor == String)
-	      if (options && options.encoding === 'binary')
-	        message = bin.stringToBytes(message);
+	      { if (options && options.encoding === 'binary')
+	        { message = bin.stringToBytes(message); }
 	      else
-	        message = utf8.stringToBytes(message);
+	        { message = utf8.stringToBytes(message); } }
 	    else if (isBuffer(message))
-	      message = Array.prototype.slice.call(message, 0);
+	      { message = Array.prototype.slice.call(message, 0); }
 	    else if (!Array.isArray(message))
-	      message = message.toString();
+	      { message = message.toString(); }
 	    // else, assume byte array already
 
 	    var m = crypt$1.bytesToWords(message),
@@ -2821,7 +2857,7 @@
 
 	  module.exports = function (message, options) {
 	    if (message === undefined || message === null)
-	      throw new Error('Illegal argument ' + message);
+	      { throw new Error('Illegal argument ' + message); }
 
 	    var digestbytes = crypt$1.wordsToBytes(md5(message, options));
 	    return options && options.asBytes ? digestbytes :
@@ -3114,23 +3150,18 @@
 	// export type Request<T, B, D> = ReturnType<typeof createRequest<T, B, D>>;
 
 	const log$1 = browser('MN:Api');
-	// long polling timeout within 30 seconds
-	const DEFAULT_TIMEOUT = 35 * 1000;
 	function createApi(config = {}) {
 	    log$1('createApi()');
-	    const delegate = axios$1.create({
-	        baseURL: '/',
-	        timeout: DEFAULT_TIMEOUT,
-	        ...config,
-	    });
+	    const delegate = axios$1.create(Object.spread({}, {baseURL: '/'},
+	        config));
 	    delegate.interceptors.response.use((response) => {
 	        const { ret, bizCode, error, data, } = response.data;
 	        if (ret < 0)
-	            throw new ApiError(bizCode, error);
+	            { throw new ApiError(bizCode, error); }
 	        // should not go here
 	        // server impl error
 	        if (ret === 0 && error)
-	            throw new ApiError(bizCode, error);
+	            { throw new ApiError(bizCode, error); }
 	        log$1('request success: %o', data);
 	        // TBD
 	        // replace response data with actual data. eg. response.data = data;
@@ -3143,7 +3174,7 @@
 	    });
 	    function request(apiName) {
 	        log$1(`request() "${apiName}"`);
-	        return createRequest$1({ ...CONFIGS[apiName] }, delegate);
+	        return createRequest$1(Object.spread({}, CONFIGS[apiName]), delegate);
 	    }
 	    return {
 	        get interceptors() {
@@ -3175,6 +3206,7 @@
 	function createUserApi(token) {
 	    const api = createApi({
 	        baseURL: CONFIG.get('baseurl',  'https://meetings.ylyun.com/webapp/'),
+	        timeout: CONFIG.get('timeout', 0),
 	    });
 	    api.interceptors.request.use((config) => {
 	        if (token) {
@@ -3201,7 +3233,7 @@
 	            working = false;
 	        }
 	        if (!running)
-	            return;
+	            { return; }
 	        interval = isFunction$1(nextInterval) ? nextInterval() : nextInterval;
 	        // schedule next
 	        timeout = setTimeout(job, interval);
@@ -3209,14 +3241,14 @@
 	    async function start(immediate = true) {
 	        log$2('start()');
 	        if (running)
-	            return;
+	            { return; }
 	        running = true;
 	        await job(immediate);
 	    }
 	    function stop() {
 	        log$2('stop()');
 	        if (!running)
-	            return;
+	            { return; }
 	        if (timeout) {
 	            clearTimeout(timeout);
 	            timeout = undefined;
@@ -3328,9 +3360,8 @@
 	    const identities = tokens.map(token => {
 	        const identityToken = token.token;
 	        let identityAuth;
-	        return {
-	            ...token,
-	            get account() {
+	        return Object.spread({}, token,
+	            {get account() {
 	                return account;
 	            },
 	            get auth() {
@@ -3341,8 +3372,7 @@
 	                    identityAuth = await createDigestAuth(identityToken);
 	                }
 	                return identityAuth;
-	            },
-	        };
+	            }});
 	    });
 	    return {
 	        account,
@@ -3424,7 +3454,7 @@
 	        }
 	        const callbacks = events[event];
 	        if (!callbacks)
-	            return;
+	            { return; }
 	        if (!fn) {
 	            events[event] = null;
 	            return;
@@ -3460,7 +3490,7 @@
 	        scopedlog(`emit() "${event}"`);
 	        let callbacks = events[event];
 	        if (!callbacks)
-	            return;
+	            { return; }
 	        callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
 	        for (const callback of callbacks) {
 	            try {
@@ -3527,7 +3557,7 @@
 	            error = e;
 	            canceled = isCancel$1(e);
 	            if (canceled)
-	                return;
+	                { return; }
 	            // if request failed by network or server error,
 	            // increase next request timeout
 	            attempts++;
@@ -3539,7 +3569,7 @@
 	            config.onError && config.onError(new Error('Max Attempts'), attempts);
 	        }
 	        if (error)
-	            return;
+	            { return; }
 	        const { bizCode, data = {
 	            interval,
 	        }, } = response.data;
@@ -3553,10 +3583,8 @@
 	        interval: () => interval,
 	        cancel: () => request.cancel(),
 	    });
-	    return {
-	        ...worker,
-	        keepalive,
-	    };
+	    return Object.spread({}, worker,
+	        {keepalive});
 	}
 
 	const log$5 = browser('MN:Polling');
@@ -3584,7 +3612,7 @@
 	    let version = 0;
 	    function analyze(data) {
 	        if (!data)
-	            return;
+	            { return; }
 	        const { version: newVersion, category, body } = data;
 	        if (!isDef(newVersion) || newVersion <= version) {
 	            log$5(`illegal version: ${newVersion}, current version: ${version}.`);
@@ -3623,11 +3651,11 @@
 	            error = e;
 	            canceled = isCancel$1(e);
 	            if (canceled)
-	                return;
+	                { return; }
 	            // polling timeout
 	            timeouted = !!error && [900408, 901323].includes(error.bizCode);
 	            if (timeouted)
-	                return;
+	                { return; }
 	            // if request failed by network or server error,
 	            // increase next polling timeout
 	            attempts++;
@@ -3639,7 +3667,7 @@
 	            config.onError && config.onError(new Error('Max Attempts'), attempts);
 	        }
 	        if (error)
-	            return;
+	            { return; }
 	        const { bizCode, data } = response.data;
 	        // TODO
 	        // check bizCode
@@ -3656,11 +3684,9 @@
 	        interval: () => interval,
 	        cancel: () => request.cancel(),
 	    });
-	    return {
-	        ...worker,
-	        poll,
-	        analyze,
-	    };
+	    return Object.spread({}, worker,
+	        {poll,
+	        analyze});
 	}
 
 	const log$6 = browser('MN:Reactive');
@@ -3733,9 +3759,8 @@
 	    function isLocked() {
 	        return getLock().admissionPolicy !== 'anonymous';
 	    }
-	    return description = {
-	        ...events,
-	        get data() {
+	    return description = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get subject() {
@@ -3749,8 +3774,7 @@
 	        setLock,
 	        lock,
 	        unlock,
-	        isLocked,
-	    };
+	        isLocked});
 	}
 
 	const log$8 = browser('MN:Information:State');
@@ -3782,9 +3806,12 @@
 	        const { 'speech-user-entity': speechUserEntity } = data;
 	        return speechUserEntity;
 	    }
-	    return description = {
-	        ...events,
-	        get data() {
+	    function getSharingType() {
+	        const { applicationsharer } = data;
+	        return applicationsharer.user && applicationsharer.user['share-type'];
+	    }
+	    return description = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
@@ -3793,7 +3820,7 @@
 	        update,
 	        getSharingUserEntity,
 	        getSpeechUserEntity,
-	    };
+	        getSharingType});
 	}
 
 	const log$9 = browser('MN:Information:Layout');
@@ -3870,10 +3897,8 @@
 	    let lastConfig = DANMAKU_CONFIGS;
 	    async function setDanmaku(config) {
 	        log$a('setDanmaku()');
-	        const finalConfig = {
-	            ...lastConfig,
-	            config,
-	        };
+	        const finalConfig = Object.spread({}, lastConfig,
+	            {config});
 	        const { type, position, displayTime, repeatCount, repeatInterval, rollDirection, } = finalConfig;
 	        await api
 	            .request('setTitle')
@@ -3938,22 +3963,20 @@
 	    function getDanmaku() {
 	        return getVideoView().title;
 	    }
-	    return view = {
-	        ...events,
-	        get data() {
+	    return view = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
 	            return data[key];
-	        },
-	        ...layout,
-	        ...danmaku,
-	        update,
+	        }},
+	        layout,
+	        danmaku,
+	        {update,
 	        getVideoView,
 	        getLayout,
 	        getFocusUserEntity,
-	        getDanmaku,
-	    };
+	        getDanmaku});
 	}
 
 	const log$c = browser('MN:Information:Camera');
@@ -4249,9 +4272,8 @@
 	            await chatChannel.sendMessage(msg, [entity]);
 	        }
 	    }
-	    return user = {
-	        ...events,
-	        get data() {
+	    return user = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
@@ -4299,8 +4321,7 @@
 	        reject,
 	        sendMessage,
 	        // camera ctrl
-	        camera,
-	    };
+	        camera});
 	}
 
 	const log$e = browser('MN:Information:Lobby');
@@ -4488,16 +4509,15 @@
 	            .request('unmuteAll')
 	            .send();
 	    }
-	    return users = {
-	        ...events,
-	        get data() {
+	    return users = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
 	            return data[key];
-	        },
-	        ...lobby,
-	        update,
+	        }},
+	        lobby,
+	        {update,
 	        getUserList,
 	        getUser,
 	        hasUser,
@@ -4517,8 +4537,7 @@
 	        invite,
 	        kick,
 	        mute,
-	        unmute,
-	    };
+	        unmute});
 	}
 
 	const log$g = browser('MN:Information:RTMP');
@@ -4601,7 +4620,7 @@
 	    function getDetail(entity) {
 	        const userdata = getUser(entity);
 	        if (!userdata)
-	            return undefined;
+	            { return undefined; }
 	        const { 'rtmp-status': status, 'rtmp-last-start-time': lastStartTime, 'rtmp-last-stop-duration': lastStopDuration, reason, } = userdata;
 	        return {
 	            reason,
@@ -4610,9 +4629,8 @@
 	            lastStopDuration,
 	        };
 	    }
-	    return rtmp = {
-	        ...events,
-	        get data() {
+	    return rtmp = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
@@ -4622,10 +4640,9 @@
 	        getEnable,
 	        getStatus,
 	        getReason,
-	        getDetail,
+	        getDetail},
 	        // rtmp ctrl
-	        ...ctrl,
-	    };
+	        ctrl);
 	}
 
 	const log$i = browser('MN:Information:Record');
@@ -4706,9 +4723,8 @@
 	            lastStopDuration,
 	        };
 	    }
-	    return record = {
-	        ...events,
-	        get data() {
+	    return record = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get(key) {
@@ -4717,10 +4733,9 @@
 	        update,
 	        getStatus,
 	        getReason,
-	        getDetail,
+	        getDetail},
 	        // record ctrl
-	        ...ctrl,
-	    };
+	        ctrl);
 	}
 
 	const log$k = browser('MN:Information:Item');
@@ -4896,9 +4911,8 @@
 	        });
 	        events.emit('updated', information);
 	    }
-	    return information = {
-	        ...events,
-	        get data() {
+	    return information = Object.spread({}, events,
+	        {get data() {
 	            return data;
 	        },
 	        get version() {
@@ -4925,8 +4939,7 @@
 	        get record() {
 	            return record;
 	        },
-	        update,
-	    };
+	        update});
 	}
 
 	/* eslint-disable no-useless-escape */
@@ -5447,7 +5460,7 @@
 
 	function closeMediaStream(stream) {
 	    if (!stream)
-	        return;
+	        { return; }
 	    // Latest spec states that MediaStream has no stop() method and instead must
 	    // call stop() on every MediaStreamTrack.
 	    try {
@@ -5818,18 +5831,18 @@
 	    const remoteHold = false;
 	    function throwIfStatus(condition, message) {
 	        if (status !== condition)
-	            return;
+	            { return; }
 	        throw new Error(message || 'Invalid State');
 	    }
 	    function throwIfNotStatus(condition, message) {
 	        if (status === condition)
-	            return;
+	            { return; }
 	        throw new Error(message || 'Invalid State');
 	    }
 	    function throwIfTerminated() {
 	        const message = 'Terminated';
 	        if (canceled)
-	            throw new Error(message);
+	            { throw new Error(message); }
 	        throwIfStatus(STATUS.kTerminated, message);
 	    }
 	    function isInProgress() {
@@ -5872,7 +5885,7 @@
 	        connection = new RTCPeerConnection(rtcConstraints);
 	        connection.addEventListener('iceconnectionstatechange', () => {
 	            if (!connection)
-	                return;
+	                { return; }
 	            const { iceConnectionState: state, } = connection;
 	            if (state === 'failed') {
 	                events.emit('peerconnection:connectionfailed');
@@ -6109,7 +6122,7 @@
 	    function close() {
 	        log$m('close()');
 	        if (status === STATUS.kTerminated)
-	            return;
+	            { return; }
 	        if (connection) {
 	            try {
 	                connection.close();
@@ -6316,7 +6329,7 @@
 	        log$m('mangleOffer()');
 	        // nothing to do
 	        if (!localHold && !remoteHold)
-	            return offer;
+	            { return offer; }
 	        const sdp = parse$1(offer);
 	        // Local hold.
 	        if (localHold && !remoteHold) {
@@ -6388,7 +6401,7 @@
 	    function addLocalStream(stream) {
 	        log$m('addLocalStream()');
 	        if (!stream)
-	            return;
+	            { return; }
 	        if (connection.addTrack) {
 	            stream
 	                .getTracks()
@@ -6426,7 +6439,7 @@
 	        if (connection.getSenders) {
 	            connection.getSenders().forEach((sender) => {
 	                if (!sender.track)
-	                    return;
+	                    { return; }
 	                peerHasAudio = sender.track.kind === 'audio' || peerHasAudio;
 	                peerHasVideo = sender.track.kind === 'video' || peerHasVideo;
 	            });
@@ -6443,7 +6456,7 @@
 	            else {
 	                connection.getSenders().forEach((sender) => {
 	                    if (!sender.track)
-	                        return;
+	                        { return; }
 	                    if (!sender.replaceTrack
 	                        && !(sender.prototype && sender.prototype.replaceTrack)) {
 	                        /* eslint-disable-next-line no-use-before-define */
@@ -6510,7 +6523,7 @@
 	            && 'setParameters' in window.RTCRtpSender.prototype) {
 	            connection.getSenders().forEach((sender) => {
 	                if (sender.track)
-	                    return;
+	                    { return; }
 	                const parameters = sender.getParameters();
 	                if (typeof audio !== 'undefined' && sender.track.kind === 'audio') {
 	                    if (audio === 0) {
@@ -6630,9 +6643,8 @@
 	        }
 	        return rtcStats;
 	    }
-	    return {
-	        ...events,
-	        get status() {
+	    return Object.spread({}, events,
+	        {get status() {
 	            return status;
 	        },
 	        get connection() {
@@ -6661,8 +6673,7 @@
 	        replaceLocalStream,
 	        adjustBandWidth,
 	        applyConstraints,
-	        getStats,
-	    };
+	        getStats});
 	}
 
 	const log$n = browser('MN:SDP');
@@ -6823,9 +6834,9 @@
 	                            const rtp = m.rtp.find((r) => r.payload === Number(p));
 	                            const fmtp = m.fmtp.find((f) => f.payload === Number(p));
 	                            if (rtp)
-	                                rtps.push(rtp);
+	                                { rtps.push(rtp); }
 	                            if (fmtp)
-	                                fmtps.push(fmtp);
+	                                { fmtps.push(fmtp); }
 	                        });
 	                        m.rtp = rtps;
 	                        m.fmtp = fmtps;
@@ -7025,9 +7036,8 @@
 	            }, 3000);
 	        }
 	    });
-	    return {
-	        ...channel,
-	        get status() {
+	    return Object.spread({}, channel,
+	        {get status() {
 	            return channel.status;
 	        },
 	        get connection() {
@@ -7044,8 +7054,7 @@
 	        },
 	        get callId() {
 	            return callId;
-	        },
-	    };
+	        }});
 	}
 
 	var MessageStatus;
@@ -7072,7 +7081,7 @@
 	    async function send(message, target) {
 	        log$p('send()');
 	        if (direction === 'incoming')
-	            throw new Error('Invalid Status');
+	            { throw new Error('Invalid Status'); }
 	        status = MessageStatus.kSending;
 	        request = api
 	            .request('pushMessage')
@@ -7102,7 +7111,7 @@
 	    async function retry() {
 	        log$p('retry()');
 	        if (!content)
-	            throw new Error('Invalid Message');
+	            { throw new Error('Invalid Message'); }
 	        await send(content, receiver);
 	    }
 	    function cancel() {
@@ -7167,7 +7176,7 @@
 	    async function connect(count = 2000) {
 	        log$q('connect()');
 	        if (ready)
-	            return;
+	            { return; }
 	        request = api.request('pullMessage').data({ count });
 	        const response = await request.send();
 	        const { data } = response.data;
@@ -7210,16 +7219,14 @@
 	        messages.push(message);
 	        return message;
 	    }
-	    return {
-	        ...events,
-	        get ready() {
+	    return Object.spread({}, events,
+	        {get ready() {
 	            return ready;
 	        },
 	        connect,
 	        terminate,
 	        sendMessage,
-	        incoming,
-	    };
+	        incoming});
 	}
 
 	const log$r = browser('MN:Conference');
@@ -7265,12 +7272,12 @@
 	    }
 	    function throwIfStatus(condition, message) {
 	        if (status !== condition)
-	            return;
+	            { return; }
 	        throw new Error(message || 'Invalid State');
 	    }
 	    function throwIfNotStatus(condition, message) {
 	        if (status === condition)
-	            return;
+	            { return; }
 	        throw new Error(message || 'Invalid State');
 	    }
 	    function onConnecting() {
@@ -7303,9 +7310,9 @@
 	    }
 	    async function maybeChat() {
 	        if (!chatChannel)
-	            return;
+	            { return; }
 	        if (chatChannel.ready)
-	            return;
+	            { return; }
 	        await chatChannel.connect().catch(() => { });
 	    }
 	    async function join(options = {}) {
@@ -7381,11 +7388,9 @@
 	            .request
 	            .use((config) => {
 	            if (/conference-ctrl/.test(config.url) && config.method === 'post') {
-	                config.data = {
-	                    'conference-user-id': userId,
-	                    'conference-uuid': uuid,
-	                    ...config.data,
-	                };
+	                config.data = Object.spread({}, {'conference-user-id': userId,
+	                    'conference-uuid': uuid},
+	                    config.data);
 	            }
 	            return config;
 	        });
@@ -7563,12 +7568,11 @@
 	    async function sendMessage(msg, target) {
 	        throwIfNotStatus(STATUS$1.kConnected);
 	        if (!chatChannel || !chatChannel.ready)
-	            throw new Error('Not Ready');
+	            { throw new Error('Not Ready'); }
 	        await chatChannel.sendMessage(msg, target);
 	    }
-	    return conference = {
-	        ...events,
-	        get api() {
+	    return conference = Object.spread({}, events,
+	        {get api() {
 	            return api;
 	        },
 	        get url() {
@@ -7625,8 +7629,7 @@
 	        end,
 	        share,
 	        setSharing,
-	        sendMessage,
-	    };
+	        sendMessage});
 	}
 
 	const log$s = browser('MN:UA');
@@ -7724,11 +7727,9 @@
 	        // hack join method
 	        const { join } = conference;
 	        conference.join = (additional) => {
-	            return join({
-	                url,
-	                ...options,
-	                ...additional,
-	            });
+	            return join(Object.spread({}, {url},
+	                options,
+	                additional));
 	        };
 	        if (isTempAuthLocallyGenerated) {
 	            conference.once('disconnected', auth.invalid);
@@ -7741,6 +7742,9 @@
 	    };
 	}
 
+	{
+	    polyfill();
+	}
 	const log$t = browser('MN');
 	const version = "1.1.2-beta";
 	// global setup
