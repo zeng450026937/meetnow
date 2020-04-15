@@ -41,6 +41,11 @@ export function createState(data: ConferenceState, context: Context) {
     return speechUserEntity;
   }
 
+  function getSharingType() {
+    const { applicationsharer } = data;
+    return applicationsharer.user && applicationsharer.user['share-type'];
+  }
+
   return description = {
     ...events,
 
@@ -56,6 +61,8 @@ export function createState(data: ConferenceState, context: Context) {
 
     getSharingUserEntity,
     getSpeechUserEntity,
+
+    getSharingType,
   };
 }
 
