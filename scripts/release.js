@@ -23,7 +23,7 @@ const isDryRun = args.dry;
 const { skipTests = true } = args;
 const { skipBuild } = args;
 const { skipTsd = true } = args;
-const { skipPublish = true } = args;
+const { skipPublish } = args;
 const packages = fs
   .readdirSync(path.resolve(__dirname, '../packages'))
   .filter(p => !p.endsWith('.ts') && !p.startsWith('.'));
