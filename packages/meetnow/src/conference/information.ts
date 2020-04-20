@@ -1,15 +1,17 @@
 import debug from 'debug';
-import { createEvents } from '../events';
-import { createDescription } from './description';
-import { createState } from './state';
-import { createView } from './view';
-import { createUsers } from './users';
-import { createRTMP } from './rtmp';
-import { createRecord } from './record';
+import { createEvents, Events } from '../events';
+import { createDescription, Description } from './description';
+import { createState, State } from './state';
+import { createView, View } from './view';
+import { createUsers, Users } from './users';
+import { createRTMP, RTMP } from './rtmp';
+import { createRecord, Record } from './record';
 import { mergeItem } from './merge';
 import { hasOwn } from '../utils';
 import { Context } from './context';
 import { ConferenceInformation } from './conference-info';
+
+export { ConferenceInformation };
 
 export * from './description';
 export * from './state';
@@ -20,7 +22,21 @@ export * from './record';
 
 const log = debug('MN:Information');
 
-export function createInformation(data: ConferenceInformation, context: Context) {
+export interface Information extends Events {
+  readonly data: ConferenceInformation;
+  readonly version?: ConferenceInformation['version'];
+  get: <T extends keyof ConferenceInformation>(key: T) => ConferenceInformation[T];
+  update: (diff: ConferenceInformation) => void;
+
+  readonly description: Description;
+  readonly state: State;
+  readonly view: View;
+  readonly users: Users;
+  readonly rtmp: RTMP;
+  readonly record: Record;
+}
+
+export function createInformation(data: ConferenceInformation, context: Context): Information {
   const events = createEvents(log);
   const { api } = context;
 
@@ -153,5 +169,3 @@ export function createInformation(data: ConferenceInformation, context: Context)
     update,
   };
 }
-
-export type Information = ReturnType<typeof createInformation>;

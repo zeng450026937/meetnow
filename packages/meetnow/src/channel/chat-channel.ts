@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Api } from '../api';
 import { Request } from '../api/request';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import {
   createMessage, Message, MessageData, MessageSender,
 } from './message';
@@ -13,7 +13,15 @@ export interface ChatChannelConfigs {
   sender?: MessageSender;
 }
 
-export function createChatChannel(config: ChatChannelConfigs) {
+export interface ChatChannel extends Events {
+  ready: boolean;
+  connect: (count?: number) => Promise<void>;
+  terminate: () => Promise<void>;
+  sendMessage: (msg: string, target?: string[]) => Promise<Message>;
+  incoming: (data: MessageData) => Message;
+}
+
+export function createChatChannel(config: ChatChannelConfigs): ChatChannel {
   const { api, sender } = config;
   const events = createEvents(log);
   let messages: Message[] = [];
@@ -103,5 +111,3 @@ export function createChatChannel(config: ChatChannelConfigs) {
     incoming,
   };
 }
-
-export type ChatChannel = ReturnType<typeof createChatChannel>;

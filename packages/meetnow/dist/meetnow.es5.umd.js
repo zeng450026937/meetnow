@@ -11857,38 +11857,41 @@ var src_utils = __webpack_require__("04c9");
 
 
 
-
 var log = browser_default()('MN:Events');
 function createEvents() {
   var scopedlog = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : log;
   var instance;
   var events = {};
 
-  function _on(event, fn) {
+  function on(event, fn) {
     if (Object(src_utils["d" /* isArray */])(event)) {
       event.forEach(function (ev) {
-        return _on(ev, fn);
+        return on(ev, fn);
       });
-      return;
+      return instance;
     }
 
     (events[event] || (events[event] = [])).push(fn);
+    return instance;
   }
 
-  function _off(event, fn) {
+  function off(event, fn) {
     if (Object(src_utils["d" /* isArray */])(event)) {
       event.forEach(function (e) {
-        return _off(e, fn);
+        return off(e, fn);
       });
-      return;
+      return instance;
     }
 
     var callbacks = events[event];
-    if (!callbacks) return;
+
+    if (!callbacks) {
+      return instance;
+    }
 
     if (!fn) {
       events[event] = null;
-      return;
+      return instance;
     }
 
     var callback;
@@ -11902,11 +11905,13 @@ function createEvents() {
         break;
       }
     }
+
+    return instance;
   }
 
-  function _once(event, fn) {
+  function once(event, fn) {
     function wrapper() {
-      _off(event, wrapper);
+      off(event, wrapper);
 
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
@@ -11916,8 +11921,8 @@ function createEvents() {
     }
 
     wrapper.fn = fn;
-
-    _on(event, wrapper);
+    on(event, wrapper);
+    return instance;
   }
 
   function toArray(list, start) {
@@ -11932,10 +11937,10 @@ function createEvents() {
     return ret;
   }
 
-  function _emit(event) {
+  function emit(event) {
     scopedlog("emit() \"".concat(event, "\""));
     var callbacks = events[event];
-    if (!callbacks) return;
+    if (!callbacks) return instance;
     callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
 
     for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -11970,33 +11975,15 @@ function createEvents() {
         }
       }
     }
+
+    return instance;
   }
 
   return instance = {
-    on: function on(event, fn) {
-      _on(event, fn);
-
-      return instance;
-    },
-    off: function off(event, fn) {
-      _off(event, fn);
-
-      return instance;
-    },
-    once: function once(event, fn) {
-      _once(event, fn);
-
-      return instance;
-    },
-    emit: function emit(event) {
-      for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
-      }
-
-      _emit.apply(void 0, [event].concat(args));
-
-      return instance;
-    }
+    on: on,
+    off: off,
+    once: once,
+    emit: emit
   };
 }
 // EXTERNAL MODULE: ./packages/meetnow/src/api/request.ts
@@ -12368,9 +12355,7 @@ var es_reflect_set = __webpack_require__("7ed3");
 
 
 var reactive_log = browser_default()('MN:Reactive');
-function createReactive() {
-  var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var events = arguments.length > 1 ? arguments[1] : undefined;
+function createReactive(data, events) {
   events = events || createEvents(reactive_log);
   return new Proxy(data, {
     set: function set(target, prop, value, receiver) {
@@ -12404,6 +12389,8 @@ function createReactive() {
 function description_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function description_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { description_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { description_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
 
 
 
@@ -12568,6 +12555,8 @@ function createDescription(data, context) {
 function state_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function state_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { state_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { state_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
 
 
 
@@ -12979,6 +12968,8 @@ function view_objectSpread(target) { for (var i = 1; i < arguments.length; i++) 
 
 
 
+
+
 var view_log = browser_default()('MN:Information:View');
 function createView(data, context) {
   var api = context.api;
@@ -13165,6 +13156,8 @@ function user_objectSpread(target) { for (var i = 1; i < arguments.length; i++) 
 
 
 
+
+
 var user_log = browser_default()('MN:Information:User');
 function createUser(data, context) {
   var api = context.api,
@@ -13248,7 +13241,7 @@ function createUser(data, context) {
 
   function isOnHold() {
     var endpoint = getEndpoint('audio-video');
-    return endpoint && endpoint.status === 'on-hold';
+    return !!endpoint && endpoint.status === 'on-hold';
   }
 
   function hasFocus() {
@@ -13326,7 +13319,7 @@ function createUser(data, context) {
 
   function isSharing() {
     var media = getMedia('applicationsharing');
-    return media && media.status === 'sendonly';
+    return !!media && media.status === 'sendonly';
   }
 
   function isSIP() {
@@ -14358,6 +14351,8 @@ function rtmp_objectSpread(target) { for (var i = 1; i < arguments.length; i++) 
 
 
 
+
+
 var rtmp_log = browser_default()('MN:Information:RTMP');
 function createRTMP(data, context) {
   var api = context.api;
@@ -14517,6 +14512,8 @@ function createRecordCtrl(api) {
 function record_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function record_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { record_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { record_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
 
 
 
@@ -14743,6 +14740,8 @@ function mergeItem(rhys, item) {
 function information_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function information_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { information_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { information_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
 
 
 
@@ -15999,6 +15998,7 @@ function createRTCStats() {
 function channel_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function channel_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { channel_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { channel_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 
 
 

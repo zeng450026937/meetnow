@@ -1,13 +1,30 @@
 import debug from 'debug';
-import { createEvents } from '../events';
-import { ConferenceRecordUsers } from './conference-info';
+import { createEvents, Events } from '../events';
+import { ConferenceRecordUser, ConferenceRecordUsers } from './conference-info';
 import { createReactive } from '../reactive';
-import { createRecordCtrl } from './record-ctrl';
+import { createRecordCtrl, RecordCtrl } from './record-ctrl';
 import { Context } from './context';
+
+export { ConferenceRecordUser, ConferenceRecordUsers };
 
 const log = debug('MN:Information:Record');
 
-export function createRecord(data: ConferenceRecordUsers, context: Context) {
+export interface Record extends Events, RecordCtrl {
+  readonly data: ConferenceRecordUsers,
+  get: <T extends keyof ConferenceRecordUsers>(key: T) => ConferenceRecordUsers[T];
+  update: (diff?: ConferenceRecordUsers) => void;
+
+  getStatus: () => ConferenceRecordUser['record-status'];
+  getReason: () => ConferenceRecordUser['reason'];
+  getDetail: () => {
+    reason: ConferenceRecordUser['reason'];
+    status: ConferenceRecordUser['record-status'];
+    lastStartTime: ConferenceRecordUser['record-last-start-time'];
+    lastStopDuration: ConferenceRecordUser['record-last-stop-duration'];
+  };
+}
+
+export function createRecord(data: ConferenceRecordUsers, context: Context): Record {
   const { api } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
@@ -75,5 +92,3 @@ export function createRecord(data: ConferenceRecordUsers, context: Context) {
     ...ctrl,
   };
 }
-
-export type Record = ReturnType<typeof createRecord>;

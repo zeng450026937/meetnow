@@ -1,10 +1,10 @@
-import { createApi } from '../api';
+import { Api, createApi } from '../api';
 import { CONFIG } from '../config';
 import { isFunction } from '../utils';
 
 export function createUserApi(
   token?: string | (() => string | undefined),
-) {
+): Api {
   const api = createApi({
     baseURL : CONFIG.get(
       'baseurl',

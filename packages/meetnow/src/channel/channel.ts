@@ -1,10 +1,12 @@
 import debug from 'debug';
 import { getBrowser } from '../browser';
 import { parse, write } from '../sdp-transform';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import { getUserMedia } from '../media/get-user-media';
 import { closeMediaStream } from '../media/close-media-stream';
 import { createRTCStats, RTCStats } from './rtc-stats';
+
+export { RTCStats };
 
 const log = debug('MN:Channel');
 const browser = getBrowser();
@@ -49,7 +51,67 @@ export interface RenegotiateOptions {
  */
 const holdMediaTypes = ['audio', 'video'];
 
-export function createChannel(config: ChannelConfigs) {
+export type ChannelOriginator = 'local' | 'remote';
+
+export interface ChannelMuteOptions {
+  audio: boolean;
+  video: boolean;
+}
+export interface ChannelHoldOptions {
+  local: boolean;
+  remote: boolean;
+}
+export interface ChannelBandwidthOptions {
+  audio?: number;
+  video?: number;
+}
+export interface ChannelConstraintsOptions {
+  audio?: MediaTrackConstraints;
+  video?: MediaTrackConstraints;
+}
+
+export interface Channel extends Events {
+  readonly status: STATUS;
+  readonly connection?: RTCPeerConnection;
+  readonly startTime?: Date;
+  readonly endTime?: Date;
+
+  isInProgress: () => boolean;
+  isEstablished: () => boolean;
+  isEnded: () => boolean;
+
+  getMute: () => ChannelMuteOptions;
+  getHold: () => ChannelHoldOptions;
+
+  connect: (options?: ConnectOptions) => Promise<void>;
+  terminate: (reason?: string) => Promise<void>;
+
+  renegotiate: (options?: RenegotiateOptions) => Promise<void>;
+
+  mute: (options?: ChannelMuteOptions) => void;
+  unmute: (options?: ChannelMuteOptions) => void;
+
+  hold: () => Promise<void>;
+  unhold: () => Promise<void>;
+
+  getRemoteStream: () => MediaStream | undefined;
+  getLocalStream: () => MediaStream | undefined;
+
+  replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
+
+  adjustBandWidth: (options: {
+    audio?: number | undefined;
+    video?: number | undefined;
+  }) => Promise<void>;
+  applyConstraints: (options: {
+    audio?: MediaTrackConstraints | undefined;
+    video?: MediaTrackConstraints | undefined;
+  }) => Promise<void>;
+
+  getStats: () => Promise<RTCStats>;
+}
+
+export function createChannel(config: ChannelConfigs): Channel {
   const {
     invite,
     confirm,
@@ -1136,5 +1198,3 @@ export function createChannel(config: ChannelConfigs) {
     getStats,
   };
 }
-
-export type Channel = ReturnType<typeof createChannel>;

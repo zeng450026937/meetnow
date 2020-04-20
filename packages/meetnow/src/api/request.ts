@@ -7,7 +7,7 @@ const log = debug('MN:Api:Request');
 
 export const { isCancel } = axios;
 
-export interface RequestResult<T extends Record<string, any> = any> {
+export interface RequestResult<T = any> {
   ret: number;
   bizCode: number;
   data: T;

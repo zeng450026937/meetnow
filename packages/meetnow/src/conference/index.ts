@@ -4,11 +4,17 @@ import { getBrowser, isMiniProgram } from '../browser';
 import { Api } from '../api';
 import { Request, RequestResult } from '../api/request';
 import { createContext } from './context';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import { createKeepAlive, KeepAlive } from './keepalive';
 import { createPolling, Polling } from './polling';
 import { ConferenceInformation } from './conference-info';
 import { createInformation, Information, User } from './information';
+import { Description } from './description';
+import { State } from './state';
+import { View } from './view';
+import { Users } from './users';
+import { RTMP } from './rtmp';
+import { Record } from './record';
 import { ConnectOptions, createMediaChannel, MediaChannel } from '../channel/media-channel';
 import { ChatChannel, createChatChannel } from '../channel/chat-channel';
 import { CONFIG } from '../config';
@@ -36,6 +42,39 @@ export interface JoinOptions {
 
 export interface ConferenceConfigs {
   api: Api;
+}
+
+export interface Conference extends Events {
+  readonly api: Api;
+
+  readonly url?: string;
+  readonly uuid?: string;
+
+  readonly userId?: string;
+  readonly user?: User;
+
+  readonly information?: Information;
+  readonly description?: Description;
+  readonly state?: State;
+  readonly view?: View;
+  readonly users?: Users;
+  readonly rtmp?: RTMP;
+  readonly record?: Record;
+
+  readonly mediaChannel?: MediaChannel;
+  readonly shareChannel?: MediaChannel;
+  readonly chatChannel?: ChatChannel;
+
+  readonly trtc?: any;
+
+  join: (options?: Partial<JoinOptions>) => Promise<Conference>;
+  leave: () => Promise<Conference>;
+  end: () => Promise<Conference>;
+
+  share: (options?: ConnectOptions) => Promise<void>;
+  setSharing: (enable?: boolean) => Promise<void>;
+
+  sendMessage: (msg: string, target?: string[]) => Promise<void>;
 }
 
 export function createConference(config: ConferenceConfigs) {
@@ -530,5 +569,3 @@ export function createConference(config: ConferenceConfigs) {
     sendMessage,
   };
 }
-
-export type Conference = ReturnType<typeof createConference>;

@@ -3,7 +3,14 @@ import { Api } from '../api';
 
 const log = debug('MN:Information:Lobby');
 
-export function createLobbyCtrl(api: Api) {
+export interface LobbyCtrl {
+  remove: (entity?: string) => Promise<void>;
+  unhold: (entity?: string) => Promise<void>;
+  hold: (entity?: string) => Promise<void>;
+  allow: (entity?: string) => Promise<void>;
+}
+
+export function createLobbyCtrl(api: Api): LobbyCtrl {
   async function remove(entity?: string) {
     log('remove()');
 

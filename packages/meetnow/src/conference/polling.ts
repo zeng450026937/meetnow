@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import debug from 'debug';
 import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
-import { createWorker } from '../utils/worker';
+import { createWorker, Worker } from '../utils/worker';
 import { ApiError } from '../api/api-error';
 import { isDef } from '../utils';
 
@@ -43,7 +43,12 @@ function computeNextTimeout(attempts: number) {
   return k * 1000;
 }
 
-export function createPolling(config: PollingConfigs) {
+export interface Polling extends Worker {
+  poll: () => Promise<void>;
+  analyze: (data: any) => void,
+}
+
+export function createPolling(config: PollingConfigs): Polling {
   const { api } = config;
   let request: Request;
   let interval: number = DEFAULT_INTERVAL;
@@ -149,5 +154,3 @@ export function createPolling(config: PollingConfigs) {
     analyze,
   };
 }
-
-export type Polling = ReturnType<typeof createPolling>;

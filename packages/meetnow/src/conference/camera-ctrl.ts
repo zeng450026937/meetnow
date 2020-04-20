@@ -24,7 +24,19 @@ export enum ActionTypes {
   FOCUSIN = 'FocusIn',
 }
 
-export function createCameraCtrl(api: Api, entity: string) {
+export interface CameraCtrl {
+  action: (type: ActionType) => Promise<void>;
+  left: () => Promise<void>;
+  right: () => Promise<void>;
+  down: () => Promise<void>;
+  up: () => Promise<void>;
+  zoomout: () => Promise<void>;
+  zoomin: () => Promise<void>;
+  focusout: () => Promise<void>;
+  focusin: () => Promise<void>;
+}
+
+export function createCameraCtrl(api: Api, entity: string): CameraCtrl {
   async function action(type: ActionType) {
     log('action()');
 
@@ -93,5 +105,3 @@ export function createCameraCtrl(api: Api, entity: string) {
     focusin,
   };
 }
-
-export type CameraCtrl = ReturnType<typeof createCameraCtrl>;

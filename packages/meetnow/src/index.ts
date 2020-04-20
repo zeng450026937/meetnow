@@ -19,6 +19,7 @@ import {
   ConnectOptions,
   createUA,
 } from './user-agent';
+import { Conference } from './conference';
 
 export {
   debug,
@@ -35,7 +36,7 @@ const log = debug('MN');
 export const version = __VERSION__;
 
 // global setup
-export function setup(config?: MeetnowConfig) {
+export function setup(config?: MeetnowConfig): void {
   setupConfig(config);
 
   if (isMiniProgram()) {
@@ -60,7 +61,7 @@ export {
   fetchControlUrl,
 };
 
-export async function connect(options: ConnectOptions) {
+export async function connect(options: ConnectOptions): Promise<Conference> {
   const ua = createUA();
   const conference = await ua.connect(options);
   return conference;

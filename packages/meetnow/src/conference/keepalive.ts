@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import debug from 'debug';
 import { Api } from '../api';
 import { isCancel, Request, RequestResult } from '../api/request';
-import { createWorker } from '../utils/worker';
+import { createWorker, Worker } from '../utils/worker';
 
 const log = debug('MN:Keepalive');
 
@@ -38,7 +38,11 @@ function computeNextTimeout(attempts: number) {
   return k * 1000;
 }
 
-export function createKeepAlive(config: KeepAliveConfigs) {
+export interface KeepAlive extends Worker {
+  keepalive: () => Promise<void>;
+}
+
+export function createKeepAlive(config: KeepAliveConfigs): KeepAlive {
   const { api } = config;
   let request: Request;
   let canceled: boolean = false;
@@ -104,5 +108,3 @@ export function createKeepAlive(config: KeepAliveConfigs) {
     keepalive,
   };
 }
-
-export type KeepAlive = ReturnType<typeof createKeepAlive>;

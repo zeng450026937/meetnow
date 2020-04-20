@@ -4,7 +4,7 @@
   "description": "Yealink Meeting via WebRTC.",
   "main": "index.js",
   "module": "dist/meetnow.esm-bundler.js",
-  "types": "interface.d.ts",
+  "types": "dist/meetnow.d.ts",
   "unpkg": "dist/meetnow.global.js",
   "files": [
     "index.js",
@@ -32,10 +32,11 @@
     "formats": [
       "esm-bundler",
       "esm-bundler-runtime",
+      "esm-browser",
+      "esm-browser-runtime",
       "cjs",
       "global",
-      "umd",
-      "esm"
+      "umd"
     ]
   }
 }

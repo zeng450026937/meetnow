@@ -1,6 +1,6 @@
 import debug from 'debug';
 import { Api } from '../api';
-import { createChannel } from './channel';
+import { Channel, createChannel } from './channel';
 import { createModifier } from './sdp-modifier';
 import { Request } from '../api/request';
 
@@ -13,7 +13,12 @@ export interface MediaChannelConfigs {
   type?: 'main' | 'slides';
 }
 
-export function createMediaChannel(config: MediaChannelConfigs) {
+export interface MediaChannel extends Channel {
+  readonly version?: number;
+  readonly callId?: string;
+}
+
+export function createMediaChannel(config: MediaChannelConfigs): MediaChannel {
   const { api, type = 'main' } = config;
   let mediaVersion: number;
   let callId: string;
@@ -172,5 +177,3 @@ export function createMediaChannel(config: MediaChannelConfigs) {
     },
   };
 }
-
-export type MediaChannel = ReturnType<typeof createMediaChannel>;

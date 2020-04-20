@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { RequestResult } from '../api/request';
 import { Authentication, createTempAuth, createUserApi } from '../auth';
-import { createConference, JoinOptions } from '../conference';
+import { Conference, createConference, JoinOptions } from '../conference';
 
 const log = debug('MN:UA');
 
@@ -21,7 +21,18 @@ export function urlToNumber(url: string) {
   return `${ number }.${ enterprise }`;
 }
 
-export function createUA(config: UAConfigs = {}) {
+export interface UA {
+  fetch: (number: string) => Promise<{
+    number: string;
+    partyId: string;
+    url: string;
+    info: object;
+  }>;
+
+  connect: (ConnectOptions) => Promise<Conference>;
+}
+
+export function createUA(config: UAConfigs = {}): UA {
   let { auth } = config;
   let api: Api | undefined;
 
@@ -158,5 +169,3 @@ export function createUA(config: UAConfigs = {}) {
     connect,
   };
 }
-
-export type UA = ReturnType<typeof createUA>;

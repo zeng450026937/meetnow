@@ -1,12 +1,19 @@
 import axios from 'axios';
+import { AxiosInstance } from 'axios';
 import { AxiosPromise } from 'axios';
 import { AxiosRequestConfig } from 'axios';
-import { AxiosResponse } from 'axios';
 import debug from 'debug';
+import { Method } from 'axios';
+
+declare type ActionType = 'PanLeft' | 'PanRight' | 'TiltDown' | 'TiltUp' | 'ZoomOut' | 'ZoomIn' | 'FocusOut' | 'FocusIn';
 
 export declare function adapter(config: AxiosRequestConfig): AxiosPromise;
 
-declare type Api = ReturnType<typeof createApi>;
+declare interface Api {
+    readonly interceptors: AxiosInstance['interceptors'];
+    request: <T extends ApiNames = ApiNames>(apiName: T) => Request<ApiDataMap[T], ApiParamsMap[T], ApiHeaderMap[T]>;
+    delegate: AxiosInstance;
+}
 
 declare interface ApiDataMap {
     [apiName: string]: any;
@@ -215,6 +222,12 @@ declare interface ApiDataMap {
     };
 }
 
+declare interface ApiHeaderMap {
+    [apiName: string]: any;
+}
+
+declare type ApiNames = keyof typeof configs;
+
 declare interface ApiParamsMap {
     [apiName: string]: any;
     'getVirtualJWT': {
@@ -224,6 +237,12 @@ declare interface ApiParamsMap {
         conferenceNo: string;
         searchNotStartedScheduledConference?: boolean;
         filterByRegionInfo?: boolean;
+    };
+}
+
+declare interface ApplicationSharer extends Partialable {
+    'user'?: ConferenceUser & {
+        'share-type': ShareType;
     };
 }
 
@@ -254,7508 +273,551 @@ export declare function bootstrap(auth: AuthInfo): Promise<{
     identities: Identity[];
 }>;
 
-export declare function connect(options: ConnectOptions): Promise<{
-    api: {
-        readonly interceptors: {
-            request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
-            response: import("axios").AxiosInterceptorManager<import("axios").AxiosResponse<any>>;
-        };
-        request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./api/request").Request<import("./api/api-configs").ApiDataMap[T], import("./api/api-configs").ApiParamsMap[T], any, any>;
-        delegate: import("axios").AxiosInstance;
-    };
-    url: string | undefined;
-    uuid: string | undefined;
-    userId: string;
-    user: {
-        data: import("./conference/conference-info").ConferenceUser;
-        get(key: string | number): any;
-        update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-        getEntity: () => string;
-        getUID: () => string;
-        getDisplayText: () => string;
-        getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-        isCurrent: () => boolean;
-        isAttendee: () => boolean;
-        isPresenter: () => boolean;
-        isCastviewer: () => boolean;
-        isOrganizer: () => boolean;
-        getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-        isOnHold: () => boolean | undefined;
-        hasFocus: () => boolean;
-        hasMedia: () => boolean;
-        hasSharing: () => boolean;
-        hasFECC: () => boolean;
-        getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-        getAudioFilter: () => {
-            ingress: "unblock" | "block" | "unblocking";
-            egress: "unblock" | "block" | "unblocking";
-        };
-        getVideoFilter: () => {
-            ingress: "unblock" | "block" | "unblocking";
-            egress: "unblock" | "block" | "unblocking";
-        };
-        isAudioBlocked: () => boolean;
-        isVideoBlocked: () => boolean;
-        isHandup: () => boolean;
-        isSharing: () => boolean | undefined;
-        isSIP: () => boolean;
-        isHTTP: () => boolean;
-        isRTMP: () => boolean;
-        setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-        setAudioFilter: (enable: boolean) => Promise<void>;
-        setVideoFilter: (enable: boolean) => Promise<void>;
-        setDisplayText: (displayText: string) => Promise<void>;
-        setRole: (role: "attendee" | "presenter") => Promise<void>;
-        setFocus: (enable?: boolean) => Promise<void>;
-        getStats: () => Promise<void>;
-        kick: () => Promise<void>;
-        hold: () => Promise<void>;
-        unhold: () => Promise<void>;
-        allow: () => Promise<void>;
-        accept: () => Promise<void>;
-        reject: () => Promise<void>;
-        sendMessage: (msg: string) => Promise<void>;
-        camera: {
-            action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-            left: () => Promise<void>;
-            right: () => Promise<void>;
-            down: () => Promise<void>;
-            up: () => Promise<void>;
-            zoomout: () => Promise<void>;
-            zoomin: () => Promise<void>;
-            focusout: () => Promise<void>;
-            focusin: () => Promise<void>;
-        };
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    information: {
-        data: import("./conference/conference-info").ConferenceInformation;
-        version: number;
-        get(key: string | number): any;
-        description: {
-            data: import("./conference/conference-info").ConferenceDescription;
-            subject: string;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceDescription | undefined) => void;
-            getLock: () => import("./conference/description").LockOptions;
-            setLock: (options: import("./conference/description").LockOptions) => Promise<void>;
-            lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
-            unlock: () => Promise<void>;
-            isLocked: () => boolean;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        state: {
-            data: import("./conference/conference-info").ConferenceState;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceState | undefined) => void;
-            getSharingUserEntity: () => string;
-            getSpeechUserEntity: () => string | undefined;
-            getSharingType: () => "applicationsharing" | "coopshare";
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        view: {
-            update: (diff?: import("./conference/conference-info").ConferenceView | undefined) => void;
-            getVideoView: () => import("./conference/conference-info").EntityView | undefined;
-            getLayout: () => import("./conference/conference-info").EntityState | undefined;
-            getFocusUserEntity: () => string;
-            getDanmaku: () => import("./conference/conference-info").EntityViewTitle | undefined;
-            setDanmaku: (config: Partial<import("./conference/danmaku-ctrl").DanmakuConfigs>) => Promise<void>;
-            sendDanmaku: (msg: string, options?: Partial<import("./conference/danmaku-ctrl").DanmakuOptions> | undefined) => Promise<void>;
-            setLayout: (options: import("./api/api-configs").CtrlApiData & {
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus': number;
-                'speech-excitation-video-round-enabled'?: boolean | undefined;
-                'speech-excitation-video-round-number'?: number | undefined;
-                'speech-excitation-video-round-interval'?: number | undefined;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-            }) => Promise<void>;
-            setCustomizeLayout: (options: import("./api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setPresenterLayout: (options: import("./api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setAttendeeLayout: (options: import("./api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setCastViewerLayout: (options: import("./api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setOSD: (options?: {
-                name: boolean;
-                icon: boolean;
-            }) => Promise<void>;
-            setSpeakMode: (mode: "free" | "hand-up") => Promise<void>;
-            data: import("./conference/conference-info").ConferenceView;
-            get(key: string | number): any;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        users: {
-            update: (diff?: import("./conference/conference-info").ConferenceUsers | undefined) => void;
-            getUserList: (filter?: ((user?: {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined) => boolean) | undefined) => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getUser: (entity: string) => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined;
-            hasUser: (entity: string) => boolean;
-            getCurrent: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined;
-            getAttendee: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getPresenter: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getCastviewer: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getOrganizer: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getOnhold: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getHandup: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getSharing: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getAudioBlocked: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getVideoBlocked: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getSIP: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getHTTP: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getRTMP: () => {
-                data: import("./conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            invite: (option: Partial<import("./conference/users").InviteOptions>) => Promise<void>;
-            kick: (entity: string) => Promise<void>;
-            mute: () => Promise<void>;
-            unmute: () => Promise<void>;
-            remove: (entity?: string | undefined) => Promise<void>;
-            unhold: (entity?: string | undefined) => Promise<void>;
-            hold: (entity?: string | undefined) => Promise<void>;
-            allow: (entity?: string | undefined) => Promise<void>;
-            data: import("./conference/conference-info").ConferenceUsers;
-            get(key: string | number): any;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        rtmp: {
-            operation: (type: import("./conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-            start: () => Promise<void>;
-            stop: () => Promise<void>;
-            pause: () => Promise<void>;
-            resume: () => Promise<void>;
-            data: import("./conference/conference-info").ConferenceRTMPUsers;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceRTMPUsers | undefined) => void;
-            getEnable: () => boolean;
-            getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
-            getReason: (entity?: string | undefined) => import("./conference/conference-info").StateReason | undefined;
-            getDetail: (entity?: string | undefined) => {
-                reason: import("./conference/conference-info").StateReason;
-                status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                lastStartTime: number;
-                lastStopDuration: number;
-            } | undefined;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        record: {
-            operation: (type: import("./conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-            start: () => Promise<void>;
-            stop: () => Promise<void>;
-            pause: () => Promise<void>;
-            resume: () => Promise<void>;
-            data: import("./conference/conference-info").ConferenceRecordUsers;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceRecordUsers | undefined) => void;
-            getStatus: () => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-            getReason: () => import("./conference/conference-info").StateReason;
-            getDetail: () => {
-                reason: import("./conference/conference-info").StateReason;
-                status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                lastStartTime: number;
-                lastStopDuration: number;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        };
-        update: (val: import("./conference/conference-info").ConferenceInformation) => void;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    description: {
-        data: import("./conference/conference-info").ConferenceDescription;
-        subject: string;
-        get(key: string | number): any;
-        update: (diff?: import("./conference/conference-info").ConferenceDescription | undefined) => void;
-        getLock: () => import("./conference/description").LockOptions;
-        setLock: (options: import("./conference/description").LockOptions) => Promise<void>;
-        lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
-        unlock: () => Promise<void>;
-        isLocked: () => boolean;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    state: {
-        data: import("./conference/conference-info").ConferenceState;
-        get(key: string | number): any;
-        update: (diff?: import("./conference/conference-info").ConferenceState | undefined) => void;
-        getSharingUserEntity: () => string;
-        getSpeechUserEntity: () => string | undefined;
-        getSharingType: () => "applicationsharing" | "coopshare";
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    view: {
-        update: (diff?: import("./conference/conference-info").ConferenceView | undefined) => void;
-        getVideoView: () => import("./conference/conference-info").EntityView | undefined;
-        getLayout: () => import("./conference/conference-info").EntityState | undefined;
-        getFocusUserEntity: () => string;
-        getDanmaku: () => import("./conference/conference-info").EntityViewTitle | undefined;
-        setDanmaku: (config: Partial<import("./conference/danmaku-ctrl").DanmakuConfigs>) => Promise<void>;
-        sendDanmaku: (msg: string, options?: Partial<import("./conference/danmaku-ctrl").DanmakuOptions> | undefined) => Promise<void>;
-        setLayout: (options: import("./api/api-configs").CtrlApiData & {
-            'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-            'speech-excitation-video-big-view'?: number | undefined;
-            'speech-excitation-video-max-view'?: number | undefined;
-            'equality-video-max-view'?: number | undefined;
-            'ext-video-as-focus': number;
-            'speech-excitation-video-round-enabled'?: boolean | undefined;
-            'speech-excitation-video-round-number'?: number | undefined;
-            'speech-excitation-video-round-interval'?: number | undefined;
-            'equality-video-round-enabled'?: boolean | undefined;
-            'equality-video-round-number'?: number | undefined;
-            'equality-video-round-interval'?: number | undefined;
-        }) => Promise<void>;
-        setCustomizeLayout: (options: import("./api/api-configs").CtrlApiData & {
-            'enable'?: boolean | undefined;
-            'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-            'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-            'speech-excitation-video-big-view'?: number | undefined;
-            'speech-excitation-video-max-view'?: number | undefined;
-            'equality-video-max-view'?: number | undefined;
-            'ext-video-as-focus'?: number | undefined;
-            'speech-excitation-video-round-enabled': boolean;
-            'speech-excitation-video-round-number': number;
-            'speech-excitation-video-round-interval': number;
-            'equality-video-round-enabled'?: boolean | undefined;
-            'equality-video-round-number'?: number | undefined;
-            'equality-video-round-interval'?: number | undefined;
-            'applied-to-attendee': boolean;
-            'applied-to-cast-viewer': boolean;
-            'selected-user-entity'?: string[] | undefined;
-            'pos'?: number | undefined;
-            'entity'?: string | undefined;
-        }) => Promise<void>;
-        setPresenterLayout: (options: import("./api/api-configs").CtrlApiData & {
-            'enable'?: boolean | undefined;
-            'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-            'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-            'speech-excitation-video-big-view'?: number | undefined;
-            'speech-excitation-video-max-view'?: number | undefined;
-            'equality-video-max-view'?: number | undefined;
-            'ext-video-as-focus'?: number | undefined;
-            'speech-excitation-video-round-enabled': boolean;
-            'speech-excitation-video-round-number': number;
-            'speech-excitation-video-round-interval': number;
-            'equality-video-round-enabled'?: boolean | undefined;
-            'equality-video-round-number'?: number | undefined;
-            'equality-video-round-interval'?: number | undefined;
-            'applied-to-attendee': boolean;
-            'applied-to-cast-viewer': boolean;
-            'selected-user-entity'?: string[] | undefined;
-            'pos'?: number | undefined;
-            'entity'?: string | undefined;
-        }) => Promise<void>;
-        setAttendeeLayout: (options: import("./api/api-configs").CtrlApiData & {
-            'enable'?: boolean | undefined;
-            'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-            'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-            'speech-excitation-video-big-view'?: number | undefined;
-            'speech-excitation-video-max-view'?: number | undefined;
-            'equality-video-max-view'?: number | undefined;
-            'ext-video-as-focus'?: number | undefined;
-            'speech-excitation-video-round-enabled': boolean;
-            'speech-excitation-video-round-number': number;
-            'speech-excitation-video-round-interval': number;
-            'equality-video-round-enabled'?: boolean | undefined;
-            'equality-video-round-number'?: number | undefined;
-            'equality-video-round-interval'?: number | undefined;
-            'applied-to-attendee': boolean;
-            'applied-to-cast-viewer': boolean;
-            'selected-user-entity'?: string[] | undefined;
-            'pos'?: number | undefined;
-            'entity'?: string | undefined;
-        }) => Promise<void>;
-        setCastViewerLayout: (options: import("./api/api-configs").CtrlApiData & {
-            'enable'?: boolean | undefined;
-            'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-            'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-            'speech-excitation-video-big-view'?: number | undefined;
-            'speech-excitation-video-max-view'?: number | undefined;
-            'equality-video-max-view'?: number | undefined;
-            'ext-video-as-focus'?: number | undefined;
-            'speech-excitation-video-round-enabled': boolean;
-            'speech-excitation-video-round-number': number;
-            'speech-excitation-video-round-interval': number;
-            'equality-video-round-enabled'?: boolean | undefined;
-            'equality-video-round-number'?: number | undefined;
-            'equality-video-round-interval'?: number | undefined;
-            'applied-to-attendee': boolean;
-            'applied-to-cast-viewer': boolean;
-            'selected-user-entity'?: string[] | undefined;
-            'pos'?: number | undefined;
-            'entity'?: string | undefined;
-        }) => Promise<void>;
-        setOSD: (options?: {
-            name: boolean;
-            icon: boolean;
-        }) => Promise<void>;
-        setSpeakMode: (mode: "free" | "hand-up") => Promise<void>;
-        data: import("./conference/conference-info").ConferenceView;
-        get(key: string | number): any;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    users: {
-        update: (diff?: import("./conference/conference-info").ConferenceUsers | undefined) => void;
-        getUserList: (filter?: ((user?: {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined) => boolean) | undefined) => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getUser: (entity: string) => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        hasUser: (entity: string) => boolean;
-        getCurrent: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        getAttendee: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getPresenter: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getCastviewer: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getOrganizer: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getOnhold: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getHandup: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getSharing: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getAudioBlocked: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getVideoBlocked: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getSIP: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getHTTP: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        getRTMP: () => {
-            data: import("./conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("./conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("./conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("./conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("./conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("./conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        }[];
-        invite: (option: Partial<import("./conference/users").InviteOptions>) => Promise<void>;
-        kick: (entity: string) => Promise<void>;
-        mute: () => Promise<void>;
-        unmute: () => Promise<void>;
-        remove: (entity?: string | undefined) => Promise<void>;
-        unhold: (entity?: string | undefined) => Promise<void>;
-        hold: (entity?: string | undefined) => Promise<void>;
-        allow: (entity?: string | undefined) => Promise<void>;
-        data: import("./conference/conference-info").ConferenceUsers;
-        get(key: string | number): any;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    rtmp: {
-        operation: (type: import("./conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-        start: () => Promise<void>;
-        stop: () => Promise<void>;
-        pause: () => Promise<void>;
-        resume: () => Promise<void>;
-        data: import("./conference/conference-info").ConferenceRTMPUsers;
-        get(key: string | number): any;
-        update: (diff?: import("./conference/conference-info").ConferenceRTMPUsers | undefined) => void;
-        getEnable: () => boolean;
-        getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
-        getReason: (entity?: string | undefined) => import("./conference/conference-info").StateReason | undefined;
-        getDetail: (entity?: string | undefined) => {
-            reason: import("./conference/conference-info").StateReason;
-            status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-            lastStartTime: number;
-            lastStopDuration: number;
-        } | undefined;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    record: {
-        operation: (type: import("./conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-        start: () => Promise<void>;
-        stop: () => Promise<void>;
-        pause: () => Promise<void>;
-        resume: () => Promise<void>;
-        data: import("./conference/conference-info").ConferenceRecordUsers;
-        get(key: string | number): any;
-        update: (diff?: import("./conference/conference-info").ConferenceRecordUsers | undefined) => void;
-        getStatus: () => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-        getReason: () => import("./conference/conference-info").StateReason;
-        getDetail: () => {
-            reason: import("./conference/conference-info").StateReason;
-            status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-            lastStartTime: number;
-            lastStopDuration: number;
-        };
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    mediaChannel: {
-        status: import("./channel").STATUS;
-        connection: RTCPeerConnection | undefined;
-        startTime: Date | undefined;
-        endTime: Date | undefined;
-        version: number;
-        callId: string;
-        isInProgress: () => boolean;
-        isEstablished: () => boolean;
-        isEnded: () => boolean;
-        getMute: () => {
-            audio: boolean;
-            video: boolean;
-        };
-        getHold: () => {
-            local: boolean;
-            remote: boolean;
-        };
-        connect: (options?: import("./channel").ConnectOptions) => Promise<void>;
-        terminate: (reason?: string | undefined) => Promise<void>;
-        renegotiate: (options?: import("./channel").RenegotiateOptions) => Promise<void>;
-        mute: (options?: {
-            audio: boolean;
-            video: boolean;
-        }) => void;
-        unmute: (options?: {
-            audio: boolean;
-            video: boolean;
-        }) => void;
-        hold: () => Promise<void>;
-        unhold: () => Promise<void>;
-        getRemoteStream: () => MediaStream | undefined;
-        getLocalStream: () => MediaStream | undefined;
-        replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
-        adjustBandWidth: (options: {
-            audio?: number | undefined;
-            video?: number | undefined;
-        }) => Promise<void>;
-        applyConstraints: (options: {
-            audio?: MediaTrackConstraints | undefined;
-            video?: MediaTrackConstraints | undefined;
-        }) => Promise<void>;
-        getStats: () => Promise<{
-            readonly quality: number;
-            readonly inbound: import("./channel/rtc-stats").ParsedStats;
-            readonly outbound: import("./channel/rtc-stats").ParsedStats;
-            update: (report: RTCStatsReport) => void;
-            clear: () => void;
-        }>;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    shareChannel: {
-        status: import("./channel").STATUS;
-        connection: RTCPeerConnection | undefined;
-        startTime: Date | undefined;
-        endTime: Date | undefined;
-        version: number;
-        callId: string;
-        isInProgress: () => boolean;
-        isEstablished: () => boolean;
-        isEnded: () => boolean;
-        getMute: () => {
-            audio: boolean;
-            video: boolean;
-        };
-        getHold: () => {
-            local: boolean;
-            remote: boolean;
-        };
-        connect: (options?: import("./channel").ConnectOptions) => Promise<void>;
-        terminate: (reason?: string | undefined) => Promise<void>;
-        renegotiate: (options?: import("./channel").RenegotiateOptions) => Promise<void>;
-        mute: (options?: {
-            audio: boolean;
-            video: boolean;
-        }) => void;
-        unmute: (options?: {
-            audio: boolean;
-            video: boolean;
-        }) => void;
-        hold: () => Promise<void>;
-        unhold: () => Promise<void>;
-        getRemoteStream: () => MediaStream | undefined;
-        getLocalStream: () => MediaStream | undefined;
-        replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
-        adjustBandWidth: (options: {
-            audio?: number | undefined;
-            video?: number | undefined;
-        }) => Promise<void>;
-        applyConstraints: (options: {
-            audio?: MediaTrackConstraints | undefined;
-            video?: MediaTrackConstraints | undefined;
-        }) => Promise<void>;
-        getStats: () => Promise<{
-            readonly quality: number;
-            readonly inbound: import("./channel/rtc-stats").ParsedStats;
-            readonly outbound: import("./channel/rtc-stats").ParsedStats;
-            update: (report: RTCStatsReport) => void;
-            clear: () => void;
-        }>;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    chatChannel: {
-        ready: boolean;
-        connect: (count?: number) => Promise<void>;
-        terminate: () => Promise<void>;
-        sendMessage: (msg: string, target?: string[] | undefined) => Promise<{
-            readonly status: import("./channel/message").MessageStatus;
-            readonly direction: import("./channel/message").MessageDirection;
-            readonly content: string | undefined;
-            readonly timestamp: number | undefined;
-            readonly version: number | undefined;
-            readonly sender: import("./channel/message").MessageSender | undefined;
-            readonly receiver: string[] | undefined;
-            readonly private: boolean;
-            send: (message: string, target?: string[] | undefined) => Promise<void>;
-            retry: () => Promise<void>;
-            cancel: () => void;
-            incoming: (data: import("./channel/message").MessageData) => any;
-        }>;
-        incoming: (data: import("./channel/message").MessageData) => {
-            readonly status: import("./channel/message").MessageStatus;
-            readonly direction: import("./channel/message").MessageDirection;
-            readonly content: string | undefined;
-            readonly timestamp: number | undefined;
-            readonly version: number | undefined;
-            readonly sender: import("./channel/message").MessageSender | undefined;
-            readonly receiver: string[] | undefined;
-            readonly private: boolean;
-            send: (message: string, target?: string[] | undefined) => Promise<void>;
-            retry: () => Promise<void>;
-            cancel: () => void;
-            incoming: (data: import("./channel/message").MessageData) => any;
-        };
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    } | undefined;
-    trtc: object;
-    join: (options?: Partial<import("./conference").JoinOptions>) => Promise<any>;
-    leave: () => Promise<any>;
-    end: () => Promise<any>;
-    share: (options?: import("./channel").ConnectOptions | undefined) => Promise<void>;
+declare interface CameraCtrl {
+    action: (type: ActionType) => Promise<void>;
+    left: () => Promise<void>;
+    right: () => Promise<void>;
+    down: () => Promise<void>;
+    up: () => Promise<void>;
+    zoomout: () => Promise<void>;
+    zoomin: () => Promise<void>;
+    focusout: () => Promise<void>;
+    focusin: () => Promise<void>;
+}
+
+declare interface Channel extends Events {
+    readonly status: STATUS;
+    readonly connection?: RTCPeerConnection;
+    readonly startTime?: Date;
+    readonly endTime?: Date;
+    isInProgress: () => boolean;
+    isEstablished: () => boolean;
+    isEnded: () => boolean;
+    getMute: () => ChannelMuteOptions;
+    getHold: () => ChannelHoldOptions;
+    connect: (options?: ConnectOptions_2) => Promise<void>;
+    terminate: (reason?: string) => Promise<void>;
+    renegotiate: (options?: RenegotiateOptions) => Promise<void>;
+    mute: (options?: ChannelMuteOptions) => void;
+    unmute: (options?: ChannelMuteOptions) => void;
+    hold: () => Promise<void>;
+    unhold: () => Promise<void>;
+    getRemoteStream: () => MediaStream | undefined;
+    getLocalStream: () => MediaStream | undefined;
+    replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
+    adjustBandWidth: (options: {
+        audio?: number | undefined;
+        video?: number | undefined;
+    }) => Promise<void>;
+    applyConstraints: (options: {
+        audio?: MediaTrackConstraints | undefined;
+        video?: MediaTrackConstraints | undefined;
+    }) => Promise<void>;
+    getStats: () => Promise<RTCStats>;
+}
+
+declare interface ChannelHoldOptions {
+    local: boolean;
+    remote: boolean;
+}
+
+declare interface ChannelMuteOptions {
+    audio: boolean;
+    video: boolean;
+}
+
+declare interface ChatChannel extends Events {
+    ready: boolean;
+    connect: (count?: number) => Promise<void>;
+    terminate: () => Promise<void>;
+    sendMessage: (msg: string, target?: string[]) => Promise<Message>;
+    incoming: (data: MessageData) => Message;
+}
+
+declare interface ConfereceUri {
+    'entity': 'focus' | 'audio-video' | 'applicationsharing';
+    'uri': string;
+    'display-text': string;
+    'purpose': string;
+}
+
+declare interface ConfereceUris {
+    'entry': ConfereceUri[];
+}
+
+declare interface Conference extends Events {
+    readonly api: Api;
+    readonly url?: string;
+    readonly uuid?: string;
+    readonly userId?: string;
+    readonly user?: User;
+    readonly information?: Information;
+    readonly description?: Description;
+    readonly state?: State;
+    readonly view?: View;
+    readonly users?: Users;
+    readonly rtmp?: RTMP;
+    readonly record?: Record;
+    readonly mediaChannel?: MediaChannel;
+    readonly shareChannel?: MediaChannel;
+    readonly chatChannel?: ChatChannel;
+    readonly trtc?: any;
+    join: (options?: Partial<JoinOptions>) => Promise<Conference>;
+    leave: () => Promise<Conference>;
+    end: () => Promise<Conference>;
+    share: (options?: ConnectOptions_2) => Promise<void>;
     setSharing: (enable?: boolean) => Promise<void>;
-    sendMessage: (msg: string, target?: string[] | undefined) => Promise<void>;
-    on(event: string | string[], fn: Function): {
-        on(event: string | string[], fn: Function): any;
-        off(event: string | string[], fn?: Function | undefined): any;
-        once(event: string | string[], fn: Function): any;
-        emit(event: string, ...args: any[]): any;
+    sendMessage: (msg: string, target?: string[]) => Promise<void>;
+}
+
+declare interface ConferenceDescription extends Partialable {
+    'subject': string;
+    'start-time': string;
+    'start-time-unix': number;
+    'profile': 'conference' | string;
+    'record-id': string;
+    'conf-uris': ConfereceUris;
+    'conf-info-url': string;
+    'organizer': Organizer;
+    'conference-id': string;
+    'conference-number': string;
+    'enable-svc': boolean;
+    'enterprise-id': string;
+    'enterprise-number': string;
+    'conference-long-no': string;
+    'conference-type': 'vmr' | string;
+    'is-recurrence': boolean;
+    'book-start-time': string;
+    'book-expiry-time': string;
+    'presenter-pin': string;
+    'attendee-pin': string;
+    'maximum-user-count': string;
+    'admission-policy': 'anonymous' | 'closedAuthenticated' | 'openAuthenticated';
+    'lobby-capable': boolean;
+    'attendee-by-pass': boolean;
+    'interactive-broadcast-enabled': boolean;
+    'video-enabled': boolean;
+    'ipcall-enabled': boolean;
+    'webrtc-enabled': boolean;
+}
+
+declare interface ConferenceInformation extends Partialable {
+    'conference-description'?: ConferenceDescription;
+    'conference-state'?: ConferenceState;
+    'conference-view'?: ConferenceView;
+    'entity': string;
+    'plan-id': string;
+    'record-id': string;
+    'record-users'?: ConferenceRecordUsers;
+    'rtmp-state'?: ConferenceRTMPUsers;
+    'users'?: ConferenceUsers;
+    'version': number;
+}
+
+declare interface ConferenceLayout {
+    'enable': boolean;
+    'broadcast-id': number;
+    'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
+    'speech-excitation-video-big-view': number;
+    'speech-excitation-video-max-view': number;
+    'speech-excitation-video-round-enabled': boolean;
+    'speech-excitation-video-round-number': number;
+    'speech-excitation-video-round-interval': number;
+    'equality-video-max-view': number;
+    'equality-video-round-enabled': boolean;
+    'equality-video-round-number': number;
+    'equality-video-round-interval': number;
+    'applied-to-attendee': boolean;
+    'applied-to-cast-viewer': boolean;
+    'selected-user-entity': string[];
+    'appoint-users': string[];
+}
+
+declare interface ConferenceRecordUser extends Partialable {
+    'entity': string;
+    'default': boolean;
+    'reason': StateReason;
+    'record-status': 'stop' | 'stopping' | 'pause' | 'pausing' | 'start' | 'starting' | 'resuming';
+    'record-last-stop-duration': number;
+    'record-last-start-time': number;
+}
+
+declare interface ConferenceRecordUsers extends Partialable {
+    'user': ConferenceRecordUser;
+}
+
+declare interface ConferenceRTMPUser extends Partialable {
+    'entity': string;
+    'default': boolean;
+    'reason': StateReason;
+    'rtmp-status': 'stop' | 'stopping' | 'pause' | 'pausing' | 'start' | 'starting' | 'resuming';
+    'rtmp-last-stop-duration': number;
+    'rtmp-last-start-time': number;
+}
+
+declare interface ConferenceRTMPUsers extends Partialable {
+    'rtmp-enable': boolean;
+    'users': ConferenceRTMPUser[];
+}
+
+declare interface ConferenceState extends Partialable {
+    'active': boolean;
+    'locked': boolean;
+    'applicationsharer': ApplicationSharer;
+    'speech-user-entity'?: string;
+    'coopshare-state'?: string | 'coopshare';
+}
+
+declare interface ConferenceUser extends Partialable {
+    'entity': string;
+    'answer-time-unix': number;
+    'display-text': string;
+    'display-number': string;
+    'display-text-pinyin-for-search': string;
+    'group-id'?: string;
+    'group-name'?: string;
+    'group-name-pinyin-for-search'?: string;
+    'subject-id': string;
+    'protocol': string | 'HTTP' | 'SIP';
+    'request-uri': string;
+    'user-agent': string;
+    'roles': UserRole;
+    'endpoint': UserEndpoint[];
+    'support-fecc': boolean;
+    'ip'?: string;
+    'reason'?: StateReason;
+}
+
+declare interface ConferenceUsers extends Partialable {
+    'broadcast-user-count'?: number;
+    'user': ConferenceUser[];
+}
+
+declare interface ConferenceView extends Partialable {
+    'entity-view': EntityView[];
+}
+
+declare const configs: {
+    getVirtualJWT: {
+        method: Method;
+        url: string;
     };
-    off(event: string | string[], fn?: Function | undefined): {
-        on(event: string | string[], fn: Function): any;
-        off(event: string | string[], fn?: Function | undefined): any;
-        once(event: string | string[], fn: Function): any;
-        emit(event: string, ...args: any[]): any;
+    login: {
+        method: Method;
+        url: string;
     };
-    once(event: string | string[], fn: Function): {
-        on(event: string | string[], fn: Function): any;
-        off(event: string | string[], fn?: Function | undefined): any;
-        once(event: string | string[], fn: Function): any;
-        emit(event: string, ...args: any[]): any;
+    selectAccount: {
+        method: Method;
+        url: string;
     };
-    emit(event: string, ...args: any[]): {
-        on(event: string | string[], fn: Function): any;
-        off(event: string | string[], fn?: Function | undefined): any;
-        once(event: string | string[], fn: Function): any;
-        emit(event: string, ...args: any[]): any;
+    logout: {
+        method: Method;
+        url: string;
     };
-}>;
+    refreshToken: {
+        method: Method;
+        url: string;
+    };
+    sendMobileLoginVerifyCode: {
+        method: Method;
+        url: string;
+    };
+    getConferenceInfo: {
+        method: Method;
+        url: string;
+    };
+    getURL: {
+        method: Method;
+        url: string;
+    };
+    getFullInfo: {
+        method: Method;
+        url: string;
+    };
+    getBasicInfo: {
+        method: Method;
+        url: string;
+    };
+    getBasicInfoOffline: {
+        method: Method;
+        url: string;
+    };
+    getStats: {
+        method: Method;
+        url: string;
+    };
+    polling: {
+        method: Method;
+        url: string;
+    };
+    keepalive: {
+        method: Method;
+        url: string;
+    };
+    joinFocus: {
+        method: Method;
+        url: string;
+    };
+    joinWechat: {
+        method: Method;
+        url: string;
+    };
+    joinMedia: {
+        method: Method;
+        url: string;
+    };
+    renegMedia: {
+        method: Method;
+        url: string;
+    };
+    joinShare: {
+        method: Method;
+        url: string;
+    };
+    leaveShare: {
+        method: Method;
+        url: string;
+    };
+    switchShare: {
+        method: Method;
+        url: string;
+    };
+    renegShare: {
+        method: Method;
+        url: string;
+    };
+    pushMessage: {
+        method: Method;
+        url: string;
+    };
+    pullMessage: {
+        method: Method;
+        url: string;
+    };
+    muteAll: {
+        method: Method;
+        url: string;
+    };
+    unmuteAll: {
+        method: Method;
+        url: string;
+    };
+    acceptLobbyUser: {
+        method: Method;
+        url: string;
+    };
+    acceptLobbyUserAll: {
+        method: Method;
+        url: string;
+    };
+    rejectLobbyUserAll: {
+        method: Method;
+        url: string;
+    };
+    waitLobbyUser: {
+        method: Method;
+        url: string;
+    };
+    waitLobbyUserAll: {
+        method: Method;
+        url: string;
+    };
+    rejectHandupAll: {
+        method: Method;
+        url: string;
+    };
+    deleteUser: {
+        method: Method;
+        url: string;
+    };
+    setUserMedia: {
+        method: Method;
+        url: string;
+    };
+    setUserRole: {
+        method: Method;
+        url: string;
+    };
+    setUserDisplayText: {
+        method: Method;
+        url: string;
+    };
+    holdUser: {
+        method: Method;
+        url: string;
+    };
+    inviteUser: {
+        method: Method;
+        url: string;
+    };
+    setFocusVideo: {
+        method: Method;
+        url: string;
+    };
+    setSpeakMode: {
+        method: Method;
+        url: string;
+    };
+    setFreeLayout: {
+        method: Method;
+        url: string;
+    };
+    setCustomizeLayout: {
+        method: Method;
+        url: string;
+    };
+    setGlobalLayout: {
+        method: Method;
+        url: string;
+    };
+    setFecc: {
+        method: Method;
+        url: string;
+    };
+    setTitle: {
+        method: Method;
+        url: string;
+    };
+    sendTitle: {
+        method: Method;
+        url: string;
+    };
+    setRecord: {
+        method: Method;
+        url: string;
+    };
+    setRTMP: {
+        method: Method;
+        url: string;
+    };
+    setLock: {
+        method: Method;
+        url: string;
+    };
+    leave: {
+        method: Method;
+        url: string;
+    };
+    end: {
+        method: Method;
+        url: string;
+    };
+};
+
+export declare function connect(options: ConnectOptions): Promise<Conference>;
 
 declare interface ConnectOptions extends JoinOptions {
 }
 
-declare function createApi(config?: AxiosRequestConfig): {
-    readonly interceptors: {
-        request: import("axios").AxiosInterceptorManager<AxiosRequestConfig>;
-        response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
-    };
-    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("./request").Request<ApiDataMap[T], ApiParamsMap[T], any, any>;
-    delegate: import("axios").AxiosInstance;
-};
+declare interface ConnectOptions_2 {
+    rtcConstraints?: RTCConfiguration;
+    rtcOfferConstraints?: RTCOfferOptions;
+    mediaStream?: MediaStream;
+    mediaConstraints?: MediaStreamConstraints;
+}
 
-export declare function createUA(config?: UAConfigs): {
-    fetch: (number: string) => Promise<{
-        partyId: string;
-        number: string;
-        url: string;
-        info: any;
-    }>;
-    connect: (options: ConnectOptions) => Promise<{
-        api: {
-            readonly interceptors: {
-                request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
-                response: import("axios").AxiosInterceptorManager<AxiosResponse<any>>;
-            };
-            request: <T extends "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getURL" | "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("../api/request").Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any, any>;
-            delegate: import("axios").AxiosInstance;
-        };
-        url: string | undefined;
-        uuid: string | undefined;
-        userId: string;
-        user: {
-            data: import("../conference/conference-info").ConferenceUser;
-            get(key: string | number): any;
-            update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-            getEntity: () => string;
-            getUID: () => string;
-            getDisplayText: () => string;
-            getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-            isCurrent: () => boolean;
-            isAttendee: () => boolean;
-            isPresenter: () => boolean;
-            isCastviewer: () => boolean;
-            isOrganizer: () => boolean;
-            getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-            isOnHold: () => boolean | undefined;
-            hasFocus: () => boolean;
-            hasMedia: () => boolean;
-            hasSharing: () => boolean;
-            hasFECC: () => boolean;
-            getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-            getAudioFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            getVideoFilter: () => {
-                ingress: "unblock" | "block" | "unblocking";
-                egress: "unblock" | "block" | "unblocking";
-            };
-            isAudioBlocked: () => boolean;
-            isVideoBlocked: () => boolean;
-            isHandup: () => boolean;
-            isSharing: () => boolean | undefined;
-            isSIP: () => boolean;
-            isHTTP: () => boolean;
-            isRTMP: () => boolean;
-            setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-            setAudioFilter: (enable: boolean) => Promise<void>;
-            setVideoFilter: (enable: boolean) => Promise<void>;
-            setDisplayText: (displayText: string) => Promise<void>;
-            setRole: (role: "attendee" | "presenter") => Promise<void>;
-            setFocus: (enable?: boolean) => Promise<void>;
-            getStats: () => Promise<void>;
-            kick: () => Promise<void>;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            allow: () => Promise<void>;
-            accept: () => Promise<void>;
-            reject: () => Promise<void>;
-            sendMessage: (msg: string) => Promise<void>;
-            camera: {
-                action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                left: () => Promise<void>;
-                right: () => Promise<void>;
-                down: () => Promise<void>;
-                up: () => Promise<void>;
-                zoomout: () => Promise<void>;
-                zoomin: () => Promise<void>;
-                focusout: () => Promise<void>;
-                focusin: () => Promise<void>;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        information: {
-            data: import("../conference/conference-info").ConferenceInformation;
-            version: number;
-            get(key: string | number): any;
-            description: {
-                data: import("../conference/conference-info").ConferenceDescription;
-                subject: string;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceDescription | undefined) => void;
-                getLock: () => import("../conference/description").LockOptions;
-                setLock: (options: import("../conference/description").LockOptions) => Promise<void>;
-                lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
-                unlock: () => Promise<void>;
-                isLocked: () => boolean;
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            state: {
-                data: import("../conference/conference-info").ConferenceState;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceState | undefined) => void;
-                getSharingUserEntity: () => string;
-                getSpeechUserEntity: () => string | undefined;
-                getSharingType: () => "applicationsharing" | "coopshare";
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            view: {
-                update: (diff?: import("../conference/conference-info").ConferenceView | undefined) => void;
-                getVideoView: () => import("../conference/conference-info").EntityView | undefined;
-                getLayout: () => import("../conference/conference-info").EntityState | undefined;
-                getFocusUserEntity: () => string;
-                getDanmaku: () => import("../conference/conference-info").EntityViewTitle | undefined;
-                setDanmaku: (config: Partial<import("../conference/danmaku-ctrl").DanmakuConfigs>) => Promise<void>;
-                sendDanmaku: (msg: string, options?: Partial<import("../conference/danmaku-ctrl").DanmakuOptions> | undefined) => Promise<void>;
-                setLayout: (options: import("../api/api-configs").CtrlApiData & {
-                    'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                    'speech-excitation-video-big-view'?: number | undefined;
-                    'speech-excitation-video-max-view'?: number | undefined;
-                    'equality-video-max-view'?: number | undefined;
-                    'ext-video-as-focus': number;
-                    'speech-excitation-video-round-enabled'?: boolean | undefined;
-                    'speech-excitation-video-round-number'?: number | undefined;
-                    'speech-excitation-video-round-interval'?: number | undefined;
-                    'equality-video-round-enabled'?: boolean | undefined;
-                    'equality-video-round-number'?: number | undefined;
-                    'equality-video-round-interval'?: number | undefined;
-                }) => Promise<void>;
-                setCustomizeLayout: (options: import("../api/api-configs").CtrlApiData & {
-                    'enable'?: boolean | undefined;
-                    'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                    'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                    'speech-excitation-video-big-view'?: number | undefined;
-                    'speech-excitation-video-max-view'?: number | undefined;
-                    'equality-video-max-view'?: number | undefined;
-                    'ext-video-as-focus'?: number | undefined;
-                    'speech-excitation-video-round-enabled': boolean;
-                    'speech-excitation-video-round-number': number;
-                    'speech-excitation-video-round-interval': number;
-                    'equality-video-round-enabled'?: boolean | undefined;
-                    'equality-video-round-number'?: number | undefined;
-                    'equality-video-round-interval'?: number | undefined;
-                    'applied-to-attendee': boolean;
-                    'applied-to-cast-viewer': boolean;
-                    'selected-user-entity'?: string[] | undefined;
-                    'pos'?: number | undefined;
-                    'entity'?: string | undefined;
-                }) => Promise<void>;
-                setPresenterLayout: (options: import("../api/api-configs").CtrlApiData & {
-                    'enable'?: boolean | undefined;
-                    'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                    'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                    'speech-excitation-video-big-view'?: number | undefined;
-                    'speech-excitation-video-max-view'?: number | undefined;
-                    'equality-video-max-view'?: number | undefined;
-                    'ext-video-as-focus'?: number | undefined;
-                    'speech-excitation-video-round-enabled': boolean;
-                    'speech-excitation-video-round-number': number;
-                    'speech-excitation-video-round-interval': number;
-                    'equality-video-round-enabled'?: boolean | undefined;
-                    'equality-video-round-number'?: number | undefined;
-                    'equality-video-round-interval'?: number | undefined;
-                    'applied-to-attendee': boolean;
-                    'applied-to-cast-viewer': boolean;
-                    'selected-user-entity'?: string[] | undefined;
-                    'pos'?: number | undefined;
-                    'entity'?: string | undefined;
-                }) => Promise<void>;
-                setAttendeeLayout: (options: import("../api/api-configs").CtrlApiData & {
-                    'enable'?: boolean | undefined;
-                    'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                    'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                    'speech-excitation-video-big-view'?: number | undefined;
-                    'speech-excitation-video-max-view'?: number | undefined;
-                    'equality-video-max-view'?: number | undefined;
-                    'ext-video-as-focus'?: number | undefined;
-                    'speech-excitation-video-round-enabled': boolean;
-                    'speech-excitation-video-round-number': number;
-                    'speech-excitation-video-round-interval': number;
-                    'equality-video-round-enabled'?: boolean | undefined;
-                    'equality-video-round-number'?: number | undefined;
-                    'equality-video-round-interval'?: number | undefined;
-                    'applied-to-attendee': boolean;
-                    'applied-to-cast-viewer': boolean;
-                    'selected-user-entity'?: string[] | undefined;
-                    'pos'?: number | undefined;
-                    'entity'?: string | undefined;
-                }) => Promise<void>;
-                setCastViewerLayout: (options: import("../api/api-configs").CtrlApiData & {
-                    'enable'?: boolean | undefined;
-                    'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                    'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                    'speech-excitation-video-big-view'?: number | undefined;
-                    'speech-excitation-video-max-view'?: number | undefined;
-                    'equality-video-max-view'?: number | undefined;
-                    'ext-video-as-focus'?: number | undefined;
-                    'speech-excitation-video-round-enabled': boolean;
-                    'speech-excitation-video-round-number': number;
-                    'speech-excitation-video-round-interval': number;
-                    'equality-video-round-enabled'?: boolean | undefined;
-                    'equality-video-round-number'?: number | undefined;
-                    'equality-video-round-interval'?: number | undefined;
-                    'applied-to-attendee': boolean;
-                    'applied-to-cast-viewer': boolean;
-                    'selected-user-entity'?: string[] | undefined;
-                    'pos'?: number | undefined;
-                    'entity'?: string | undefined;
-                }) => Promise<void>;
-                setOSD: (options?: {
-                    name: boolean;
-                    icon: boolean;
-                }) => Promise<void>;
-                setSpeakMode: (mode: "free" | "hand-up") => Promise<void>;
-                data: import("../conference/conference-info").ConferenceView;
-                get(key: string | number): any;
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            users: {
-                update: (diff?: import("../conference/conference-info").ConferenceUsers | undefined) => void;
-                getUserList: (filter?: ((user?: {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                } | undefined) => boolean) | undefined) => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getUser: (entity: string) => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                } | undefined;
-                hasUser: (entity: string) => boolean;
-                getCurrent: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                } | undefined;
-                getAttendee: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getPresenter: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getCastviewer: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getOrganizer: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getOnhold: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getHandup: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getSharing: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getAudioBlocked: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getVideoBlocked: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getSIP: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getHTTP: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                getRTMP: () => {
-                    data: import("../conference/conference-info").ConferenceUser;
-                    get(key: string | number): any;
-                    update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                    getEntity: () => string;
-                    getUID: () => string;
-                    getDisplayText: () => string;
-                    getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                    isCurrent: () => boolean;
-                    isAttendee: () => boolean;
-                    isPresenter: () => boolean;
-                    isCastviewer: () => boolean;
-                    isOrganizer: () => boolean;
-                    getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                    isOnHold: () => boolean | undefined;
-                    hasFocus: () => boolean;
-                    hasMedia: () => boolean;
-                    hasSharing: () => boolean;
-                    hasFECC: () => boolean;
-                    getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                    getAudioFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    getVideoFilter: () => {
-                        ingress: "unblock" | "block" | "unblocking";
-                        egress: "unblock" | "block" | "unblocking";
-                    };
-                    isAudioBlocked: () => boolean;
-                    isVideoBlocked: () => boolean;
-                    isHandup: () => boolean;
-                    isSharing: () => boolean | undefined;
-                    isSIP: () => boolean;
-                    isHTTP: () => boolean;
-                    isRTMP: () => boolean;
-                    setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                    setAudioFilter: (enable: boolean) => Promise<void>;
-                    setVideoFilter: (enable: boolean) => Promise<void>;
-                    setDisplayText: (displayText: string) => Promise<void>;
-                    setRole: (role: "attendee" | "presenter") => Promise<void>;
-                    setFocus: (enable?: boolean) => Promise<void>;
-                    getStats: () => Promise<void>;
-                    kick: () => Promise<void>;
-                    hold: () => Promise<void>;
-                    unhold: () => Promise<void>;
-                    allow: () => Promise<void>;
-                    accept: () => Promise<void>;
-                    reject: () => Promise<void>;
-                    sendMessage: (msg: string) => Promise<void>;
-                    camera: {
-                        action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                        left: () => Promise<void>;
-                        right: () => Promise<void>;
-                        down: () => Promise<void>;
-                        up: () => Promise<void>;
-                        zoomout: () => Promise<void>;
-                        zoomin: () => Promise<void>;
-                        focusout: () => Promise<void>;
-                        focusin: () => Promise<void>;
-                    };
-                    on(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    off(event: string | string[], fn?: Function | undefined): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    once(event: string | string[], fn: Function): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                    emit(event: string, ...args: any[]): {
-                        on(event: string | string[], fn: Function): any;
-                        off(event: string | string[], fn?: Function | undefined): any;
-                        once(event: string | string[], fn: Function): any;
-                        emit(event: string, ...args: any[]): any;
-                    };
-                }[];
-                invite: (option: Partial<import("../conference/users").InviteOptions>) => Promise<void>;
-                kick: (entity: string) => Promise<void>;
-                mute: () => Promise<void>;
-                unmute: () => Promise<void>;
-                remove: (entity?: string | undefined) => Promise<void>;
-                unhold: (entity?: string | undefined) => Promise<void>;
-                hold: (entity?: string | undefined) => Promise<void>;
-                allow: (entity?: string | undefined) => Promise<void>;
-                data: import("../conference/conference-info").ConferenceUsers;
-                get(key: string | number): any;
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            rtmp: {
-                operation: (type: import("../conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-                start: () => Promise<void>;
-                stop: () => Promise<void>;
-                pause: () => Promise<void>;
-                resume: () => Promise<void>;
-                data: import("../conference/conference-info").ConferenceRTMPUsers;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceRTMPUsers | undefined) => void;
-                getEnable: () => boolean;
-                getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
-                getReason: (entity?: string | undefined) => import("../conference/conference-info").StateReason | undefined;
-                getDetail: (entity?: string | undefined) => {
-                    reason: import("../conference/conference-info").StateReason;
-                    status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                    lastStartTime: number;
-                    lastStopDuration: number;
-                } | undefined;
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            record: {
-                operation: (type: import("../conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-                start: () => Promise<void>;
-                stop: () => Promise<void>;
-                pause: () => Promise<void>;
-                resume: () => Promise<void>;
-                data: import("../conference/conference-info").ConferenceRecordUsers;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceRecordUsers | undefined) => void;
-                getStatus: () => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                getReason: () => import("../conference/conference-info").StateReason;
-                getDetail: () => {
-                    reason: import("../conference/conference-info").StateReason;
-                    status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                    lastStartTime: number;
-                    lastStopDuration: number;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            };
-            update: (val: import("../conference/conference-info").ConferenceInformation) => void;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        description: {
-            data: import("../conference/conference-info").ConferenceDescription;
-            subject: string;
-            get(key: string | number): any;
-            update: (diff?: import("../conference/conference-info").ConferenceDescription | undefined) => void;
-            getLock: () => import("../conference/description").LockOptions;
-            setLock: (options: import("../conference/description").LockOptions) => Promise<void>;
-            lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
-            unlock: () => Promise<void>;
-            isLocked: () => boolean;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        state: {
-            data: import("../conference/conference-info").ConferenceState;
-            get(key: string | number): any;
-            update: (diff?: import("../conference/conference-info").ConferenceState | undefined) => void;
-            getSharingUserEntity: () => string;
-            getSpeechUserEntity: () => string | undefined;
-            getSharingType: () => "applicationsharing" | "coopshare";
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        view: {
-            update: (diff?: import("../conference/conference-info").ConferenceView | undefined) => void;
-            getVideoView: () => import("../conference/conference-info").EntityView | undefined;
-            getLayout: () => import("../conference/conference-info").EntityState | undefined;
-            getFocusUserEntity: () => string;
-            getDanmaku: () => import("../conference/conference-info").EntityViewTitle | undefined;
-            setDanmaku: (config: Partial<import("../conference/danmaku-ctrl").DanmakuConfigs>) => Promise<void>;
-            sendDanmaku: (msg: string, options?: Partial<import("../conference/danmaku-ctrl").DanmakuOptions> | undefined) => Promise<void>;
-            setLayout: (options: import("../api/api-configs").CtrlApiData & {
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus': number;
-                'speech-excitation-video-round-enabled'?: boolean | undefined;
-                'speech-excitation-video-round-number'?: number | undefined;
-                'speech-excitation-video-round-interval'?: number | undefined;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-            }) => Promise<void>;
-            setCustomizeLayout: (options: import("../api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setPresenterLayout: (options: import("../api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setAttendeeLayout: (options: import("../api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setCastViewerLayout: (options: import("../api/api-configs").CtrlApiData & {
-                'enable'?: boolean | undefined;
-                'viewer'?: "attendee" | "presenter" | "castviewer" | undefined;
-                'video-layout': "Equality" | "SpeechExcitation" | "Exclusive";
-                'speech-excitation-video-big-view'?: number | undefined;
-                'speech-excitation-video-max-view'?: number | undefined;
-                'equality-video-max-view'?: number | undefined;
-                'ext-video-as-focus'?: number | undefined;
-                'speech-excitation-video-round-enabled': boolean;
-                'speech-excitation-video-round-number': number;
-                'speech-excitation-video-round-interval': number;
-                'equality-video-round-enabled'?: boolean | undefined;
-                'equality-video-round-number'?: number | undefined;
-                'equality-video-round-interval'?: number | undefined;
-                'applied-to-attendee': boolean;
-                'applied-to-cast-viewer': boolean;
-                'selected-user-entity'?: string[] | undefined;
-                'pos'?: number | undefined;
-                'entity'?: string | undefined;
-            }) => Promise<void>;
-            setOSD: (options?: {
-                name: boolean;
-                icon: boolean;
-            }) => Promise<void>;
-            setSpeakMode: (mode: "free" | "hand-up") => Promise<void>;
-            data: import("../conference/conference-info").ConferenceView;
-            get(key: string | number): any;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        users: {
-            update: (diff?: import("../conference/conference-info").ConferenceUsers | undefined) => void;
-            getUserList: (filter?: ((user?: {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined) => boolean) | undefined) => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getUser: (entity: string) => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined;
-            hasUser: (entity: string) => boolean;
-            getCurrent: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            } | undefined;
-            getAttendee: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getPresenter: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getCastviewer: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getOrganizer: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getOnhold: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getHandup: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getSharing: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getAudioBlocked: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getVideoBlocked: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getSIP: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getHTTP: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            getRTMP: () => {
-                data: import("../conference/conference-info").ConferenceUser;
-                get(key: string | number): any;
-                update: (diff?: import("../conference/conference-info").ConferenceUser | undefined) => void;
-                getEntity: () => string;
-                getUID: () => string;
-                getDisplayText: () => string;
-                getRole: () => "organizer" | "attendee" | "presenter" | "castviewer";
-                isCurrent: () => boolean;
-                isAttendee: () => boolean;
-                isPresenter: () => boolean;
-                isCastviewer: () => boolean;
-                isOrganizer: () => boolean;
-                getEndpoint: (type: "focus" | "audio-video" | "applicationsharing" | "fecc") => import("../conference/conference-info").UserEndpoint | undefined;
-                isOnHold: () => boolean | undefined;
-                hasFocus: () => boolean;
-                hasMedia: () => boolean;
-                hasSharing: () => boolean;
-                hasFECC: () => boolean;
-                getMedia: (label: "applicationsharing" | "main-audio" | "main-video") => import("../conference/conference-info").UserMedia | undefined;
-                getAudioFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                getVideoFilter: () => {
-                    ingress: "unblock" | "block" | "unblocking";
-                    egress: "unblock" | "block" | "unblocking";
-                };
-                isAudioBlocked: () => boolean;
-                isVideoBlocked: () => boolean;
-                isHandup: () => boolean;
-                isSharing: () => boolean | undefined;
-                isSIP: () => boolean;
-                isHTTP: () => boolean;
-                isRTMP: () => boolean;
-                setFilter: (options: import("../conference/user").FilterOptions) => Promise<void>;
-                setAudioFilter: (enable: boolean) => Promise<void>;
-                setVideoFilter: (enable: boolean) => Promise<void>;
-                setDisplayText: (displayText: string) => Promise<void>;
-                setRole: (role: "attendee" | "presenter") => Promise<void>;
-                setFocus: (enable?: boolean) => Promise<void>;
-                getStats: () => Promise<void>;
-                kick: () => Promise<void>;
-                hold: () => Promise<void>;
-                unhold: () => Promise<void>;
-                allow: () => Promise<void>;
-                accept: () => Promise<void>;
-                reject: () => Promise<void>;
-                sendMessage: (msg: string) => Promise<void>;
-                camera: {
-                    action: (type: import("../conference/camera-ctrl").ActionType) => Promise<void>;
-                    left: () => Promise<void>;
-                    right: () => Promise<void>;
-                    down: () => Promise<void>;
-                    up: () => Promise<void>;
-                    zoomout: () => Promise<void>;
-                    zoomin: () => Promise<void>;
-                    focusout: () => Promise<void>;
-                    focusin: () => Promise<void>;
-                };
-                on(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                off(event: string | string[], fn?: Function | undefined): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                once(event: string | string[], fn: Function): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-                emit(event: string, ...args: any[]): {
-                    on(event: string | string[], fn: Function): any;
-                    off(event: string | string[], fn?: Function | undefined): any;
-                    once(event: string | string[], fn: Function): any;
-                    emit(event: string, ...args: any[]): any;
-                };
-            }[];
-            invite: (option: Partial<import("../conference/users").InviteOptions>) => Promise<void>;
-            kick: (entity: string) => Promise<void>;
-            mute: () => Promise<void>;
-            unmute: () => Promise<void>;
-            remove: (entity?: string | undefined) => Promise<void>;
-            unhold: (entity?: string | undefined) => Promise<void>;
-            hold: (entity?: string | undefined) => Promise<void>;
-            allow: (entity?: string | undefined) => Promise<void>;
-            data: import("../conference/conference-info").ConferenceUsers;
-            get(key: string | number): any;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        rtmp: {
-            operation: (type: import("../conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-            start: () => Promise<void>;
-            stop: () => Promise<void>;
-            pause: () => Promise<void>;
-            resume: () => Promise<void>;
-            data: import("../conference/conference-info").ConferenceRTMPUsers;
-            get(key: string | number): any;
-            update: (diff?: import("../conference/conference-info").ConferenceRTMPUsers | undefined) => void;
-            getEnable: () => boolean;
-            getStatus: (entity?: string | undefined) => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming" | undefined;
-            getReason: (entity?: string | undefined) => import("../conference/conference-info").StateReason | undefined;
-            getDetail: (entity?: string | undefined) => {
-                reason: import("../conference/conference-info").StateReason;
-                status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                lastStartTime: number;
-                lastStopDuration: number;
-            } | undefined;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        record: {
-            operation: (type: import("../conference/rtmp-ctrl").RTMPOperationType) => Promise<void>;
-            start: () => Promise<void>;
-            stop: () => Promise<void>;
-            pause: () => Promise<void>;
-            resume: () => Promise<void>;
-            data: import("../conference/conference-info").ConferenceRecordUsers;
-            get(key: string | number): any;
-            update: (diff?: import("../conference/conference-info").ConferenceRecordUsers | undefined) => void;
-            getStatus: () => "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-            getReason: () => import("../conference/conference-info").StateReason;
-            getDetail: () => {
-                reason: import("../conference/conference-info").StateReason;
-                status: "start" | "stop" | "pause" | "stopping" | "pausing" | "starting" | "resuming";
-                lastStartTime: number;
-                lastStopDuration: number;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        mediaChannel: {
-            status: import("../channel").STATUS;
-            connection: RTCPeerConnection | undefined;
-            startTime: Date | undefined;
-            endTime: Date | undefined;
-            version: number;
-            callId: string;
-            isInProgress: () => boolean;
-            isEstablished: () => boolean;
-            isEnded: () => boolean;
-            getMute: () => {
-                audio: boolean;
-                video: boolean;
-            };
-            getHold: () => {
-                local: boolean;
-                remote: boolean;
-            };
-            connect: (options?: import("../channel").ConnectOptions) => Promise<void>;
-            terminate: (reason?: string | undefined) => Promise<void>;
-            renegotiate: (options?: import("../channel").RenegotiateOptions) => Promise<void>;
-            mute: (options?: {
-                audio: boolean;
-                video: boolean;
-            }) => void;
-            unmute: (options?: {
-                audio: boolean;
-                video: boolean;
-            }) => void;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            getRemoteStream: () => MediaStream | undefined;
-            getLocalStream: () => MediaStream | undefined;
-            replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
-            adjustBandWidth: (options: {
-                audio?: number | undefined;
-                video?: number | undefined;
-            }) => Promise<void>;
-            applyConstraints: (options: {
-                audio?: MediaTrackConstraints | undefined;
-                video?: MediaTrackConstraints | undefined;
-            }) => Promise<void>;
-            getStats: () => Promise<{
-                readonly quality: number;
-                readonly inbound: import("../channel/rtc-stats").ParsedStats;
-                readonly outbound: import("../channel/rtc-stats").ParsedStats;
-                update: (report: RTCStatsReport) => void;
-                clear: () => void;
-            }>;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        shareChannel: {
-            status: import("../channel").STATUS;
-            connection: RTCPeerConnection | undefined;
-            startTime: Date | undefined;
-            endTime: Date | undefined;
-            version: number;
-            callId: string;
-            isInProgress: () => boolean;
-            isEstablished: () => boolean;
-            isEnded: () => boolean;
-            getMute: () => {
-                audio: boolean;
-                video: boolean;
-            };
-            getHold: () => {
-                local: boolean;
-                remote: boolean;
-            };
-            connect: (options?: import("../channel").ConnectOptions) => Promise<void>;
-            terminate: (reason?: string | undefined) => Promise<void>;
-            renegotiate: (options?: import("../channel").RenegotiateOptions) => Promise<void>;
-            mute: (options?: {
-                audio: boolean;
-                video: boolean;
-            }) => void;
-            unmute: (options?: {
-                audio: boolean;
-                video: boolean;
-            }) => void;
-            hold: () => Promise<void>;
-            unhold: () => Promise<void>;
-            getRemoteStream: () => MediaStream | undefined;
-            getLocalStream: () => MediaStream | undefined;
-            replaceLocalStream: (stream?: MediaStream | undefined, renegotiation?: boolean) => Promise<void>;
-            adjustBandWidth: (options: {
-                audio?: number | undefined;
-                video?: number | undefined;
-            }) => Promise<void>;
-            applyConstraints: (options: {
-                audio?: MediaTrackConstraints | undefined;
-                video?: MediaTrackConstraints | undefined;
-            }) => Promise<void>;
-            getStats: () => Promise<{
-                readonly quality: number;
-                readonly inbound: import("../channel/rtc-stats").ParsedStats;
-                readonly outbound: import("../channel/rtc-stats").ParsedStats;
-                update: (report: RTCStatsReport) => void;
-                clear: () => void;
-            }>;
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        chatChannel: {
-            ready: boolean;
-            connect: (count?: number) => Promise<void>;
-            terminate: () => Promise<void>;
-            sendMessage: (msg: string, target?: string[] | undefined) => Promise<{
-                readonly status: import("../channel/message").MessageStatus;
-                readonly direction: import("../channel/message").MessageDirection;
-                readonly content: string | undefined;
-                readonly timestamp: number | undefined;
-                readonly version: number | undefined;
-                readonly sender: import("../channel/message").MessageSender | undefined;
-                readonly receiver: string[] | undefined;
-                readonly private: boolean;
-                send: (message: string, target?: string[] | undefined) => Promise<void>;
-                retry: () => Promise<void>;
-                cancel: () => void;
-                incoming: (data: import("../channel/message").MessageData) => any;
-            }>;
-            incoming: (data: import("../channel/message").MessageData) => {
-                readonly status: import("../channel/message").MessageStatus;
-                readonly direction: import("../channel/message").MessageDirection;
-                readonly content: string | undefined;
-                readonly timestamp: number | undefined;
-                readonly version: number | undefined;
-                readonly sender: import("../channel/message").MessageSender | undefined;
-                readonly receiver: string[] | undefined;
-                readonly private: boolean;
-                send: (message: string, target?: string[] | undefined) => Promise<void>;
-                retry: () => Promise<void>;
-                cancel: () => void;
-                incoming: (data: import("../channel/message").MessageData) => any;
-            };
-            on(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            off(event: string | string[], fn?: Function | undefined): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            once(event: string | string[], fn: Function): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-            emit(event: string, ...args: any[]): {
-                on(event: string | string[], fn: Function): any;
-                off(event: string | string[], fn?: Function | undefined): any;
-                once(event: string | string[], fn: Function): any;
-                emit(event: string, ...args: any[]): any;
-            };
-        } | undefined;
-        trtc: object;
-        join: (options?: Partial<JoinOptions>) => Promise<any>;
-        leave: () => Promise<any>;
-        end: () => Promise<any>;
-        share: (options?: import("../channel").ConnectOptions | undefined) => Promise<void>;
-        setSharing: (enable?: boolean) => Promise<void>;
-        sendMessage: (msg: string, target?: string[] | undefined) => Promise<void>;
-        on(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        off(event: string | string[], fn?: Function | undefined): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        once(event: string | string[], fn: Function): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-        emit(event: string, ...args: any[]): {
-            on(event: string | string[], fn: Function): any;
-            off(event: string | string[], fn?: Function | undefined): any;
-            once(event: string | string[], fn: Function): any;
-            emit(event: string, ...args: any[]): any;
-        };
-    }>;
-};
+export declare function createUA(config?: UAConfigs): UA;
 
-export declare function createUserApi(token?: string | (() => string | undefined)): {
-    readonly interceptors: {
-        request: import("axios").AxiosInterceptorManager<import("axios").AxiosRequestConfig>;
-        response: import("axios").AxiosInterceptorManager<import("axios").AxiosResponse<any>>;
-    };
-    request: <T extends "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end" = "getVirtualJWT" | "login" | "selectAccount" | "logout" | "refreshToken" | "sendMobileLoginVerifyCode" | "getConferenceInfo" | "getURL" | "getFullInfo" | "getBasicInfo" | "getBasicInfoOffline" | "getStats" | "polling" | "keepalive" | "joinFocus" | "joinWechat" | "joinMedia" | "renegMedia" | "joinShare" | "leaveShare" | "switchShare" | "renegShare" | "pushMessage" | "pullMessage" | "muteAll" | "unmuteAll" | "acceptLobbyUser" | "acceptLobbyUserAll" | "rejectLobbyUserAll" | "waitLobbyUser" | "waitLobbyUserAll" | "rejectHandupAll" | "deleteUser" | "setUserMedia" | "setUserRole" | "setUserDisplayText" | "holdUser" | "inviteUser" | "setFocusVideo" | "setSpeakMode" | "setFreeLayout" | "setCustomizeLayout" | "setGlobalLayout" | "setFecc" | "setTitle" | "sendTitle" | "setRecord" | "setRTMP" | "setLock" | "leave" | "end">(apiName: T) => import("../api/request").Request<import("../api/api-configs").ApiDataMap[T], import("../api/api-configs").ApiParamsMap[T], any, any>;
-    delegate: import("axios").AxiosInstance;
-};
-
-declare function createWorker(config: WorkerConfig): {
-    config: WorkerConfig;
-    readonly running: boolean;
-    start: (immediate?: boolean) => Promise<void>;
-    stop: () => void;
-};
+export declare function createUserApi(token?: string | (() => string | undefined)): Api;
 
 declare interface CtrlApiData {
     'conference-uuid'?: string;
     'conference-user-id'?: number;
     [key: string]: any;
 }
+
+declare interface DanmakuConfigs {
+    type: DanmakuType;
+    position: DanmakuPosition;
+    displayTime: number;
+    repeatCount: number;
+    repeatInterval: number;
+    rollDirection: DanmakuRollDirection;
+}
+
+declare interface DanmakuCtrl {
+    setDanmaku: (config: Partial<DanmakuConfigs>) => Promise<void>;
+    sendDanmaku: (msg: string, options?: Partial<DanmakuOptions>) => Promise<void>;
+}
+
+declare interface DanmakuOptions {
+    presenter: boolean;
+    attendee: boolean;
+    castviewer: boolean;
+}
+
+declare type DanmakuPosition = 'top' | 'medium' | 'bottom';
+
+declare type DanmakuRollDirection = 'R2L' | 'L2R';
+
+declare type DanmakuType = 'dynamic' | 'static';
 export { debug }
 
+declare interface Description extends Events {
+    readonly data: ConferenceDescription;
+    readonly subject: ConferenceDescription['subject'];
+    get: <T extends keyof ConferenceDescription>(key: T) => ConferenceDescription[T];
+    update: (diff?: ConferenceDescription) => void;
+    getLock: () => LockOptions;
+    setLock: (options: LockOptions) => Promise<void>;
+    lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
+    unlock: () => Promise<void>;
+    isLocked: () => boolean;
+}
+
+declare interface EntityState extends Partialable {
+    'speak-mode': 'free' | 'hand-up';
+    'focus-video-user-entity': string;
+    'ext-video-as-focus': boolean;
+    'video-layout': 'Equality' | 'SpeechExcitation' | 'Exclusive';
+    'speech-excitation-video-big-view': number;
+    'speech-excitation-video-max-view': number;
+    'speech-excitation-video-round-enabled': boolean;
+    'speech-excitation-video-round-number': number;
+    'speech-excitation-video-round-interval': number;
+    'video-speech-ex-enabled': boolean;
+    'video-speech-ex-sensitivity': number;
+    'equality-video-max-view': number;
+    'equality-video-round-enabled': boolean;
+    'equality-video-round-number': number;
+    'equality-video-round-interval': number;
+    'custom-presenter-layout': ConferenceLayout;
+    'custom-attendee-layout': ConferenceLayout;
+    'custom-cast-viewer-layout': ConferenceLayout;
+    'video-big-round': boolean;
+    'video-data-mix-enabled': boolean;
+    'hide-osd-site-name': boolean;
+    'hide-osd-site-icon': boolean;
+    'audio-as-mixed-screen-enable': boolean;
+}
+
+declare interface EntityView extends Partialable, ConfereceUri {
+    'entity-state'?: EntityState;
+    'title'?: EntityViewTitle;
+}
+
+declare interface EntityViewTitle extends Partialable {
+    'position': 'top' | 'bottom';
+    'type': 'static' | 'dynamic';
+    'display-time': number;
+    'repeat-count': number;
+    'repeat-interval': number;
+    'roll-direction': 'R2L' | 'L2R';
+}
+
+declare interface Events {
+    on: (event: string | string[], fn: Function) => Events;
+    off: (event: string | string[], fn?: Function) => Events;
+    once: (event: string | string[], fn: Function) => Events;
+    emit: (event: string, ...args: any[]) => Events;
+}
+
 export declare function fetchControlUrl(identity: Identity, number: string, baseurl?: string): Promise<string>;
+
+declare interface FilterOptions {
+    label: UserMedia['label'];
+    enable: boolean;
+}
 
 declare interface Identity {
     party: any;
@@ -7769,11 +831,69 @@ declare interface Identity {
     confirm: () => Promise<Authentication>;
 }
 
+declare interface Information extends Events {
+    readonly data: ConferenceInformation;
+    readonly version?: ConferenceInformation['version'];
+    get: <T extends keyof ConferenceInformation>(key: T) => ConferenceInformation[T];
+    update: (diff: ConferenceInformation) => void;
+    readonly description: Description;
+    readonly state: State;
+    readonly view: View;
+    readonly users: Users;
+    readonly rtmp: RTMP;
+    readonly record: Record;
+}
+
+declare interface InviteOptions {
+    uid: string[];
+    sipURL: string;
+    h323URL: string;
+}
+
+declare interface JoinInfo {
+    'when': string;
+}
+
 declare interface JoinOptions {
     url?: string;
     number: string;
     password?: string;
     displayName?: string;
+}
+
+declare interface LayoutCtrl {
+    setLayout: (options: ApiDataMap['setFreeLayout']) => Promise<void>;
+    setCustomizeLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+    setPresenterLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+    setAttendeeLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+    setCastViewerLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+    setOSD: (options: {
+        name: true;
+        icon: true;
+    }) => Promise<void>;
+    setSpeakMode: (mode: 'free' | 'hand-up') => Promise<void>;
+}
+
+declare interface LobbyCtrl {
+    remove: (entity?: string) => Promise<void>;
+    unhold: (entity?: string) => Promise<void>;
+    hold: (entity?: string) => Promise<void>;
+    allow: (entity?: string) => Promise<void>;
+}
+
+declare interface LockOptions {
+    admissionPolicy: ConferenceDescription['admission-policy'];
+    attendeeByPass?: boolean;
+}
+
+declare interface MediaChannel extends Channel {
+    readonly version?: number;
+    readonly callId?: string;
+}
+
+declare interface MediaFilter {
+    'type': 'unblock' | 'block' | 'unblocking';
+    'blockby': 'server' | string;
 }
 
 declare interface MeetnowConfig {
@@ -7786,16 +906,307 @@ declare interface MeetnowConfig {
     timeout?: number;
 }
 
+declare interface Message {
+    readonly status: MessageStatus;
+    readonly direction: MessageDirection;
+    readonly content?: string;
+    readonly timestamp?: number;
+    readonly version?: number;
+    readonly sender?: MessageSender;
+    readonly receiver?: string[];
+    readonly private?: boolean;
+    send: (message: string, target?: string[]) => Promise<void>;
+    retry: () => Promise<void>;
+    cancel: () => void;
+    incoming: (data: MessageData) => Message;
+}
+
+declare interface MessageData {
+    'is-private': boolean;
+    'im-context': string;
+    'im-timestamp': number;
+    'im-version': number;
+    'sender-entity': string;
+    'sender-subject-id': string;
+    'sender-display-text': string;
+}
+
+declare type MessageDirection = 'incoming' | 'outgoing';
+
+declare interface MessageSender {
+    'entity': string;
+    'subjectId': string;
+    'displayText': string;
+}
+
+declare enum MessageStatus {
+    kNull = 0,
+    kSending = 1,
+    kSuccess = 2,
+    kFailed = 3
+}
+
+declare interface Organizer {
+    'display-text': string;
+    'subject-id': string;
+}
+
+declare interface ParsedStats {
+    audio?: any;
+    video?: any;
+}
+
+declare interface Partialable {
+    'state': 'full' | 'partial' | 'deleted';
+    [key: string]: any;
+}
+
+declare interface Record extends Events, RecordCtrl {
+    readonly data: ConferenceRecordUsers;
+    get: <T extends keyof ConferenceRecordUsers>(key: T) => ConferenceRecordUsers[T];
+    update: (diff?: ConferenceRecordUsers) => void;
+    getStatus: () => ConferenceRecordUser['record-status'];
+    getReason: () => ConferenceRecordUser['reason'];
+    getDetail: () => {
+        reason: ConferenceRecordUser['reason'];
+        status: ConferenceRecordUser['record-status'];
+        lastStartTime: ConferenceRecordUser['record-last-start-time'];
+        lastStopDuration: ConferenceRecordUser['record-last-stop-duration'];
+    };
+}
+
+declare interface RecordCtrl {
+    operation: (type: RecordOperationType) => Promise<void>;
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+    pause: () => Promise<void>;
+    resume: () => Promise<void>;
+}
+
+declare type RecordOperationType = 'start' | 'stop' | 'pause' | 'resume';
+
+declare interface RenegotiateOptions {
+    rtcConstraints?: RTCConfiguration;
+    rtcOfferConstraints?: RTCOfferOptions;
+    mediaStream?: MediaStream;
+    mediaConstraints?: MediaStreamConstraints;
+}
+
+declare interface Request<RequestData = any, RequestParams = any, RequestHeader = any, RequestResultData = any> {
+    config: AxiosRequestConfig;
+    header: (header: RequestHeader) => Request<RequestData, RequestParams, RequestHeader>;
+    params: (params: RequestParams) => Request<RequestData, RequestParams, RequestHeader>;
+    data: (data: RequestData) => Request<RequestData, RequestParams, RequestHeader>;
+    send: () => AxiosPromise<RequestResult<RequestResultData>>;
+    cancel: () => void;
+}
+
+declare interface RequestResult<T = any> {
+    ret: number;
+    bizCode: number;
+    data: T;
+    error?: {
+        msg: string;
+        errorCode: number;
+    };
+    statusCode?: number;
+}
+
+declare interface RTCStats {
+    readonly quality: number;
+    readonly inbound: ParsedStats;
+    readonly outbound: ParsedStats;
+    update: (report: RTCStatsReport) => void;
+    clear: () => void;
+}
+
+declare interface RTMP extends Events, RTMPCtrl {
+    readonly data: ConferenceRTMPUsers;
+    get: <T extends keyof ConferenceRTMPUsers>(key: T) => ConferenceRTMPUsers[T];
+    update: (diff?: ConferenceRTMPUsers) => void;
+    getEnable: () => ConferenceRTMPUsers['rtmp-enable'];
+    getStatus: () => ConferenceRTMPUser['rtmp-status'] | undefined;
+    getReason: () => ConferenceRTMPUser['reason'] | undefined;
+    getDetail: () => {
+        reason: ConferenceRTMPUser['reason'];
+        status: ConferenceRTMPUser['rtmp-status'];
+        lastStartTime: ConferenceRTMPUser['rtmp-last-start-time'];
+        lastStopDuration: ConferenceRTMPUser['rtmp-last-stop-duration'];
+    } | undefined;
+}
+
+declare interface RTMPCtrl {
+    operation: (type: RTMPOperationType) => Promise<void>;
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+    pause: () => Promise<void>;
+    resume: () => Promise<void>;
+}
+
+declare type RTMPOperationType = 'start' | 'stop' | 'pause' | 'resume';
+
 export declare function setup(config?: MeetnowConfig): void;
+
+declare type ShareType = 'applicationsharing' | 'coopshare';
+
+declare interface State extends Events {
+    readonly data: ConferenceState;
+    get: <T extends keyof ConferenceState>(key: T) => ConferenceState[T];
+    update: (diff?: ConferenceState) => void;
+    getSharingUserEntity: () => string | undefined;
+    getSpeechUserEntity: () => string | undefined;
+    getSharingType: () => ShareType | undefined;
+}
+
+declare interface StateReason {
+    'reason-code': number;
+    'reason-text'?: string;
+    'bizCode': number;
+}
+
+declare enum STATUS {
+    kNull = 0,
+    kProgress = 1,
+    kOffered = 2,
+    kAnswered = 3,
+    kAccepted = 4,
+    kCanceled = 5,
+    kTerminated = 6
+}
+
+declare interface UA {
+    fetch: (number: string) => Promise<{
+        number: string;
+        partyId: string;
+        url: string;
+        info: object;
+    }>;
+    connect: (ConnectOptions: any) => Promise<Conference>;
+}
 
 declare interface UAConfigs {
     language?: string;
     auth?: Authentication;
 }
 
+declare interface User extends Events {
+    readonly data: ConferenceUser;
+    get: <T extends keyof ConferenceUser>(key: T) => ConferenceUser[T];
+    update: (diff?: ConferenceUser) => void;
+    getEntity: () => ConferenceUser['entity'];
+    getUID: () => ConferenceUser['subject-id'];
+    getDisplayText: () => ConferenceUser['display-text'];
+    getRole: () => ConferenceUser['roles']['role'];
+    isCurrent: () => boolean;
+    isAttendee: () => boolean;
+    isPresenter: () => boolean;
+    isCastviewer: () => boolean;
+    isOrganizer: () => boolean;
+    getEndpoint: (type: UserEndpoint['session-type']) => UserEndpoint | undefined;
+    isOnHold: () => boolean;
+    hasFocus: () => boolean;
+    hasMedia: () => boolean;
+    hasSharing: () => boolean;
+    hasFECC: () => boolean;
+    getMedia: (label: UserMedia['label']) => UserMedia | undefined;
+    getAudioFilter: (label: UserMedia['label']) => {
+        ingress: MediaFilter['type'];
+        egress: MediaFilter['type'];
+    } | undefined;
+    getVideoFilter: (label: UserMedia['label']) => {
+        ingress: MediaFilter['type'];
+        egress: MediaFilter['type'];
+    } | undefined;
+    isAudioBlocked: () => boolean;
+    isVideoBlocked: () => boolean;
+    isHandup: () => boolean;
+    isSharing: () => boolean;
+    isSIP: () => boolean;
+    isHTTP: () => boolean;
+    isRTMP: () => boolean;
+    setFilter: (options: FilterOptions) => Promise<void>;
+    setAudioFilter: (enable: boolean) => Promise<void>;
+    setVideoFilter: (enable: boolean) => Promise<void>;
+    setDisplayText: (displayText: string) => Promise<void>;
+    setRole: (role: 'attendee' | 'presenter') => Promise<void>;
+    setFocus: (enable?: boolean) => Promise<void>;
+    getStats: () => Promise<any>;
+    kick: () => Promise<any>;
+    hold: () => Promise<any>;
+    unhold: () => Promise<any>;
+    allow: () => Promise<any>;
+    accept: () => Promise<any>;
+    reject: () => Promise<any>;
+    sendMessage: (msg: string) => Promise<any>;
+    camera: CameraCtrl;
+}
+
+declare interface UserEndpoint extends Partialable {
+    'entity': string;
+    'session-type': 'focus' | 'audio-video' | 'applicationsharing' | 'fecc';
+    'status': 'pending' | 'dialing-out' | 'dialing-in' | 'alerting' | 'connected' | 'disconnected' | 'disconnecting' | 'calling' | 'on-hold' | 'muted-via-focus';
+    'joining-method': 'dialed-in' | 'dialed-out';
+    'joining-info': JoinInfo;
+    'media'?: UserMedia[];
+}
+
+declare interface UserMedia {
+    'id': number;
+    'type': 'audio' | 'video';
+    'label': 'main-audio' | 'main-video' | 'applicationsharing';
+    'status': 'sendrecv' | 'sendonly' | 'recvonly';
+    'media-ingress-filter': MediaFilter;
+    'media-egress-filter': MediaFilter;
+}
+
+declare interface UserRole {
+    'role': 'attendee' | 'presenter' | 'castviewer' | 'organizer';
+}
+
+declare interface Users extends Events, LobbyCtrl {
+    readonly data: ConferenceUsers;
+    get: <T extends keyof ConferenceUsers>(key: T) => ConferenceUsers[T];
+    update: (diff?: ConferenceUsers) => void;
+    getUserList: (filter?: ((user?: User) => boolean)) => User[];
+    getUser: (entity: string) => User | undefined;
+    hasUser: (entity: string) => boolean;
+    getCurrent: () => User | undefined;
+    getAttendee: () => User[];
+    getPresenter: () => User[];
+    getCastviewer: () => User[];
+    getOrganizer: () => User[];
+    getOnhold: () => User[];
+    getHandup: () => User[];
+    getSharing: () => User[];
+    getAudioBlocked: () => User[];
+    getVideoBlocked: () => User[];
+    getSIP: () => User[];
+    getHTTP: () => User[];
+    getRTMP: () => User[];
+    invite: (option: Partial<InviteOptions>) => Promise<void>;
+    kick: (entity: string) => Promise<void>;
+    mute: () => Promise<void>;
+    unmute: () => Promise<void>;
+}
+
 export declare const version: string;
 
-declare type Worker = ReturnType<typeof createWorker>;
+declare interface View extends Events, DanmakuCtrl, LayoutCtrl {
+    readonly data: ConferenceView;
+    get: <T extends keyof ConferenceView>(key: T) => ConferenceView[T];
+    update: (diff?: ConferenceView) => void;
+    getVideoView: () => EntityView | undefined;
+    getLayout: () => EntityState | undefined;
+    getFocusUserEntity: () => EntityState['focus-video-user-entity'];
+    getDanmaku: () => EntityView['title'];
+}
+
+declare interface Worker {
+    config: WorkerConfig;
+    readonly running: boolean;
+    start: (immediate?: boolean) => Promise<void>;
+    stop: () => void;
+}
 
 declare interface WorkerConfig {
     work: (times: number) => Promise<any> | any;

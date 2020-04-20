@@ -58,8 +58,10 @@ export interface ConferenceDescription extends Partialable {
 
 // Conference State
 
+export type ShareType = 'applicationsharing' | 'coopshare';
+
 export interface ApplicationSharer extends Partialable {
-  'user': ConferenceUser & { 'share-type': 'applicationsharing' | 'coopshare' };
+  'user'?: ConferenceUser & { 'share-type': ShareType };
 }
 
 export interface ConferenceState extends Partialable {

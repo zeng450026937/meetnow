@@ -1,14 +1,20 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import debug from 'debug';
 import {
   ApiDataMap, ApiHeaderMap, ApiNames, ApiParamsMap, CONFIGS,
 } from './api-configs';
 import { ApiError } from './api-error';
-import { createRequest, RequestResult } from './request';
+import { createRequest, Request, RequestResult } from './request';
 
 const log = debug('MN:Api');
 
-export function createApi(config: AxiosRequestConfig = {}) {
+export interface Api {
+  readonly interceptors: AxiosInstance['interceptors'];
+  request: <T extends ApiNames = ApiNames>(apiName: T) => Request<ApiDataMap[T], ApiParamsMap[T], ApiHeaderMap[T]>;
+  delegate: AxiosInstance,
+}
+
+export function createApi(config: AxiosRequestConfig = {}): Api {
   log('createApi()');
 
   const delegate = axios.create({
@@ -62,5 +68,3 @@ export function createApi(config: AxiosRequestConfig = {}) {
     delegate,
   };
 }
-
-export type Api = ReturnType<typeof createApi>;

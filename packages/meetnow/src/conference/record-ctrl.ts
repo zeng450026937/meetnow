@@ -12,7 +12,15 @@ export enum RecordOperationTypes {
   RESUME = 'resume',
 }
 
-export function createRecordCtrl(api: Api) {
+export interface RecordCtrl {
+  operation: (type: RecordOperationType) => Promise<void>;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+}
+
+export function createRecordCtrl(api: Api): RecordCtrl {
   async function operation(type: RecordOperationType) {
     await api
       .request('setRecord')
@@ -50,5 +58,3 @@ export function createRecordCtrl(api: Api) {
     resume,
   };
 }
-
-export type RecordCtrl = ReturnType<typeof createRecordCtrl>;

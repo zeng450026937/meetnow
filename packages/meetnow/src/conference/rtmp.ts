@@ -1,13 +1,31 @@
 import debug from 'debug';
-import { createEvents } from '../events';
-import { ConferenceRTMPUsers } from './conference-info';
+import { createEvents, Events } from '../events';
+import { ConferenceRTMPUser, ConferenceRTMPUsers } from './conference-info';
 import { createReactive } from '../reactive';
-import { createRTMPCtrl } from './rtmp-ctrl';
+import { createRTMPCtrl, RTMPCtrl } from './rtmp-ctrl';
 import { Context } from './context';
+
+export { ConferenceRTMPUser, ConferenceRTMPUsers };
 
 const log = debug('MN:Information:RTMP');
 
-export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
+export interface RTMP extends Events, RTMPCtrl {
+  readonly data: ConferenceRTMPUsers,
+  get: <T extends keyof ConferenceRTMPUsers>(key: T) => ConferenceRTMPUsers[T];
+  update: (diff?: ConferenceRTMPUsers) => void;
+
+  getEnable: () => ConferenceRTMPUsers['rtmp-enable'];
+  getStatus: () => ConferenceRTMPUser['rtmp-status'] | undefined;
+  getReason: () => ConferenceRTMPUser['reason'] | undefined;
+  getDetail: () => {
+    reason: ConferenceRTMPUser['reason'];
+    status: ConferenceRTMPUser['rtmp-status'];
+    lastStartTime: ConferenceRTMPUser['rtmp-last-start-time'];
+    lastStopDuration: ConferenceRTMPUser['rtmp-last-stop-duration'];
+  } | undefined;
+}
+
+export function createRTMP(data: ConferenceRTMPUsers, context: Context): RTMP {
   const { api } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
@@ -85,5 +103,3 @@ export function createRTMP(data: ConferenceRTMPUsers, context: Context) {
     ...ctrl,
   };
 }
-
-export type RTMP = ReturnType<typeof createRTMP>;

@@ -1,14 +1,27 @@
 import debug from 'debug';
-import { createEvents } from '../events';
-import { ConferenceView } from './conference-info';
+import { createEvents, Events } from '../events';
+import { ConferenceView, EntityState, EntityView } from './conference-info';
 import { createReactive } from '../reactive';
-import { createLayoutCtrl } from './layout-ctrl';
-import { createDanmakuCtrl } from './danmaku-ctrl';
+import { createLayoutCtrl, LayoutCtrl } from './layout-ctrl';
+import { createDanmakuCtrl, DanmakuCtrl } from './danmaku-ctrl';
 import { Context } from './context';
+
+export { ConferenceView };
 
 const log = debug('MN:Information:View');
 
-export function createView(data: ConferenceView, context: Context) {
+export interface View extends Events, DanmakuCtrl, LayoutCtrl {
+  readonly data: ConferenceView,
+  get: <T extends keyof ConferenceView>(key: T) => ConferenceView[T];
+  update: (diff?: ConferenceView) => void;
+
+  getVideoView: () => EntityView | undefined;
+  getLayout: () => EntityState | undefined;
+  getFocusUserEntity: () => EntityState['focus-video-user-entity'],
+  getDanmaku: () => EntityView['title'],
+}
+
+export function createView(data: ConferenceView, context: Context): View {
   const { api } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
@@ -65,5 +78,3 @@ export function createView(data: ConferenceView, context: Context) {
     getDanmaku,
   };
 }
-
-export type View = ReturnType<typeof createView>;

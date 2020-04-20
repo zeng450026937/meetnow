@@ -12,7 +12,15 @@ export enum RTMPOperationTypes {
   RESUME = 'resume',
 }
 
-export function createRTMPCtrl(api: Api) {
+export interface RTMPCtrl {
+  operation: (type: RTMPOperationType) => Promise<void>;
+  start: () => Promise<void>;
+  stop: () => Promise<void>;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+}
+
+export function createRTMPCtrl(api: Api): RTMPCtrl {
   async function operation(type: RTMPOperationType) {
     log('operation');
 
@@ -52,5 +60,3 @@ export function createRTMPCtrl(api: Api) {
     resume,
   };
 }
-
-export type RTMPCtrl = ReturnType<typeof createRTMPCtrl>;

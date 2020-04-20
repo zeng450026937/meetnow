@@ -4,7 +4,19 @@ import { ApiDataMap } from '../api/api-configs';
 
 const log = debug('MN:Information:Layout');
 
-export function createLayoutCtrl(api: Api) {
+export interface LayoutCtrl {
+  setLayout: (options: ApiDataMap['setFreeLayout']) => Promise<void>;
+  setCustomizeLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+
+  setPresenterLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+  setAttendeeLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+  setCastViewerLayout: (options: ApiDataMap['setCustomizeLayout']) => Promise<void>;
+
+  setOSD: (options: { name: true, icon: true }) => Promise<void>;
+  setSpeakMode: (mode: 'free' | 'hand-up') => Promise<void>;
+}
+
+export function createLayoutCtrl(api: Api): LayoutCtrl {
   async function setLayout(options: ApiDataMap['setFreeLayout']) {
     log('setLayout()');
 

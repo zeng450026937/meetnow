@@ -4,9 +4,9 @@ import { camelize, hasChanged, hasOwn } from '../utils';
 
 const log = debug('MN:Reactive');
 
-export function createReactive(data: object = {}, events?: Events) {
+export function createReactive<T extends object>(data: T, events?: Events): T {
   events = events || createEvents(log);
-  return new Proxy(data, {
+  return new Proxy<T>(data, {
     set(target: object, prop: string, value: unknown, receiver: object) {
       const oldValue = (target as any)[prop];
       const hadKey = hasOwn(target, prop);

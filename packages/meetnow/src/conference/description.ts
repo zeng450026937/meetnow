@@ -1,8 +1,10 @@
 import debug from 'debug';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import { ConferenceDescription } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
+
+export { ConferenceDescription };
 
 const log = debug('MN:Information:Description');
 
@@ -11,7 +13,22 @@ export interface LockOptions {
   attendeeByPass?: boolean;
 }
 
-export function createDescription(data: ConferenceDescription, context: Context) {
+export interface Description extends Events {
+  readonly data: ConferenceDescription,
+  readonly subject: ConferenceDescription['subject'],
+  get: <T extends keyof ConferenceDescription>(key: T) => ConferenceDescription[T];
+  update: (diff?: ConferenceDescription) => void;
+
+  getLock: () => LockOptions;
+  setLock: (options: LockOptions) => Promise<void>;
+
+  lock: (attendeeByPass?: boolean, presenterOnly?: boolean) => Promise<void>;
+  unlock: () => Promise<void>;
+
+  isLocked: () => boolean;
+}
+
+export function createDescription(data: ConferenceDescription, context: Context): Description {
   const { api } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
@@ -96,5 +113,3 @@ export function createDescription(data: ConferenceDescription, context: Context)
     isLocked,
   };
 }
-
-export type Description = ReturnType<typeof createDescription>;

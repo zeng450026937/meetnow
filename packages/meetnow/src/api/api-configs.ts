@@ -12,7 +12,7 @@ export interface ApiConfigs {
 }
 
 export interface ApiConfig extends AxiosRequestConfig {
-  method?: Method | any;
+  method?: Method;
   responseType?: ResponseType | any;
 }
 

@@ -34,9 +34,8 @@ const outputConfigs = {
     file   : resolve(`dist/${ name }.esm-bundler.js`),
     format : 'es',
   },
-  // main "meetnow" package only
-  'esm-bundler-runtime' : {
-    file   : resolve(`dist/${ name }.runtime.esm-bundler.js`),
+  'esm-browser' : {
+    file   : resolve(`dist/${ name }.esm-browser.js`),
     format : 'es',
   },
   cjs : {
@@ -51,9 +50,23 @@ const outputConfigs = {
     file   : resolve(`dist/${ name }.umd.js`),
     format : 'umd',
   },
-  esm : {
-    file   : resolve(`dist/${ name }.esm.js`),
+
+  // runtime-only builds, for main "meetnow" package only
+  'esm-bundler-runtime' : {
+    file   : resolve(`dist/${ name }.runtime.esm-bundler.js`),
     format : 'es',
+  },
+  'esm-browser-runtime' : {
+    file   : resolve(`dist/${ name }.runtime.esm-browser.js`),
+    format : 'es',
+  },
+  'global-runtime' : {
+    file   : resolve(`dist/${ name }.runtime.global.js`),
+    format : 'iife',
+  },
+  'umd-runtime' : {
+    file   : resolve(`dist/${ name }.runtime.umd.js`),
+    format : 'iife',
   },
 };
 
@@ -69,7 +82,7 @@ if (process.env.NODE_ENV === 'production') {
     if (format === 'cjs' && packageOptions.prod !== false) {
       packageConfigs.push(createProductionConfig(format));
     }
-    if (format === 'global' || format === 'umd' || format === 'esm') {
+    if (/^(global|umd|esm-browser)(-runtime)?/.test(format)) {
       packageConfigs.push(createMinifiedConfig(format));
     }
   });
@@ -83,14 +96,17 @@ function createConfig(format, output, plugins = []) {
     process.exit(1);
   }
 
+  output.sourcemap = !!process.env.SOURCE_MAP || packageOptions.sourcemap;
   output.externalLiveBindings = false;
 
   const isProductionBuild = process.env.__DEV__ === 'false' || /\.prod\.js$/.test(output.file);
-  const isGlobalBuild = format === 'global' || format === 'umd';
-  const isRawESMBuild = format === 'esm';
   const isBundlerESMBuild = /esm-bundler/.test(format);
+  const isBrowserESMBuild = /esm-browser/.test(format);
+  const isNodeBuild = /cjs/.test(format);
+  const isGlobalBuild = /global/.test(format);
+  const isUMDBuild = /umd/.test(format);
 
-  if (isGlobalBuild) {
+  if (isGlobalBuild || isUMDBuild) {
     output.name = packageOptions.name;
   }
 
@@ -115,7 +131,7 @@ function createConfig(format, output, plugins = []) {
   // during a single build.
   hasTSChecked = true;
 
-  const entryFile = format === 'esm-bundler-runtime' ? 'src/runtime.ts' : 'src/index.ts';
+  const entryFile = /runtime$/.test(format) ? 'src/runtime.ts' : 'src/index.ts';
 
   // const compatPlugin = babel({
   //   extensions     : ['.js', '.ts'],
@@ -139,7 +155,7 @@ function createConfig(format, output, plugins = []) {
     // Global and Browser ESM builds inlines everything so that they can be
     // used alone.
     external :
-      isGlobalBuild || isRawESMBuild
+      isGlobalBuild || isBundlerESMBuild
         ? []
         : knownExternals.concat(Object.keys(pkg.dependencies || [])),
     plugins : [
@@ -154,8 +170,10 @@ function createConfig(format, output, plugins = []) {
       createReplacePlugin(
         isProductionBuild,
         isBundlerESMBuild,
-        (isGlobalBuild || isRawESMBuild || isBundlerESMBuild)
+        // isBrowserBuild?
+        (isGlobalBuild || isBrowserESMBuild || isBundlerESMBuild)
           && !packageOptions.enableNonBrowserBranches,
+        isNodeBuild,
       ),
       compatPlugin,
       ...plugins,
@@ -173,6 +191,7 @@ function createReplacePlugin(
   isProduction,
   isBundlerESMBuild,
   isBrowserBuild,
+  isNodeBuild,
 ) {
   const replacements = {
     __COMMIT__  : `"${ process.env.COMMIT }"`,
@@ -188,6 +207,8 @@ function createReplacePlugin(
     __BROWSER__     : isBrowserBuild,
     // is targeting bundlers?
     __BUNDLER__     : isBundlerESMBuild,
+    // is targeting Node (SSR)?
+    __NODE_JS__     : isNodeBuild,
     __FEATURE_ES5__ : false,
   };
   // allow inline overrides like

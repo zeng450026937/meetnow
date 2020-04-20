@@ -3440,21 +3440,23 @@ var MeetNow = (function (exports) {
 	    function on(event, fn) {
 	        if (isArray$1(event)) {
 	            event.forEach((ev) => on(ev, fn));
-	            return;
+	            return instance;
 	        }
 	        (events[event] || (events[event] = [])).push(fn);
+	        return instance;
 	    }
 	    function off(event, fn) {
 	        if (isArray$1(event)) {
 	            event.forEach((e) => off(e, fn));
-	            return;
+	            return instance;
 	        }
 	        const callbacks = events[event];
-	        if (!callbacks)
-	            { return; }
+	        if (!callbacks) {
+	            return instance;
+	        }
 	        if (!fn) {
 	            events[event] = null;
-	            return;
+	            return instance;
 	        }
 	        let callback;
 	        let index = callbacks.length;
@@ -3465,6 +3467,7 @@ var MeetNow = (function (exports) {
 	                break;
 	            }
 	        }
+	        return instance;
 	    }
 	    function once(event, fn) {
 	        function wrapper(...args) {
@@ -3473,6 +3476,7 @@ var MeetNow = (function (exports) {
 	        }
 	        wrapper.fn = fn;
 	        on(event, wrapper);
+	        return instance;
 	    }
 	    function toArray(list, start) {
 	        start = start || 0;
@@ -3487,7 +3491,7 @@ var MeetNow = (function (exports) {
 	        scopedlog(`emit() "${event}"`);
 	        let callbacks = events[event];
 	        if (!callbacks)
-	            { return; }
+	            { return instance; }
 	        callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
 	        for (const callback of callbacks) {
 	            try {
@@ -3497,24 +3501,13 @@ var MeetNow = (function (exports) {
 	                scopedlog(`invoke "${event}" callback failed: %o`, error);
 	            }
 	        }
+	        return instance;
 	    }
 	    return instance = {
-	        on(event, fn) {
-	            on(event, fn);
-	            return instance;
-	        },
-	        off(event, fn) {
-	            off(event, fn);
-	            return instance;
-	        },
-	        once(event, fn) {
-	            once(event, fn);
-	            return instance;
-	        },
-	        emit(event, ...args) {
-	            emit(event, ...args);
-	            return instance;
-	        },
+	        on,
+	        off,
+	        once,
+	        emit,
 	    };
 	}
 
@@ -3687,7 +3680,7 @@ var MeetNow = (function (exports) {
 	}
 
 	const log$6 = browser('MN:Reactive');
-	function createReactive(data = {}, events) {
+	function createReactive(data, events) {
 	    events = events || createEvents(log$6);
 	    return new Proxy(data, {
 	        set(target, prop, value, receiver) {
@@ -4107,7 +4100,7 @@ var MeetNow = (function (exports) {
 	    }
 	    function isOnHold() {
 	        const endpoint = getEndpoint('audio-video');
-	        return endpoint && endpoint.status === 'on-hold';
+	        return !!endpoint && endpoint.status === 'on-hold';
 	    }
 	    function hasFocus() {
 	        return !!getEndpoint('focus');
@@ -4155,7 +4148,7 @@ var MeetNow = (function (exports) {
 	    }
 	    function isSharing() {
 	        const media = getMedia('applicationsharing');
-	        return media && media.status === 'sendonly';
+	        return !!media && media.status === 'sendonly';
 	    }
 	    function isSIP() {
 	        return data.protocol.toLowerCase() === 'sip';

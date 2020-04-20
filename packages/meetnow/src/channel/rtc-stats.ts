@@ -11,7 +11,16 @@ export interface ParsedStatsReport {
   outbound: ParsedStats;
 }
 
-export function createRTCStats() {
+export interface RTCStats {
+  readonly quality: number;
+  readonly inbound: ParsedStats;
+  readonly outbound: ParsedStats;
+
+  update: (report: RTCStatsReport) => void;
+  clear: () => void;
+}
+
+export function createRTCStats(): RTCStats {
   let quality: number = -1;
   let inbound = {} as ParsedStats;
   let outbound = {} as ParsedStats;
@@ -326,5 +335,3 @@ export function createRTCStats() {
     clear,
   };
 }
-
-export type RTCStats = ReturnType<typeof createRTCStats>;

@@ -1,10 +1,23 @@
 import debug from 'debug';
-import { createEvents } from '../events';
-import { ConferenceState } from './conference-info';
+import { createEvents, Events } from '../events';
+import { ConferenceState, ShareType } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
 
+export { ConferenceState, ShareType };
+
 const log = debug('MN:Information:State');
+
+export interface State extends Events {
+  readonly data: ConferenceState,
+  get: <T extends keyof ConferenceState>(key: T) => ConferenceState[T];
+  update: (diff?: ConferenceState) => void;
+
+  getSharingUserEntity: () => string | undefined;
+  getSpeechUserEntity: () => string | undefined;
+
+  getSharingType: () => ShareType | undefined,
+}
 
 export function createState(data: ConferenceState, context: Context) {
   const events = createEvents(log);
@@ -65,5 +78,3 @@ export function createState(data: ConferenceState, context: Context) {
     getSharingType,
   };
 }
-
-export type State = ReturnType<typeof createState>;

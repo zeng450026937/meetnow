@@ -36,7 +36,22 @@ export interface MessageConfigs {
 
 const log = debug('MN:Message');
 
-export function createMessage(config: MessageConfigs) {
+export interface Message {
+  readonly status: MessageStatus;
+  readonly direction: MessageDirection;
+  readonly content?: string;
+  readonly timestamp?: number;
+  readonly version?: number;
+  readonly sender?: MessageSender;
+  readonly receiver?: string[];
+  readonly private?: boolean;
+  send: (message: string, target?: string[]) => Promise<void>;
+  retry: () => Promise<void>;
+  cancel: () => void;
+  incoming: (data: MessageData) => Message;
+}
+
+export function createMessage(config: MessageConfigs): Message {
   const { api, onSucceeded, onFailed } = config;
 
   let status = MessageStatus.kNull;
@@ -159,5 +174,3 @@ export function createMessage(config: MessageConfigs) {
     incoming,
   };
 }
-
-export type Message = ReturnType<typeof createMessage>;

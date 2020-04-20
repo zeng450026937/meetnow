@@ -1,9 +1,9 @@
 import debug from 'debug';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import { ConferenceUser, ConferenceUsers } from './conference-info';
 import { createUser, User } from './user';
 import { createReactive } from '../reactive';
-import { createLobbyCtrl } from './lobby-ctrl';
+import { createLobbyCtrl, LobbyCtrl } from './lobby-ctrl';
 import { Context } from './context';
 
 export * from './user';
@@ -16,7 +16,41 @@ export interface InviteOptions {
   h323URL: string;
 }
 
-export function createUsers(data: ConferenceUsers, context: Context) {
+export interface Users extends Events, LobbyCtrl {
+  readonly data: ConferenceUsers,
+  get: <T extends keyof ConferenceUsers>(key: T) => ConferenceUsers[T];
+  update: (diff?: ConferenceUsers) => void;
+
+  getUserList: (filter?: ((user?: User) => boolean)) => User[];
+
+  getUser: (entity: string) => User | undefined;
+  hasUser: (entity: string) => boolean;
+
+  getCurrent: () => User | undefined;
+  getAttendee: () => User[];
+  getPresenter: () => User[];
+  getCastviewer: () => User[];
+  getOrganizer: () => User[];
+
+  getOnhold: () => User[];
+  getHandup: () => User[];
+
+  getSharing: () => User[];
+  getAudioBlocked: () => User[];
+  getVideoBlocked: () => User[];
+
+  getSIP: () => User[];
+  getHTTP: () => User[];
+  getRTMP: () => User[];
+
+  invite: (option: Partial<InviteOptions>) => Promise<void>;
+  kick: (entity: string) => Promise<void>;
+
+  mute: () => Promise<void>;
+  unmute: () => Promise<void>;
+}
+
+export function createUsers(data: ConferenceUsers, context: Context): Users {
   const { api } = context;
   const events = createEvents(log);
   const userMap = new Map<string, User>();
@@ -231,5 +265,3 @@ export function createUsers(data: ConferenceUsers, context: Context) {
     unmute,
   };
 }
-
-export type Users = ReturnType<typeof createUsers>;

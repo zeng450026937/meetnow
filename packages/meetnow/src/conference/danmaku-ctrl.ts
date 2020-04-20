@@ -31,7 +31,12 @@ export const DANMAKU_CONFIGS: DanmakuConfigs = {
   rollDirection  : 'R2L',
 };
 
-export function createDanmakuCtrl(api: Api) {
+export interface DanmakuCtrl {
+  setDanmaku: (config: Partial<DanmakuConfigs>) => Promise<void>;
+  sendDanmaku: (msg: string, options?: Partial<DanmakuOptions>) => Promise<void>;
+}
+
+export function createDanmakuCtrl(api: Api): DanmakuCtrl {
   let lastConfig: DanmakuConfigs = DANMAKU_CONFIGS;
 
   async function setDanmaku(config: Partial<DanmakuConfigs>) {

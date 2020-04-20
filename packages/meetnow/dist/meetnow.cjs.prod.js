@@ -1540,21 +1540,23 @@ function createEvents(scopedlog = log$3) {
     function on(event, fn) {
         if (isArray$1(event)) {
             event.forEach((ev) => on(ev, fn));
-            return;
+            return instance;
         }
         (events[event] || (events[event] = [])).push(fn);
+        return instance;
     }
     function off(event, fn) {
         if (isArray$1(event)) {
             event.forEach((e) => off(e, fn));
-            return;
+            return instance;
         }
         const callbacks = events[event];
-        if (!callbacks)
-            { return; }
+        if (!callbacks) {
+            return instance;
+        }
         if (!fn) {
             events[event] = null;
-            return;
+            return instance;
         }
         let callback;
         let index = callbacks.length;
@@ -1565,6 +1567,7 @@ function createEvents(scopedlog = log$3) {
                 break;
             }
         }
+        return instance;
     }
     function once(event, fn) {
         function wrapper(...args) {
@@ -1573,6 +1576,7 @@ function createEvents(scopedlog = log$3) {
         }
         wrapper.fn = fn;
         on(event, wrapper);
+        return instance;
     }
     function toArray(list, start) {
         start = start || 0;
@@ -1587,7 +1591,7 @@ function createEvents(scopedlog = log$3) {
         scopedlog(`emit() "${event}"`);
         let callbacks = events[event];
         if (!callbacks)
-            { return; }
+            { return instance; }
         callbacks = callbacks.length > 1 ? toArray(callbacks) : callbacks;
         for (const callback of callbacks) {
             try {
@@ -1597,24 +1601,13 @@ function createEvents(scopedlog = log$3) {
                 scopedlog(`invoke "${event}" callback failed: %o`, error);
             }
         }
+        return instance;
     }
     return instance = {
-        on(event, fn) {
-            on(event, fn);
-            return instance;
-        },
-        off(event, fn) {
-            off(event, fn);
-            return instance;
-        },
-        once(event, fn) {
-            once(event, fn);
-            return instance;
-        },
-        emit(event, ...args) {
-            emit(event, ...args);
-            return instance;
-        },
+        on,
+        off,
+        once,
+        emit,
     };
 }
 
@@ -1787,7 +1780,7 @@ function createPolling(config) {
 }
 
 const log$6 = debug('MN:Reactive');
-function createReactive(data = {}, events) {
+function createReactive(data, events) {
     events = events || createEvents(log$6);
     return new Proxy(data, {
         set(target, prop, value, receiver) {
@@ -2207,7 +2200,7 @@ function createUser(data, context) {
     }
     function isOnHold() {
         const endpoint = getEndpoint('audio-video');
-        return endpoint && endpoint.status === 'on-hold';
+        return !!endpoint && endpoint.status === 'on-hold';
     }
     function hasFocus() {
         return !!getEndpoint('focus');
@@ -2255,7 +2248,7 @@ function createUser(data, context) {
     }
     function isSharing() {
         const media = getMedia('applicationsharing');
-        return media && media.status === 'sendonly';
+        return !!media && media.status === 'sendonly';
     }
     function isSIP() {
         return data.protocol.toLowerCase() === 'sip';

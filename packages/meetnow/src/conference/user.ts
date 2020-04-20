@@ -1,12 +1,16 @@
 import debug from 'debug';
-import { createEvents } from '../events';
+import { createEvents, Events } from '../events';
 import {
   ConferenceUser, MediaFilter, UserEndpoint, UserMedia,
 } from './conference-info';
 import { createReactive } from '../reactive';
 import { Context } from './context';
-import { createCameraCtrl } from './camera-ctrl';
+import { CameraCtrl, createCameraCtrl } from './camera-ctrl';
 import { ChatChannel } from '../channel/chat-channel';
+
+export {
+  ConferenceUser, MediaFilter, UserEndpoint, UserMedia,
+};
 
 const log = debug('MN:Information:User');
 
@@ -15,7 +19,77 @@ export interface FilterOptions {
   enable: boolean;
 }
 
-export function createUser(data: ConferenceUser, context: Context) {
+export interface User extends Events {
+  readonly data: ConferenceUser,
+  get: <T extends keyof ConferenceUser>(key: T) => ConferenceUser[T];
+  update: (diff?: ConferenceUser) => void;
+
+  getEntity: () => ConferenceUser['entity'];
+  getUID: () => ConferenceUser['subject-id'];
+  getDisplayText: () => ConferenceUser['display-text'];
+  getRole: () => ConferenceUser['roles']['role'];
+
+  isCurrent: () => boolean;
+  isAttendee: () => boolean;
+  isPresenter: () => boolean;
+  isCastviewer: () => boolean;
+  isOrganizer: () => boolean;
+
+  getEndpoint: (type: UserEndpoint['session-type']) => UserEndpoint | undefined;
+  isOnHold: () => boolean;
+
+  hasFocus: () => boolean;
+  hasMedia: () => boolean;
+  hasSharing: () => boolean;
+  hasFECC: () => boolean;
+
+  getMedia: (label: UserMedia['label']) => UserMedia | undefined;
+  getAudioFilter: (label: UserMedia['label']) => {
+    ingress: MediaFilter['type'];
+    egress: MediaFilter['type'];
+  } | undefined;
+  getVideoFilter: (label: UserMedia['label']) => {
+    ingress: MediaFilter['type'];
+    egress: MediaFilter['type'];
+  } | undefined;
+
+  isAudioBlocked: () => boolean;
+  isVideoBlocked: () => boolean;
+
+  isHandup: () => boolean;
+  isSharing: () => boolean;
+
+  isSIP: () => boolean;
+  isHTTP: () => boolean;
+  isRTMP: () => boolean;
+
+  // user ctrl
+  setFilter: (options: FilterOptions) => Promise<void>;
+  setAudioFilter: (enable: boolean) => Promise<void>;
+  setVideoFilter: (enable: boolean) => Promise<void>;
+
+  setDisplayText: (displayText: string) => Promise<void>;
+  setRole: (role: 'attendee' | 'presenter') => Promise<void>;
+  setFocus: (enable?: boolean) => Promise<void>;
+
+  getStats: () => Promise<any>;
+
+  kick: () => Promise<any>;
+
+  hold: () => Promise<any>;
+  unhold: () => Promise<any>;
+  allow: () => Promise<any>;
+
+  accept: () => Promise<any>;
+  reject: () => Promise<any>;
+
+  sendMessage: (msg: string) => Promise<any>;
+
+  // camera ctrl
+  camera: CameraCtrl
+}
+
+export function createUser(data: ConferenceUser, context: Context): User {
   const { api, userId } = context;
   const events = createEvents(log);
   /* eslint-disable-next-line no-use-before-define */
@@ -87,7 +161,7 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
   function isOnHold() {
     const endpoint = getEndpoint('audio-video');
-    return endpoint && endpoint.status === 'on-hold';
+    return !!endpoint && endpoint.status === 'on-hold';
   }
 
   function hasFocus() {
@@ -142,7 +216,7 @@ export function createUser(data: ConferenceUser, context: Context) {
   }
   function isSharing() {
     const media = getMedia('applicationsharing');
-    return media && media.status === 'sendonly';
+    return !!media && media.status === 'sendonly';
   }
 
   function isSIP() {
@@ -357,5 +431,3 @@ export function createUser(data: ConferenceUser, context: Context) {
     camera,
   };
 }
-
-export type User = ReturnType<typeof createUser>;

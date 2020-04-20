@@ -9,7 +9,14 @@ export interface WorkerConfig {
   interval?: number | (() => number);
 }
 
-export function createWorker(config: WorkerConfig) {
+export interface Worker {
+  config: WorkerConfig;
+  readonly running: boolean;
+  start: (immediate?: boolean) => Promise<void>;
+  stop: () => void;
+}
+
+export function createWorker(config: WorkerConfig): Worker {
   let running: boolean = false;
   let working: boolean = false;
   let interval: number = 0;
@@ -74,5 +81,3 @@ export function createWorker(config: WorkerConfig) {
     stop,
   };
 }
-
-export type Worker = ReturnType<typeof createWorker>;
