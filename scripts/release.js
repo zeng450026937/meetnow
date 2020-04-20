@@ -201,7 +201,7 @@ async function publishPackage(pkgName, version, runIfNotDry) {
   const releaseTags = semver.prerelease(version);
   const releaseTag = releaseTags && releaseTags[0];
 
-  step(`Publishing ${ pkg }...`);
+  step(`Publishing ${ pkgName }...`);
   try {
     await runIfNotDry(
       'yarn',
