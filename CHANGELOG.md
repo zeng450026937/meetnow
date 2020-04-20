@@ -1,3 +1,7 @@
+# [1.0.0](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.1.3-beta...v1.0.0) (2020-04-20)
+
+
+
 ## [1.1.3-beta](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.1.2-beta...v1.1.3-beta) (2020-04-15)
 
 

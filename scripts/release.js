@@ -177,8 +177,7 @@ function updateDeps(pkg, depType, version) {
   if (!deps) return;
   Object.keys(deps).forEach(dep => {
     if (
-      dep === 'vue' ||
-      (dep.startsWith('@vue') && packages.includes(dep.replace(/^@vue\//, '')))
+      dep.startsWith('@meetnow') && packages.includes(dep.replace(/^@meetnow\//, ''))
     ) {
       console.log(
         chalk.yellow(`${ pkg.name } -> ${ depType } -> ${ dep }@${ version }`),
@@ -199,13 +198,8 @@ async function publishPackage(pkgName, version, runIfNotDry) {
     return;
   }
 
-  // for now (alpha/beta phase), every package except "vue" can be published as
-  // `latest`, whereas "vue" will be published under the "next" tag.
-  const releaseTag =
-    pkgName === 'vue' ? 'next' : semver.prerelease(version)[0] || 'latest';
-
-  // TODO use inferred release channel after offcial 3.0 release
-  // const releaseTag = semver.prerelease(version)[0] || 'latest'
+  const releaseTags = semver.prerelease(version);
+  const releaseTag = releaseTags && releaseTags[0];
 
   step(`Publishing ${ pkg }...`);
   try {
@@ -215,8 +209,7 @@ async function publishPackage(pkgName, version, runIfNotDry) {
         'publish',
         '--new-version',
         version,
-        '--tag',
-        releaseTag,
+        ...(releaseTag ? ['--tag', releaseTag] : []),
         '--access',
         'public',
       ],

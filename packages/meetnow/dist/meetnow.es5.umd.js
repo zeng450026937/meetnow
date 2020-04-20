@@ -18710,8 +18710,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.1.3-beta"));
-              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.1.3-beta")); // join focus
+              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.0"));
+              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.0")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -19506,7 +19506,7 @@ function createUA() {
 if (false) {}
 
 var src_log = browser_default()('MN');
-var src_version = "1.1.3-beta"; // global setup
+var src_version = "1.0.0"; // global setup
 
 function src_setup(config) {
   Object(src_config["a" /* setupConfig */])(config);

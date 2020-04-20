@@ -155,7 +155,7 @@ function createConfig(format, output, plugins = []) {
     // Global and Browser ESM builds inlines everything so that they can be
     // used alone.
     external :
-      isGlobalBuild || isBundlerESMBuild
+      isGlobalBuild || isUMDBuild || isBundlerESMBuild
         ? []
         : knownExternals.concat(Object.keys(pkg.dependencies || [])),
     plugins : [
