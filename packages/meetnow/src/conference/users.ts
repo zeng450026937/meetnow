@@ -48,6 +48,7 @@ export interface Users extends Events, LobbyCtrl {
 
   mute: () => Promise<void>;
   unmute: () => Promise<void>;
+  reject: () => Promise<void>;
 }
 
 export function createUsers(data: ConferenceUsers, context: Context): Users {
@@ -220,6 +221,13 @@ export function createUsers(data: ConferenceUsers, context: Context): Users {
       .request('unmuteAll')
       .send();
   }
+  async function reject() {
+    log('reject');
+
+    await api
+      .request('rejectHandupAll')
+      .send();
+  }
 
   return users = {
     ...events,
@@ -263,5 +271,6 @@ export function createUsers(data: ConferenceUsers, context: Context): Users {
 
     mute,
     unmute,
+    reject,
   };
 }
