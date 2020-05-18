@@ -442,7 +442,7 @@ export function createChannel(config: ChannelConfigs): Channel {
       });
     } catch (error) {
       /* eslint-disable-next-line no-use-before-define */
-      onFailed('local', 'Bad Media Description');
+      onFailed('remote', 'Bad Media Description');
 
       events.emit('peerconnection:setremotedescriptionfailed', error);
 
