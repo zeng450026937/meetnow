@@ -353,10 +353,10 @@ export function createConference(config: ConferenceConfigs) {
 
     state.on('sharingUserEntityChanged', (val: string) => {
       // in some cases, eg. whitebord sharing
-      // sharing use entity is an new unique id, which can not be find in user list
+      // sharing use entity is an new unique id, which can not be finded in user list
       // use the second param the help making sharing detection strategy
       // 1. no user & no entity => no sharing
-      // 2. no user & has entity => sharing
+      // 2. no user & has entity => sharing(whitebord)
       // 3. has user => sharing
       events.emit('sharinguser', users.getUser(val), val);
     });
@@ -514,7 +514,7 @@ export function createConference(config: ConferenceConfigs) {
     // in conference info
     // user entity is string type
     // while we may receive number type
-    // change to string type
+    // cast to string type
     get userId() {
       return `${ userId }`;
     },
