@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="icon" href="favicon.ico" />
-    <title>DEMO</title>
+    <title>接收辅流</title>
     <style>
       * {
         margin: 0;
@@ -42,23 +42,8 @@
         height: 100%;
         object-fit: fill;
       }
-      .share {
-        position: absolute;
-        top: 200px;
-        left: 20px;
-
-        width: 580px;
-        height: 360px;
-      }
-      .share-video {
-        width: 100%;
-        height: 100%;
-        object-fit: fill;
-      }
-      /* 123456.36898 */
     </style>
-    <script src="./adapter-latest.js"></script>
-    <script src="./meetnow.umd.js"></script>
+    <script src="../packages/meetnow/dist/meetnow.global.js"></script>
   </head>
   <body>
     <div class="form">
@@ -72,7 +57,7 @@
         <input class="nickname-input" type="text" placeholder="昵称" required />
       </div>
       <div class="form__button">
-        <button onclick="join()">加入会议</button>
+        <button onclick="join()">辅流入会</button>
         <button onclick="leave()">退出会议</button>
       </div>
     </div>
@@ -83,20 +68,14 @@
       <div class="local">
         <video class="local-video" autoplay loop="loop"></video>
       </div>
-
-      <div class="share">
-        辅流
-        <video class="share-video" autoplay loop="loop"></video>
-      </div>
     </div>
+
     <script>
-      MeetNow.setup();
+      MeetNow.default.setup();
       let ua = null;
       let conf = null;
       let [number, password, displayName] = ['', '', ''];
-      let [user, users, confStatus] = [{}, {}, 'disconnected'];
-
-      let sharing = false;
+      let [user, users, confStatus, sharing] = [{}, {}, 'disconnected'];
 
       async function join() {
         if (confStatus !== 'disconnected' || !number || !displayName) {
@@ -113,11 +92,18 @@
 
         await conf.join();
 
-        if (conf.mediaChannel) await conf.mediaChannel.connect();
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then(
+          async mediaStream => {
+            // we have a stream, attach it to a feedback video element
 
-        // 辅流 connect
-        if (conf.shareChannel)
-          await conf.shareChannel.connect({ mediaConstraints: {} });
+            await conf.share({ mediaStream });
+            const remoteVideo = document.querySelector('.remote-video');
+            remoteVideo.srcObject = mediaStream;
+          },
+          error => {
+            console.log('Unable to acquire screen capture', error);
+          },
+        );
       }
 
       function leave() {
@@ -140,7 +126,7 @@
 
         navigator.mediaDevices
           .getUserMedia(constraints)
-          .then((mediaStream) => {
+          .then(mediaStream => {
             const localVideo = document.querySelector('.local-video');
 
             if (!localVideo) return;
@@ -150,7 +136,7 @@
               localVideo.play();
             };
           })
-          .catch((error) => {
+          .catch(error => {
             console.error(error);
           });
       }
@@ -169,8 +155,6 @@
           confStatus = 'disconnected';
           console.warn('disconnected');
           conf = null;
-          console.log('conf', conf);
-          console.log('confStatus', confStatus);
         });
         conf.on('connected', () => {
           confStatus = 'connected';
@@ -179,17 +163,7 @@
             console.warn('error');
           });
 
-          // 辅流
-          // remotestream
-          conf.shareChannel.on('remotestream', (stream) => {
-            console.warn(
-              'shareChannel - remotestream',
-              conf.state.getSharingUserEntity(),
-              stream,
-            );
-          });
-
-          conf.users.on('updated', (data) => {
+          conf.users.on('updated', data => {
             console.warn('updated', data);
             user = conf.user;
             users = conf.users;
@@ -206,48 +180,46 @@
             users = conf.users;
           });
 
-          conf.mediaChannel.on('localstream', (stream) => {
+          conf.mediaChannel.on('localstream', () => {
             console.warn('localstream');
-            const localVideo = document.querySelector('.local-video');
-            localVideo.srcObject = stream;
           });
-          conf.mediaChannel.on('remotestream', (stream) => {
+          conf.mediaChannel.on('remotestream', () => {
             console.warn('remotestream');
+
             const remoteVideo = document.querySelector('.remote-video');
-            remoteVideo.srcObject = stream;
+
+            const mediaStream = conf.mediaChannel.getRemoteStream();
+
+            remoteVideo.srcObject = mediaStream;
+          });
+
+          // shareChannel
+          conf.shareChannel.on('connected', () => {
+            console.warn('shareChannel - connected');
+          });
+          conf.shareChannel.on('ended', () => {
+            console.warn('shareChannel - ended');
+          });
+          conf.shareChannel.on('localstream', () => {
+            console.warn('shareChannel - localstream');
+          });
+          conf.shareChannel.on('remotestream', () => {
+            console.warn('shareChannel - remotestream');
           });
         });
 
-        // 辅流
-        // sharinguser
-        conf.on('sharinguser', (data, val) => {
-          console.warn('sharinguser');
-
-          // 普通辅流 data 为分享辅流用户 User | 白板协作 data 为 空， val为白板用户 entity
-          // 如需支持白板，必须进行如下判断
-          sharing = (data && data.getEntity()) || val ? true : false;
-
-          const shareVideo = document.querySelector('.share-video');
-
-          if (sharing) {
-            const stream = conf.shareChannel.getRemoteStream();
-
-            console.log('sharing stream', stream);
-
-            shareVideo.srcObject = stream;
-          } else {
-            shareVideo.srcObject = null;
-          }
+        conf.on('sharinguser', data => {
+          console.warn('sharinguser', data);
         });
 
         // currentUser
-        conf.on('user', (data) => {
+        conf.on('user', data => {
           console.warn('user', data);
           console.warn('user', data.isCurrent());
 
           users = conf.users;
 
-          conf.user.on('updated', (data) => {
+          conf.user.on('updated', data => {
             console.warn('updated', data);
           });
           conf.user.on('displayTextChanged', () => {
@@ -259,7 +231,7 @@
           conf.user.on('holdChanged', () => {
             console.warn('holdChanged');
           });
-          conf.user.on('handupChanged', (data) => {
+          conf.user.on('handupChanged', data => {
             console.warn('handupChanged', data);
           });
           conf.user.on('audioChanged', () => {
@@ -268,10 +240,10 @@
           conf.user.on('videoChanged', () => {
             console.warn('videoChanged');
           });
-          conf.user.on('mediaChanged', (data) => {
+          conf.user.on('mediaChanged', data => {
             console.warn('mediaChanged', data);
           });
-          conf.user.on('sharingChanged', (data) => {
+          conf.user.on('sharingChanged', data => {
             console.warn('sharingChanged', data);
           });
         });
@@ -319,6 +291,10 @@
         nicknameInput.addEventListener('input', () => {
           displayName = nicknameInput.value;
         });
+      };
+
+      window.onbeforeunload = function() {
+        leave();
       };
     </script>
   </body>
