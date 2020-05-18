@@ -336,12 +336,13 @@ export function createConference(config: ConferenceConfigs) {
   async function end() {
     throwIfNotStatus(STATUS.kConnected);
 
-    await leave();
-
-    await api
-      .request('end')
-      .data({ 'conference-url': url! })
-      .send();
+    await Promise.all([
+      leave(),
+      api
+        .request('end')
+        .data({ 'conference-url': url! })
+        .send(),
+    ]);
 
     return conference as Conference;
   }
