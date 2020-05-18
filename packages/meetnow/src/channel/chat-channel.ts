@@ -64,17 +64,17 @@ export function createChatChannel(config: ChatChannelConfigs): ChatChannel {
     events.emit('disconnected');
   }
 
-  async function sendMessage(msg: string, target?: string[]) {
+  async function sendMessage(content: string, target?: string[]) {
     log('sendMessage()');
 
-    const message = createMessage({ api, sender });
+    const message = createMessage({ api, content, sender });
 
     events.emit('message', {
       originator : 'local',
       message,
     });
 
-    await message.send(msg, target);
+    await message.send(target);
 
     messages.push(message);
 
@@ -101,6 +101,10 @@ export function createChatChannel(config: ChatChannelConfigs): ChatChannel {
 
     get ready() {
       return ready;
+    },
+
+    get  messages() {
+      return messages;
     },
 
     connect,

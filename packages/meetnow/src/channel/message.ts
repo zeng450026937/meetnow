@@ -2,6 +2,7 @@ import debug from 'debug';
 import { AxiosResponse } from 'axios';
 import { Api } from '../api';
 import { Request, RequestResult } from '../api/request';
+import { createEvents, Events } from '../events';
 
 export enum MessageStatus {
   kNull,
@@ -29,9 +30,8 @@ export interface MessageSender {
 
 export interface MessageConfigs {
   api: Api;
+  content?: string;
   sender?: MessageSender;
-  onSucceeded?: (msg: Message) => void;
-  onFailed?: (msg: Message) => void;
 }
 
 const log = debug('MN:Message');
@@ -45,20 +45,22 @@ export interface Message {
   readonly sender?: MessageSender;
   readonly receiver?: string[];
   readonly private?: boolean;
-  send: (message: string, target?: string[]) => Promise<void>;
+  send: (target?: string[]) => Promise<void>;
   retry: () => Promise<void>;
   cancel: () => void;
   incoming: (data: MessageData) => Message;
 }
 
 export function createMessage(config: MessageConfigs): Message {
-  const { api, onSucceeded, onFailed } = config;
+  const { api } = config;
+  const events = createEvents(log);
 
   let status = MessageStatus.kNull;
   let direction: MessageDirection = 'outgoing';
-  let content: string | undefined;
   let timestamp: number | undefined;
   let version: number | undefined;
+  /* eslint-disable-next-line prefer-destructuring */
+  let content: string | undefined = config.content;
   /* eslint-disable-next-line prefer-destructuring */
   let sender: MessageSender | undefined = config.sender;
   let receiver: string[] | undefined;
@@ -67,12 +69,13 @@ export function createMessage(config: MessageConfigs): Message {
   let message: any;
   let request: Request | undefined;
 
-  async function send(message: string, target?: string[]) {
+  async function send(target?: string[]) {
     log('send()');
 
     if (direction === 'incoming') throw new Error('Invalid Status');
 
     status = MessageStatus.kSending;
+    events.emit('sending', message);
 
     request = api
       .request('pushMessage')
@@ -88,14 +91,13 @@ export function createMessage(config: MessageConfigs): Message {
     } catch (error) {
       status = MessageStatus.kFailed;
 
-      onFailed && onFailed(message as any);
+      events.emit('failed', message);
 
       throw error;
     }
 
     const { data } = response;
 
-    content = message;
     receiver = target;
     ({
       'im-version': version,
@@ -104,7 +106,7 @@ export function createMessage(config: MessageConfigs): Message {
 
     status = MessageStatus.kSuccess;
 
-    onSucceeded && onSucceeded(message as any);
+    events.emit('succeeded', message);
   }
 
   async function retry() {
@@ -112,7 +114,7 @@ export function createMessage(config: MessageConfigs): Message {
 
     if (!content) throw new Error('Invalid Message');
 
-    await send(content, receiver);
+    await send(receiver);
   }
 
   function cancel() {
@@ -142,6 +144,8 @@ export function createMessage(config: MessageConfigs): Message {
   }
 
   return message = {
+    ...events,
+
     get status() {
       return status;
     },
