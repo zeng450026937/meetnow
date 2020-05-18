@@ -186,8 +186,8 @@ export function createUser(data: ConferenceUser, context: Context): User {
   function getMediaFilter(label: UserMedia['label']) {
     const media = getMedia(label);
     const {
-      'media-ingress-filter': ingress = { type: 'block' } as MediaFilter,
-      'media-egress-filter': egress = { type: 'block' } as MediaFilter,
+      'media-ingress-filter': ingress = { type: 'unblock' } as MediaFilter,
+      'media-egress-filter': egress = { type: 'unblock' } as MediaFilter,
     } = media || {};
     return {
       ingress : ingress.type,
@@ -298,10 +298,12 @@ export function createUser(data: ConferenceUser, context: Context): User {
   async function getStats() {
     log('getStats()');
 
-    await api
+    const { data } = await api
       .request('getStats')
       .data({ 'user-entity-list': [entity] })
       .send();
+
+    return data;
   }
 
   async function kick() {
