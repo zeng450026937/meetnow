@@ -196,7 +196,8 @@ export function createUsers(data: ConferenceUsers, context: Context): Users {
         uid        : option.uid,
         'sip-url'  : option.sipURL,
         'h323-url' : option.h323URL,
-      });
+      })
+      .send();
   }
   async function kick(entity: string) {
     log('kick');
