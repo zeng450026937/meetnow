@@ -91,10 +91,17 @@ export function createMediaChannel(config: MediaChannelConfigs): MediaChannel {
 
   channel.on(
     'sdp',
-    createModifier()
-      .content(type)
-      .prefer('h264')
-      .build(),
+    (data) => {
+      if (data.originator === 'local') {
+        createModifier()
+          .content(type)
+          .prefer('h264')
+          .build()(data);
+        return;
+      }
+
+      log(`${ data.originator } sdp: \n\n %s \n`, data.sdp);
+    },
   );
 
   channel.on('peerconnection', (pc: RTCPeerConnection) => {
