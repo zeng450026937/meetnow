@@ -170,6 +170,16 @@ export function createConference(config: ConferenceConfigs) {
     await chatChannel.connect().catch(() => {});
   }
 
+  async function retryChannel(channel: MediaChannel) {
+    if (status !== STATUS.kConnected) {
+      log('retry channel in wrong conference status: %s', status);
+      return;
+    }
+    const options = channel.getConnectOptions();
+    await channel!.terminate('Retry');
+    await channel!.connect(options);
+  }
+
   async function join(options: Partial<JoinOptions> = {}) {
     log('join()');
 
@@ -396,7 +406,8 @@ export function createConference(config: ConferenceConfigs) {
       onRenegotiate : (data: any) => {
         log('receive renegotiate: %o', data);
 
-        mediaChannel!.renegotiate();
+        retryChannel(mediaChannel!);
+        retryChannel(shareChannel!);
       },
 
       onQuit : (data: any) => {

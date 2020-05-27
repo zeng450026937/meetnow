@@ -25,7 +25,7 @@ export type Originator = 'local' | 'remote';
 export type OfferAnswer = { sdp: string };
 
 export interface ChannelConfigs {
-  invite: (offer: OfferAnswer) => OfferAnswer | Promise<OfferAnswer>;
+  invite: (offer: OfferAnswer & { renegotiate: boolean }) => OfferAnswer | Promise<OfferAnswer>;
   confirm: () => void | Promise<void>;
   cancel: (reason?: string) => void | Promise<void>;
   bye: (reason?: string) => void | Promise<void>;
@@ -44,6 +44,13 @@ export interface RenegotiateOptions {
   rtcOfferConstraints?: RTCOfferOptions;
   mediaStream?: MediaStream;
   mediaConstraints?: MediaStreamConstraints;
+}
+
+export interface ParsedConnectOptions {
+  rtcConstraints: RTCConfiguration;
+  rtcOfferConstraints: RTCOfferOptions;
+  localMediaStream?: MediaStream
+  localMediaStreamLocallyGenerated: boolean;
 }
 
 /**
@@ -75,6 +82,8 @@ export interface Channel extends Events {
   readonly connection?: RTCPeerConnection;
   readonly startTime?: Date;
   readonly endTime?: Date;
+
+  getConnectOptions: () => ParsedConnectOptions;
 
   isInProgress: () => boolean;
   isEstablished: () => boolean;
@@ -314,7 +323,10 @@ export function createChannel(config: ChannelConfigs): Channel {
   async function connect(options: ConnectOptions = {}) {
     log('connect()');
 
-    throwIfNotStatus(STATUS.kNull);
+    throwIfStatus(STATUS.kProgress);
+    throwIfStatus(STATUS.kOffered);
+    throwIfStatus(STATUS.kAnswered);
+    throwIfStatus(STATUS.kAccepted);
 
     if (!(window as any).RTCPeerConnection) {
       throw new Error('WebRTC not supported');
@@ -392,7 +404,7 @@ export function createChannel(config: ChannelConfigs): Channel {
     let answer: OfferAnswer;
 
     try {
-      answer = await invite({ sdp: localSDP });
+      answer = await invite({ sdp: localSDP, renegotiate: false });
     } catch (error) {
       /* eslint-disable-next-line no-use-before-define */
       onFailed('local', 'Request Error');
@@ -490,13 +502,13 @@ export function createChannel(config: ChannelConfigs): Channel {
 
         status = STATUS.kCanceled;
         /* eslint-disable-next-line no-use-before-define */
-        onFailed('local', 'Canceled');
+        onFailed('local', reason || 'Canceled');
         break;
       case STATUS.kAnswered:
       case STATUS.kAccepted:
         await bye(reason);
         /* eslint-disable-next-line no-use-before-define */
-        onEnded('local', 'Terminated');
+        onEnded('local', reason || 'Terminated');
         break;
       default:
         break;
@@ -737,6 +749,7 @@ export function createChannel(config: ChannelConfigs): Channel {
 
     /* eslint-disable-next-line no-use-before-define */
     const answer = await invite({ sdp: mangleOffer(localSDP) });
+    const answer = await invite({ sdp: mangleOffer(localSDP), renegotiate: true });
 
     const desc = {
       originator : 'remote',
@@ -1152,6 +1165,15 @@ export function createChannel(config: ChannelConfigs): Channel {
     return rtcStats;
   }
 
+  const getConnectOptions = (): ParsedConnectOptions => {
+    return {
+      rtcConstraints,
+      rtcOfferConstraints,
+      localMediaStream,
+      localMediaStreamLocallyGenerated,
+    } as any;
+  };
+
   return {
     ...events,
 
@@ -1168,6 +1190,8 @@ export function createChannel(config: ChannelConfigs): Channel {
     get endTime() {
       return endTime;
     },
+
+    getConnectOptions,
 
     isInProgress,
     isEstablished,

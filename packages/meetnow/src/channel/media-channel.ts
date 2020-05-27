@@ -20,7 +20,7 @@ export interface MediaChannel extends Channel {
 
 export function createMediaChannel(config: MediaChannelConfigs): MediaChannel {
   const { api, type = 'main' } = config;
-  let mediaVersion: number;
+  let mediaVersion: number | undefined;
   let callId: string;
   let request: Request | undefined;
   let icetimmeout: number | undefined;
@@ -34,7 +34,7 @@ export function createMediaChannel(config: MediaChannelConfigs): MediaChannel {
 
       let { sdp } = offer;
 
-      const apiName = mediaVersion
+      const apiName = offer.renegotiate
         ? type === 'main'
           ? 'renegMedia'
           : 'renegShare'
@@ -73,11 +73,13 @@ export function createMediaChannel(config: MediaChannelConfigs): MediaChannel {
 
       request && request.cancel();
       request = undefined;
+      mediaVersion = undefined;
     },
     bye : () => {
       log('bye()');
 
       request = undefined;
+      mediaVersion = undefined;
     },
 
     localstream : (stream) => {
