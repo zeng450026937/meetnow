@@ -80,7 +80,7 @@ export function createMessage(config: MessageConfigs): Message {
     request = api
       .request('pushMessage')
       .data({
-        'im-context'       : message,
+        'im-context'       : message.content,
         'user-entity-list' : target,
       });
 
