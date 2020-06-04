@@ -175,9 +175,10 @@ export function createConference(config: ConferenceConfigs) {
       log('retry channel in wrong conference status: %s', status);
       return;
     }
-    const options = channel.getConnectOptions();
+    const { localMediaStream, rtcConstraints, rtcOfferConstraints } = channel.getConnectOptions();
+
     await channel!.terminate('Retry');
-    await channel!.connect(options);
+    await channel!.connect({ rtcConstraints, rtcOfferConstraints, mediaStream: localMediaStream });
   }
 
   async function join(options: Partial<JoinOptions> = {}) {
