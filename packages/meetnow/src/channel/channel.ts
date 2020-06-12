@@ -748,7 +748,6 @@ export function createChannel(config: ChannelConfigs): Channel {
     const localSDP = await createLocalDescription('offer', rtcOfferConstraints!);
 
     /* eslint-disable-next-line no-use-before-define */
-    const answer = await invite({ sdp: mangleOffer(localSDP) });
     const answer = await invite({ sdp: mangleOffer(localSDP), renegotiate: true });
 
     const desc = {
@@ -835,6 +834,7 @@ export function createChannel(config: ChannelConfigs): Channel {
 
     let stream: MediaStream | undefined;
 
+    // @ts-ignore
     if (connection!.getReceivers) {
       stream = new (window as any).MediaStream();
 
@@ -857,6 +857,7 @@ export function createChannel(config: ChannelConfigs): Channel {
 
     let stream: MediaStream | undefined;
 
+    // @ts-ignore
     if (connection!.getSenders) {
       stream = new (window as any).MediaStream();
 
@@ -880,6 +881,7 @@ export function createChannel(config: ChannelConfigs): Channel {
 
     if (!stream) return;
 
+    // @ts-ignore
     if (connection!.addTrack) {
       stream
         .getTracks()
@@ -918,6 +920,7 @@ export function createChannel(config: ChannelConfigs): Channel {
     let peerHasAudio = false;
     let peerHasVideo = false;
 
+    // @ts-ignore
     if (connection!.getSenders) {
       connection!.getSenders().forEach((sender) => {
         if (!sender.track) return;

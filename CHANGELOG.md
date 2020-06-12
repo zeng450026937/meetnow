@@ -1,3 +1,27 @@
+## [1.0.1](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.0...v1.0.1) (2020-06-12)
+
+
+### Bug Fixes
+
+* **chat-channel:** message ([e2d1e03](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/e2d1e03c5e7ff106da4e388a8efcfe024086313b))
+* **retry:** parameter error ([bef85c9](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/bef85c92d388167a619fac7e02b2d04e5b1f4cfa))
+* port-change media reconnect ([5c504b6](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/5c504b6306be462d655d9d05e90ccc1292c15753))
+* remote sdp ([707323c](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/707323c5d39be173669d8bd00bab01600e639b36))
+* **channel:** fix originator when remote sdp failed ([c9ffa9c](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/c9ffa9c504b5046b144381110d3893b461f5f6bc))
+* **conference:** end error ([e2c73d7](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/e2c73d7daf87c11dee9da7a3ffb9801f93f68c50))
+* **demo:** meetnow setup ([6ef5da0](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/6ef5da0fc66a8a565fe9099fecb74156fad78c05))
+* **users:** invite error ([49ee9ed](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/49ee9ed06571b35faaf23248457f249ab8fccd48))
+
+
+### Features
+
+* **chat-channel:** send message ([4d5274b](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/4d5274bc3d7ca7671226f565f36e8791b7990847))
+* **demo:** add share ([bcbed17](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/bcbed17ca4627634cb8aa9f121305987d2c75de1))
+* **user:** media-filter initial value ([e793465](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/e7934653c84c8eb3f4d0d6a63161c8a2e4216ff4))
+* **users:** ad api: reject all ([fa34ab7](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/fa34ab7b359f57b744de00eaf8825e3cd4c9db91))
+
+
+
 # [1.0.0](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.1.3-beta...v1.0.0) (2020-04-20)
 
 

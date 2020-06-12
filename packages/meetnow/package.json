@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/meetnow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Yealink Meeting via WebRTC.",
   "main": "index.js",
   "module": "dist/meetnow.esm-bundler.js",
@@ -19,9 +19,9 @@
   "license": "MIT",
   "sideEffects": false,
   "dependencies": {
-    "@meetnow/axios-miniprogram-adapter": "1.0.0",
-    "@meetnow/browser": "1.0.0",
-    "@meetnow/sdp-transform": "1.0.0",
+    "@meetnow/axios-miniprogram-adapter": "1.0.1",
+    "@meetnow/browser": "1.0.1",
+    "@meetnow/sdp-transform": "1.0.1",
     "axios": "^0.19.0",
     "debug": "^4.1.1",
     "md5": "^2.2.1",

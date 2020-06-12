@@ -4125,7 +4125,7 @@
 	    }
 	    function getMediaFilter(label) {
 	        const media = getMedia(label);
-	        const { 'media-ingress-filter': ingress = { type: 'block' }, 'media-egress-filter': egress = { type: 'block' }, } = media || {};
+	        const { 'media-ingress-filter': ingress = { type: 'unblock' }, 'media-egress-filter': egress = { type: 'unblock' }, } = media || {};
 	        return {
 	            ingress: ingress.type,
 	            egress: egress.type,
@@ -4217,10 +4217,11 @@
 	    }
 	    async function getStats() {
 	        log$d('getStats()');
-	        await api
+	        const { data } = await api
 	            .request('getStats')
 	            .data({ 'user-entity-list': [entity] })
 	            .send();
+	        return data;
 	    }
 	    async function kick() {
 	        log$d('kick()');
@@ -4481,7 +4482,8 @@
 	            uid: option.uid,
 	            'sip-url': option.sipURL,
 	            'h323-url': option.h323URL,
-	        });
+	        })
+	            .send();
 	    }
 	    async function kick(entity) {
 	        log$f('kick');
@@ -4500,6 +4502,12 @@
 	        log$f('unmute');
 	        await api
 	            .request('unmuteAll')
+	            .send();
+	    }
+	    async function reject() {
+	        log$f('reject');
+	        await api
+	            .request('rejectHandupAll')
 	            .send();
 	    }
 	    return users = Object.spread({}, events,
@@ -4530,7 +4538,8 @@
 	        invite,
 	        kick,
 	        mute,
-	        unmute});
+	        unmute,
+	        reject});
 	}
 
 	const log$g = browser('MN:Information:RTMP');
@@ -5827,11 +5836,6 @@
 	            { return; }
 	        throw new Error(message || 'Invalid State');
 	    }
-	    function throwIfNotStatus(condition, message) {
-	        if (status === condition)
-	            { return; }
-	        throw new Error(message || 'Invalid State');
-	    }
 	    function throwIfTerminated() {
 	        const message = 'Terminated';
 	        if (canceled)
@@ -5966,7 +5970,10 @@
 	    }
 	    async function connect(options = {}) {
 	        log$m('connect()');
-	        throwIfNotStatus(STATUS.kNull);
+	        throwIfStatus(STATUS.kProgress);
+	        throwIfStatus(STATUS.kOffered);
+	        throwIfStatus(STATUS.kAnswered);
+	        throwIfStatus(STATUS.kAccepted);
 	        if (!window.RTCPeerConnection) {
 	            throw new Error('WebRTC not supported');
 	        }
@@ -6026,7 +6033,7 @@
 	        status = STATUS.kOffered;
 	        let answer;
 	        try {
-	            answer = await invite({ sdp: localSDP });
+	            answer = await invite({ sdp: localSDP, renegotiate: false });
 	        }
 	        catch (error) {
 	            /* eslint-disable-next-line no-use-before-define */
@@ -6064,7 +6071,7 @@
 	        }
 	        catch (error) {
 	            /* eslint-disable-next-line no-use-before-define */
-	            onFailed('local', 'Bad Media Description');
+	            onFailed('remote', 'Bad Media Description');
 	            events.emit('peerconnection:setremotedescriptionfailed', error);
 	            log$m('setRemoteDescription failed: %o', error);
 	            await bye();
@@ -6102,13 +6109,13 @@
 	                }
 	                status = STATUS.kCanceled;
 	                /* eslint-disable-next-line no-use-before-define */
-	                onFailed('local', 'Canceled');
+	                onFailed('local', reason || 'Canceled');
 	                break;
 	            case STATUS.kAnswered:
 	            case STATUS.kAccepted:
 	                await bye(reason);
 	                /* eslint-disable-next-line no-use-before-define */
-	                onEnded('local', 'Terminated');
+	                onEnded('local', reason || 'Terminated');
 	                break;
 	        }
 	    }
@@ -6291,7 +6298,7 @@
 	        }
 	        const localSDP = await createLocalDescription('offer', rtcOfferConstraints);
 	        /* eslint-disable-next-line no-use-before-define */
-	        const answer = await invite({ sdp: mangleOffer(localSDP) });
+	        const answer = await invite({ sdp: mangleOffer(localSDP), renegotiate: true });
 	        const desc = {
 	            originator: 'remote',
 	            type: 'answer',
@@ -6356,6 +6363,7 @@
 	    function getRemoteStream() {
 	        log$m('getRemoteStream()');
 	        let stream;
+	        // @ts-ignore
 	        if (connection.getReceivers) {
 	            stream = new window.MediaStream();
 	            connection
@@ -6375,6 +6383,7 @@
 	    function getLocalStream() {
 	        log$m('getLocalStream()');
 	        let stream;
+	        // @ts-ignore
 	        if (connection.getSenders) {
 	            stream = new window.MediaStream();
 	            connection
@@ -6395,6 +6404,7 @@
 	        log$m('addLocalStream()');
 	        if (!stream)
 	            { return; }
+	        // @ts-ignore
 	        if (connection.addTrack) {
 	            stream
 	                .getTracks()
@@ -6429,6 +6439,7 @@
 	        let renegotiationNeeded = false;
 	        let peerHasAudio = false;
 	        let peerHasVideo = false;
+	        // @ts-ignore
 	        if (connection.getSenders) {
 	            connection.getSenders().forEach((sender) => {
 	                if (!sender.track)
@@ -6636,6 +6647,14 @@
 	        }
 	        return rtcStats;
 	    }
+	    const getConnectOptions = () => {
+	        return {
+	            rtcConstraints,
+	            rtcOfferConstraints,
+	            localMediaStream,
+	            localMediaStreamLocallyGenerated,
+	        };
+	    };
 	    return Object.spread({}, events,
 	        {get status() {
 	            return status;
@@ -6649,6 +6668,7 @@
 	        get endTime() {
 	            return endTime;
 	        },
+	        getConnectOptions,
 	        isInProgress,
 	        isEstablished,
 	        isEnded,
@@ -6940,7 +6960,7 @@
 	        invite: async (offer) => {
 	            log$o('invite()');
 	            let { sdp } = offer;
-	            const apiName = mediaVersion
+	            const apiName = offer.renegotiate
 	                ? type === 'main'
 	                    ? 'renegMedia'
 	                    : 'renegShare'
@@ -6971,20 +6991,28 @@
 	            log$o('cancel()');
 	            request && request.cancel();
 	            request = undefined;
+	            mediaVersion = undefined;
 	        },
 	        bye: () => {
 	            log$o('bye()');
 	            request = undefined;
+	            mediaVersion = undefined;
 	        },
 	        localstream: (stream) => {
 	            localstream = stream;
 	            channel.emit('localstream', localstream);
 	        },
 	    });
-	    channel.on('sdp', createModifier()
-	        .content(type)
-	        .prefer('h264')
-	        .build());
+	    channel.on('sdp', (data) => {
+	        if (data.originator === 'local') {
+	            createModifier()
+	                .content(type)
+	                .prefer('h264')
+	                .build()(data);
+	            return;
+	        }
+	        log$o(`${data.originator} sdp: \n\n %s \n`, data.sdp);
+	    });
 	    channel.on('peerconnection', (pc) => {
 	        pc.addEventListener('connectionstatechange', () => {
 	            log$o('peerconnection:connectionstatechange : %s', pc.connectionState);
@@ -7059,27 +7087,30 @@
 	})(MessageStatus || (MessageStatus = {}));
 	const log$p = browser('MN:Message');
 	function createMessage(config) {
-	    const { api, onSucceeded, onFailed } = config;
+	    const { api } = config;
+	    const events = createEvents(log$p);
 	    let status = MessageStatus.kNull;
 	    let direction = 'outgoing';
-	    let content;
 	    let timestamp;
 	    let version;
+	    /* eslint-disable-next-line prefer-destructuring */
+	    let content = config.content;
 	    /* eslint-disable-next-line prefer-destructuring */
 	    let sender = config.sender;
 	    let receiver;
 	    let isPrivate = false;
 	    let message;
 	    let request;
-	    async function send(message, target) {
+	    async function send(target) {
 	        log$p('send()');
 	        if (direction === 'incoming')
 	            { throw new Error('Invalid Status'); }
 	        status = MessageStatus.kSending;
+	        events.emit('sending', message);
 	        request = api
 	            .request('pushMessage')
 	            .data({
-	            'im-context': message,
+	            'im-context': message.content,
 	            'user-entity-list': target,
 	        });
 	        let response;
@@ -7088,24 +7119,23 @@
 	        }
 	        catch (error) {
 	            status = MessageStatus.kFailed;
-	            onFailed && onFailed(message);
+	            events.emit('failed', message);
 	            throw error;
 	        }
 	        const { data } = response;
-	        content = message;
 	        receiver = target;
 	        ({
 	            'im-version': version,
 	            'im-timestamp': timestamp,
 	        } = data.data);
 	        status = MessageStatus.kSuccess;
-	        onSucceeded && onSucceeded(message);
+	        events.emit('succeeded', message);
 	    }
 	    async function retry() {
 	        log$p('retry()');
 	        if (!content)
 	            { throw new Error('Invalid Message'); }
-	        await send(content, receiver);
+	        await send(receiver);
 	    }
 	    function cancel() {
 	        log$p('cancel()');
@@ -7127,8 +7157,8 @@
 	        };
 	        return message;
 	    }
-	    return message = {
-	        get status() {
+	    return message = Object.spread({}, events,
+	        {get status() {
 	            return status;
 	        },
 	        get direction() {
@@ -7155,8 +7185,7 @@
 	        send,
 	        retry,
 	        cancel,
-	        incoming,
-	    };
+	        incoming});
 	}
 
 	const log$q = browser('MN:ChatChannel');
@@ -7191,14 +7220,14 @@
 	        }
 	        events.emit('disconnected');
 	    }
-	    async function sendMessage(msg, target) {
+	    async function sendMessage(content, target) {
 	        log$q('sendMessage()');
-	        const message = createMessage({ api, sender });
+	        const message = createMessage({ api, content, sender });
 	        events.emit('message', {
 	            originator: 'local',
 	            message,
 	        });
-	        await message.send(msg, target);
+	        await message.send(target);
 	        messages.push(message);
 	        return message;
 	    }
@@ -7215,6 +7244,9 @@
 	    return Object.spread({}, events,
 	        {get ready() {
 	            return ready;
+	        },
+	        get messages() {
+	            return messages;
 	        },
 	        connect,
 	        terminate,
@@ -7308,6 +7340,15 @@
 	            { return; }
 	        await chatChannel.connect().catch(() => { });
 	    }
+	    async function retryChannel(channel) {
+	        if (status !== STATUS$1.kConnected) {
+	            log$r('retry channel in wrong conference status: %s', status);
+	            return;
+	        }
+	        const { localMediaStream, rtcConstraints, rtcOfferConstraints } = channel.getConnectOptions();
+	        await channel.terminate('Retry');
+	        await channel.connect({ rtcConstraints, rtcOfferConstraints, mediaStream: localMediaStream });
+	    }
 	    async function join(options = {}) {
 	        log$r('join()');
 	        throwIfNotStatus(STATUS$1.kNull);
@@ -7328,8 +7369,8 @@
 	            // extract url
 	            ({ url: options.url } = data.data);
 	        }
-	        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.0"}`);
-	        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.0"}`);
+	        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.1"}`);
+	        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.1"}`);
 	        // join focus
 	        const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 	        request = api
@@ -7437,11 +7478,13 @@
 	    }
 	    async function end() {
 	        throwIfNotStatus(STATUS$1.kConnected);
-	        await leave();
-	        await api
-	            .request('end')
-	            .data({ 'conference-url': url })
-	            .send();
+	        await Promise.all([
+	            leave(),
+	            api
+	                .request('end')
+	                .data({ 'conference-url': url })
+	                .send(),
+	        ]);
 	        return conference;
 	    }
 	    function setup() {
@@ -7449,10 +7492,10 @@
 	        const { state, users } = information;
 	        state.on('sharingUserEntityChanged', (val) => {
 	            // in some cases, eg. whitebord sharing
-	            // sharing use entity is an new unique id, which can not be find in user list
+	            // sharing use entity is an new unique id, which can not be finded in user list
 	            // use the second param the help making sharing detection strategy
 	            // 1. no user & no entity => no sharing
-	            // 2. no user & has entity => sharing
+	            // 2. no user & has entity => sharing(whitebord)
 	            // 3. has user => sharing
 	            events.emit('sharinguser', users.getUser(val), val);
 	        });
@@ -7480,7 +7523,8 @@
 	            },
 	            onRenegotiate: (data) => {
 	                log$r('receive renegotiate: %o', data);
-	                mediaChannel.renegotiate();
+	                retryChannel(mediaChannel);
+	                retryChannel(shareChannel);
 	            },
 	            onQuit: (data) => {
 	                log$r('receive quit: %o', data);
@@ -7577,7 +7621,7 @@
 	        // in conference info
 	        // user entity is string type
 	        // while we may receive number type
-	        // change to string type
+	        // cast to string type
 	        get userId() {
 	            return `${userId}`;
 	        },
@@ -7739,7 +7783,7 @@
 	    polyfill();
 	}
 	const log$t = browser('MN');
-	const version = "1.0.0";
+	const version = "1.0.1";
 	// global setup
 	function setup$2(config) {
 	    setupConfig(config);

@@ -18,7 +18,8 @@ const currentVersion = require('../package.json').version;
 const { prompt } = require('enquirer');
 const execa = require('execa');
 
-const preId = args.preid || semver.prerelease(currentVersion)[0] || 'alpha';
+const prerelease = semver.prerelease(currentVersion);
+const preId = args.preid || (prerelease && prerelease[0]);
 const isDryRun = args.dry;
 const { skipTests = true } = args;
 const { skipBuild } = args;

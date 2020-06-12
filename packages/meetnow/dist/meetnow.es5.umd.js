@@ -11806,8 +11806,17 @@ var temp_auth = __webpack_require__("344a");
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.description.js
 var es_symbol_description = __webpack_require__("e01a");
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.iterator.js
+var es_array_iterator = __webpack_require__("e260");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.iterator.js
+var es_string_iterator = __webpack_require__("3ca3");
+
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.replace.js
 var es_string_replace = __webpack_require__("5319");
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.iterator.js
+var web_dom_collections_iterator = __webpack_require__("ddb0");
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.reflect.get.js
 var es_reflect_get = __webpack_require__("5d41");
@@ -11830,17 +11839,8 @@ function createContext(delegate) {
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.iterator.js
 var es_symbol_iterator = __webpack_require__("d28b");
 
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.iterator.js
-var es_array_iterator = __webpack_require__("e260");
-
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.splice.js
 var es_array_splice = __webpack_require__("a434");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.iterator.js
-var es_string_iterator = __webpack_require__("3ca3");
-
-// EXTERNAL MODULE: ./node_modules/core-js/modules/web.dom-collections.iterator.js
-var web_dom_collections_iterator = __webpack_require__("ddb0");
 
 // EXTERNAL MODULE: ./packages/meetnow/src/utils/index.ts
 var src_utils = __webpack_require__("04c9");
@@ -13275,11 +13275,11 @@ function createUser(data, context) {
     var _ref = media || {},
         _ref$mediaIngressFi = _ref['media-ingress-filter'],
         ingress = _ref$mediaIngressFi === void 0 ? {
-      type: 'block'
+      type: 'unblock'
     } : _ref$mediaIngressFi,
         _ref$mediaEgressFil = _ref['media-egress-filter'],
         egress = _ref$mediaEgressFil === void 0 ? {
-      type: 'block'
+      type: 'unblock'
     } : _ref$mediaEgressFil;
 
     return {
@@ -13525,6 +13525,8 @@ function createUser(data, context) {
     _getStats = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee7() {
+      var _ref2, data;
+
       return regeneratorRuntime.wrap(function _callee7$(_context7) {
         while (1) {
           switch (_context7.prev = _context7.next) {
@@ -13536,6 +13538,11 @@ function createUser(data, context) {
               }).send();
 
             case 3:
+              _ref2 = _context7.sent;
+              data = _ref2.data;
+              return _context7.abrupt("return", data);
+
+            case 6:
             case "end":
               return _context7.stop();
           }
@@ -14138,7 +14145,7 @@ function createUsers(data, context) {
                 uid: option.uid,
                 'sip-url': option.sipURL,
                 'h323-url': option.h323URL
-              });
+              }).send();
 
             case 3:
             case "end":
@@ -14230,6 +14237,32 @@ function createUsers(data, context) {
     return _unmute.apply(this, arguments);
   }
 
+  function reject() {
+    return _reject.apply(this, arguments);
+  }
+
+  function _reject() {
+    _reject = Object(asyncToGenerator["a" /* default */])(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee5() {
+      return regeneratorRuntime.wrap(function _callee5$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              users_log('reject');
+              _context5.next = 3;
+              return api.request('rejectHandupAll').send();
+
+            case 3:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, _callee5);
+    }));
+    return _reject.apply(this, arguments);
+  }
+
   return users = users_objectSpread({}, events, {
     get data() {
       return data;
@@ -14259,7 +14292,8 @@ function createUsers(data, context) {
     invite: invite,
     kick: kick,
     mute: mute,
-    unmute: unmute
+    unmute: unmute,
+    reject: reject
   });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/rtmp-ctrl.ts
@@ -16306,16 +16340,19 @@ function createChannel(config) {
             case 0:
               options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
               channel_log('connect()');
-              throwIfNotStatus(STATUS.kNull);
+              throwIfStatus(STATUS.kProgress);
+              throwIfStatus(STATUS.kOffered);
+              throwIfStatus(STATUS.kAnswered);
+              throwIfStatus(STATUS.kAccepted);
 
               if (window.RTCPeerConnection) {
-                _context2.next = 5;
+                _context2.next = 8;
                 break;
               }
 
               throw new Error('WebRTC not supported');
 
-            case 5:
+            case 8:
               status = STATUS.kProgress;
               /* eslint-disable-next-line no-use-before-define */
 
@@ -16340,22 +16377,22 @@ function createChannel(config) {
               createRTCConnection(rtcConstraints);
 
               if (!mediaStream) {
-                _context2.next = 19;
+                _context2.next = 22;
                 break;
               }
 
               localMediaStream = mediaStream;
               localMediaStreamLocallyGenerated = false;
-              _context2.next = 24;
+              _context2.next = 27;
               break;
 
-            case 19:
+            case 22:
               if (!(mediaConstraints.audio || mediaConstraints.video)) {
-                _context2.next = 24;
+                _context2.next = 27;
                 break;
               }
 
-              _context2.next = 22;
+              _context2.next = 25;
               return getUserMedia(mediaConstraints).catch(function (error) {
                 /* eslint-disable-next-line no-use-before-define */
                 onFailed('local', 'User Denied Media Access');
@@ -16363,35 +16400,35 @@ function createChannel(config) {
                 throw error;
               });
 
-            case 22:
+            case 25:
               localMediaStream = _context2.sent;
               localMediaStreamLocallyGenerated = true;
 
-            case 24:
+            case 27:
               throwIfTerminated();
 
               if (!localMediaStream) {
-                _context2.next = 34;
+                _context2.next = 37;
                 break;
               }
 
               localMediaStream.getTracks().forEach(function (track) {
                 connection.addTrack(track, localMediaStream);
               });
-              _context2.prev = 27;
-              _context2.next = 30;
+              _context2.prev = 30;
+              _context2.next = 33;
               return localstream(localMediaStream);
 
-            case 30:
-              _context2.next = 34;
+            case 33:
+              _context2.next = 37;
               break;
 
-            case 32:
-              _context2.prev = 32;
-              _context2.t0 = _context2["catch"](27);
+            case 35:
+              _context2.prev = 35;
+              _context2.t0 = _context2["catch"](30);
 
-            case 34:
-              _context2.next = 36;
+            case 37:
+              _context2.next = 39;
               return createLocalDescription('offer', rtcOfferConstraints).catch(function (error) {
                 /* eslint-disable-next-line no-use-before-define */
                 onFailed('local', 'WebRTC Error');
@@ -16399,31 +16436,32 @@ function createChannel(config) {
                 throw error;
               });
 
-            case 36:
+            case 39:
               localSDP = _context2.sent;
               throwIfTerminated();
               status = STATUS.kOffered;
-              _context2.prev = 39;
-              _context2.next = 42;
+              _context2.prev = 42;
+              _context2.next = 45;
               return invite({
-                sdp: localSDP
+                sdp: localSDP,
+                renegotiate: false
               });
 
-            case 42:
+            case 45:
               answer = _context2.sent;
-              _context2.next = 50;
+              _context2.next = 53;
               break;
 
-            case 45:
-              _context2.prev = 45;
-              _context2.t1 = _context2["catch"](39);
+            case 48:
+              _context2.prev = 48;
+              _context2.t1 = _context2["catch"](42);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'Request Error');
               channel_log('invite failed: %o', _context2.t1);
               throw _context2.t1;
 
-            case 50:
+            case 53:
               throwIfTerminated();
               status = STATUS.kAnswered;
               _answer = answer, remoteSDP = _answer.sdp;
@@ -16435,93 +16473,93 @@ function createChannel(config) {
               events.emit('sdp', desc);
 
               if (!(connection.signalingState === 'stable')) {
-                _context2.next = 71;
+                _context2.next = 74;
                 break;
               }
 
-              _context2.prev = 56;
-              _context2.next = 59;
+              _context2.prev = 59;
+              _context2.next = 62;
               return connection.createOffer();
 
-            case 59:
+            case 62:
               offer = _context2.sent;
-              _context2.next = 62;
+              _context2.next = 65;
               return connection.setLocalDescription(offer);
 
-            case 62:
-              _context2.next = 71;
+            case 65:
+              _context2.next = 74;
               break;
 
-            case 64:
-              _context2.prev = 64;
-              _context2.t2 = _context2["catch"](56);
+            case 67:
+              _context2.prev = 67;
+              _context2.t2 = _context2["catch"](59);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'WebRTC Error');
               channel_log('createOff|setLocalDescription failed: %o', _context2.t2);
-              _context2.next = 70;
+              _context2.next = 73;
               return bye();
 
-            case 70:
+            case 73:
               throw _context2.t2;
 
-            case 71:
-              _context2.prev = 71;
-              _context2.next = 74;
+            case 74:
+              _context2.prev = 74;
+              _context2.next = 77;
               return connection.setRemoteDescription({
                 type: 'answer',
                 sdp: desc.sdp
               });
 
-            case 74:
-              _context2.next = 84;
+            case 77:
+              _context2.next = 87;
               break;
 
-            case 76:
-              _context2.prev = 76;
-              _context2.t3 = _context2["catch"](71);
+            case 79:
+              _context2.prev = 79;
+              _context2.t3 = _context2["catch"](74);
 
               /* eslint-disable-next-line no-use-before-define */
-              onFailed('local', 'Bad Media Description');
+              onFailed('remote', 'Bad Media Description');
               events.emit('peerconnection:setremotedescriptionfailed', _context2.t3);
               channel_log('setRemoteDescription failed: %o', _context2.t3);
-              _context2.next = 83;
+              _context2.next = 86;
               return bye();
 
-            case 83:
+            case 86:
               throw _context2.t3;
 
-            case 84:
-              _context2.prev = 84;
-              _context2.next = 87;
+            case 87:
+              _context2.prev = 87;
+              _context2.next = 90;
               return confirm();
 
-            case 87:
-              _context2.next = 94;
+            case 90:
+              _context2.next = 97;
               break;
 
-            case 89:
-              _context2.prev = 89;
-              _context2.t4 = _context2["catch"](84);
+            case 92:
+              _context2.prev = 92;
+              _context2.t4 = _context2["catch"](87);
 
               /* eslint-disable-next-line no-use-before-define */
               onFailed('local', 'Request Error');
               channel_log('confirm failed: %o', _context2.t4);
               throw _context2.t4;
 
-            case 94:
+            case 97:
               status = STATUS.kAccepted;
               /* eslint-disable-next-line no-use-before-define */
 
               onAccepted('local');
               events.emit('connected');
 
-            case 97:
+            case 100:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2, null, [[27, 32], [39, 45], [56, 64], [71, 76], [84, 89]]);
+      }, _callee2, null, [[30, 35], [42, 48], [59, 67], [74, 79], [87, 92]]);
     }));
     return _connect.apply(this, arguments);
   }
@@ -16568,7 +16606,7 @@ function createChannel(config) {
               status = STATUS.kCanceled;
               /* eslint-disable-next-line no-use-before-define */
 
-              onFailed('local', 'Canceled');
+              onFailed('local', reason || 'Canceled');
               return _context3.abrupt("break", 20);
 
             case 15:
@@ -16577,7 +16615,7 @@ function createChannel(config) {
 
             case 17:
               /* eslint-disable-next-line no-use-before-define */
-              onEnded('local', 'Terminated');
+              onEnded('local', reason || 'Terminated');
               return _context3.abrupt("break", 20);
 
             case 19:
@@ -16892,7 +16930,8 @@ function createChannel(config) {
               localSDP = _context6.sent;
               _context6.next = 10;
               return invite({
-                sdp: mangleOffer(localSDP)
+                sdp: mangleOffer(localSDP),
+                renegotiate: true
               });
 
             case 10:
@@ -17059,7 +17098,7 @@ function createChannel(config) {
 
   function getRemoteStream() {
     channel_log('getRemoteStream()');
-    var stream;
+    var stream; // @ts-ignore
 
     if (connection.getReceivers) {
       stream = new window.MediaStream();
@@ -17079,7 +17118,7 @@ function createChannel(config) {
 
   function getLocalStream() {
     channel_log('getLocalStream()');
-    var stream;
+    var stream; // @ts-ignore
 
     if (connection.getSenders) {
       stream = new window.MediaStream();
@@ -17099,7 +17138,7 @@ function createChannel(config) {
 
   function addLocalStream(stream) {
     channel_log('addLocalStream()');
-    if (!stream) return;
+    if (!stream) return; // @ts-ignore
 
     if (connection.addTrack) {
       stream.getTracks().forEach(function (track) {
@@ -17198,7 +17237,7 @@ function createChannel(config) {
               queue = [];
               renegotiationNeeded = false;
               peerHasAudio = false;
-              peerHasVideo = false;
+              peerHasVideo = false; // @ts-ignore
 
               if (connection.getSenders) {
                 connection.getSenders().forEach(function (sender) {
@@ -17532,6 +17571,15 @@ function createChannel(config) {
     return _getStats.apply(this, arguments);
   }
 
+  var getConnectOptions = function getConnectOptions() {
+    return {
+      rtcConstraints: rtcConstraints,
+      rtcOfferConstraints: rtcOfferConstraints,
+      localMediaStream: localMediaStream,
+      localMediaStreamLocallyGenerated: localMediaStreamLocallyGenerated
+    };
+  };
+
   return channel_objectSpread({}, events, {
     get status() {
       return status;
@@ -17549,6 +17597,7 @@ function createChannel(config) {
       return endTime;
     },
 
+    getConnectOptions: getConnectOptions,
     isInProgress: isInProgress,
     isEstablished: isEstablished,
     isEnded: isEnded,
@@ -17983,7 +18032,7 @@ function createMediaChannel(config) {
               case 0:
                 media_channel_log('invite()');
                 sdp = offer.sdp;
-                apiName = mediaVersion ? type === 'main' ? 'renegMedia' : 'renegShare' : type === 'main' ? 'joinMedia' : 'joinShare';
+                apiName = offer.renegotiate ? type === 'main' ? 'renegMedia' : 'renegShare' : type === 'main' ? 'joinMedia' : 'joinShare';
                 request = api.request(apiName).data({
                   sdp: sdp,
                   'media-version': mediaVersion
@@ -18026,17 +18075,26 @@ function createMediaChannel(config) {
       media_channel_log('cancel()');
       request && request.cancel();
       request = undefined;
+      mediaVersion = undefined;
     },
     bye: function bye() {
       media_channel_log('bye()');
       request = undefined;
+      mediaVersion = undefined;
     },
     localstream: function localstream(stream) {
       _localstream = stream;
       channel.emit('localstream', _localstream);
     }
   });
-  channel.on('sdp', createModifier().content(type).prefer('h264').build());
+  channel.on('sdp', function (data) {
+    if (data.originator === 'local') {
+      createModifier().content(type).prefer('h264').build()(data);
+      return;
+    }
+
+    media_channel_log("".concat(data.originator, " sdp: \n\n %s \n"), data.sdp);
+  });
   channel.on('peerconnection', function (pc) {
     pc.addEventListener('connectionstatechange', function () {
       media_channel_log('peerconnection:connectionstatechange : %s', pc.connectionState);
@@ -18115,6 +18173,19 @@ function createMediaChannel(config) {
 
 
 
+
+
+
+
+
+
+
+function message_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function message_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { message_ownKeys(Object(source), true).forEach(function (key) { Object(defineProperty["a" /* default */])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { message_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
+
 var MessageStatus;
 
 (function (MessageStatus) {
@@ -18126,14 +18197,15 @@ var MessageStatus;
 
 var message_log = browser_default()('MN:Message');
 function createMessage(config) {
-  var api = config.api,
-      onSucceeded = config.onSucceeded,
-      onFailed = config.onFailed;
+  var api = config.api;
+  var events = createEvents(message_log);
   var status = MessageStatus.kNull;
   var direction = 'outgoing';
-  var content;
   var timestamp;
   var version;
+  /* eslint-disable-next-line prefer-destructuring */
+
+  var content = config.content;
   /* eslint-disable-next-line prefer-destructuring */
 
   var sender = config.sender;
@@ -18142,14 +18214,14 @@ function createMessage(config) {
   var message;
   var request;
 
-  function send(_x, _x2) {
+  function send(_x) {
     return _send.apply(this, arguments);
   }
 
   function _send() {
     _send = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee(message, target) {
+    regeneratorRuntime.mark(function _callee(target) {
       var response, _response, data, _data$data;
 
       return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -18167,42 +18239,42 @@ function createMessage(config) {
 
             case 3:
               status = MessageStatus.kSending;
+              events.emit('sending', message);
               request = api.request('pushMessage').data({
-                'im-context': message,
+                'im-context': message.content,
                 'user-entity-list': target
               });
-              _context.prev = 5;
-              _context.next = 8;
+              _context.prev = 6;
+              _context.next = 9;
               return request.send();
 
-            case 8:
+            case 9:
               response = _context.sent;
-              _context.next = 16;
+              _context.next = 17;
               break;
 
-            case 11:
-              _context.prev = 11;
-              _context.t0 = _context["catch"](5);
+            case 12:
+              _context.prev = 12;
+              _context.t0 = _context["catch"](6);
               status = MessageStatus.kFailed;
-              onFailed && onFailed(message);
+              events.emit('failed', message);
               throw _context.t0;
 
-            case 16:
+            case 17:
               _response = response, data = _response.data;
-              content = message;
               receiver = target;
               _data$data = data.data;
               version = _data$data['im-version'];
               timestamp = _data$data['im-timestamp'];
               status = MessageStatus.kSuccess;
-              onSucceeded && onSucceeded(message);
+              events.emit('succeeded', message);
 
             case 24:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[5, 11]]);
+      }, _callee, null, [[6, 12]]);
     }));
     return _send.apply(this, arguments);
   }
@@ -18230,7 +18302,7 @@ function createMessage(config) {
 
             case 3:
               _context2.next = 5;
-              return send(content, receiver);
+              return send(receiver);
 
             case 5:
             case "end":
@@ -18265,7 +18337,7 @@ function createMessage(config) {
     return message;
   }
 
-  return message = {
+  return message = message_objectSpread({}, events, {
     get status() {
       return status;
     },
@@ -18302,7 +18374,7 @@ function createMessage(config) {
     retry: retry,
     cancel: cancel,
     incoming: incoming
-  };
+  });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/channel/chat-channel.ts
 
@@ -18427,7 +18499,7 @@ function createChatChannel(config) {
   function _sendMessage() {
     _sendMessage = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee3(msg, target) {
+    regeneratorRuntime.mark(function _callee3(content, target) {
       var message;
       return regeneratorRuntime.wrap(function _callee3$(_context3) {
         while (1) {
@@ -18436,6 +18508,7 @@ function createChatChannel(config) {
               chat_channel_log('sendMessage()');
               message = createMessage({
                 api: api,
+                content: content,
                 sender: sender
               });
               events.emit('message', {
@@ -18443,7 +18516,7 @@ function createChatChannel(config) {
                 message: message
               });
               _context3.next = 5;
-              return message.send(msg, target);
+              return message.send(target);
 
             case 5:
               messages.push(message);
@@ -18477,6 +18550,10 @@ function createChatChannel(config) {
       return ready;
     },
 
+    get messages() {
+      return messages;
+    },
+
     connect: connect,
     terminate: terminate,
     sendMessage: sendMessage,
@@ -18484,6 +18561,11 @@ function createChatChannel(config) {
   });
 }
 // CONCATENATED MODULE: ./packages/meetnow/src/conference/index.ts
+
+
+
+
+
 
 
 
@@ -18649,6 +18731,51 @@ function createConference(config) {
     return _maybeChat.apply(this, arguments);
   }
 
+  function retryChannel(_x) {
+    return _retryChannel.apply(this, arguments);
+  }
+
+  function _retryChannel() {
+    _retryChannel = Object(asyncToGenerator["a" /* default */])(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee2(channel) {
+      var _channel$getConnectOp, localMediaStream, rtcConstraints, rtcOfferConstraints;
+
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (!(status !== conference_STATUS.kConnected)) {
+                _context2.next = 3;
+                break;
+              }
+
+              conference_log('retry channel in wrong conference status: %s', status);
+              return _context2.abrupt("return");
+
+            case 3:
+              _channel$getConnectOp = channel.getConnectOptions(), localMediaStream = _channel$getConnectOp.localMediaStream, rtcConstraints = _channel$getConnectOp.rtcConstraints, rtcOfferConstraints = _channel$getConnectOp.rtcOfferConstraints;
+              _context2.next = 6;
+              return channel.terminate('Retry');
+
+            case 6:
+              _context2.next = 8;
+              return channel.connect({
+                rtcConstraints: rtcConstraints,
+                rtcOfferConstraints: rtcOfferConstraints,
+                mediaStream: localMediaStream
+              });
+
+            case 8:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+    return _retryChannel.apply(this, arguments);
+  }
+
   function join() {
     return _join.apply(this, arguments);
   }
@@ -18656,7 +18783,7 @@ function createConference(config) {
   function _join() {
     _join = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee2() {
+    regeneratorRuntime.mark(function _callee3() {
       var options,
           response,
           data,
@@ -18670,18 +18797,18 @@ function createConference(config) {
           _response3,
           info,
           context,
-          _args2 = arguments;
+          _args3 = arguments;
 
-      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
         while (1) {
-          switch (_context2.prev = _context2.next) {
+          switch (_context3.prev = _context3.next) {
             case 0:
-              options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
+              options = _args3.length > 0 && _args3[0] !== undefined ? _args3[0] : {};
               conference_log('join()');
               throwIfNotStatus(conference_STATUS.kNull);
 
               if (!(!options.url && !options.number)) {
-                _context2.next = 5;
+                _context3.next = 5;
                 break;
               }
 
@@ -18693,25 +18820,25 @@ function createConference(config) {
               hasMedia = true;
 
               if (!(!options.url && options.number)) {
-                _context2.next = 16;
+                _context3.next = 16;
                 break;
               }
 
               request = api.request('getURL').data({
                 'long-number': options.number
               });
-              _context2.next = 12;
+              _context3.next = 12;
               return request.send();
 
             case 12:
-              response = _context2.sent;
+              response = _context3.sent;
               _response = response;
               data = _response.data;
               options.url = data.data.url;
 
             case 16:
-              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.0"));
-              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.0")); // join focus
+              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.1"));
+              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.1")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -18735,20 +18862,20 @@ function createConference(config) {
                   'frame-rate': 15
                 }
               });
-              _context2.prev = 20;
-              _context2.next = 23;
+              _context3.prev = 20;
+              _context3.next = 23;
               return request.send();
 
             case 23:
-              response = _context2.sent;
-              _context2.next = 30;
+              response = _context3.sent;
+              _context3.next = 30;
               break;
 
             case 26:
-              _context2.prev = 26;
-              _context2.t0 = _context2["catch"](20);
-              events.emit('failed', _context2.t0);
-              throw _context2.t0;
+              _context3.prev = 26;
+              _context3.t0 = _context3["catch"](20);
+              events.emit('failed', _context3.t0);
+              throw _context3.t0;
 
             case 30:
               _response2 = response;
@@ -18760,7 +18887,7 @@ function createConference(config) {
               onAccepted();
 
               if (!(!userId || !uuid)) {
-                _context2.next = 40;
+                _context3.next = 40;
                 break;
               }
 
@@ -18782,20 +18909,20 @@ function createConference(config) {
               }); // get full info
 
               request = api.request('getFullInfo');
-              _context2.prev = 43;
-              _context2.next = 46;
+              _context3.prev = 43;
+              _context3.next = 46;
               return request.send();
 
             case 46:
-              response = _context2.sent;
-              _context2.next = 53;
+              response = _context3.sent;
+              _context3.next = 53;
               break;
 
             case 49:
-              _context2.prev = 49;
-              _context2.t1 = _context2["catch"](43);
-              events.emit('failed', _context2.t1);
-              throw _context2.t1;
+              _context3.prev = 49;
+              _context3.t1 = _context3["catch"](43);
+              events.emit('failed', _context3.t1);
+              throw _context3.t1;
 
             case 53:
               _response3 = response;
@@ -18806,14 +18933,14 @@ function createConference(config) {
 
               information = createInformation(info, context);
               onConnected();
-              return _context2.abrupt("return", conference);
+              return _context3.abrupt("return", conference);
 
             case 60:
             case "end":
-              return _context2.stop();
+              return _context3.stop();
           }
         }
-      }, _callee2, null, [[20, 26], [43, 49]]);
+      }, _callee3, null, [[20, 26], [43, 49]]);
     }));
     return _join.apply(this, arguments);
   }
@@ -18825,35 +18952,35 @@ function createConference(config) {
   function _leave() {
     _leave = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee3() {
-      return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    regeneratorRuntime.mark(function _callee4() {
+      return regeneratorRuntime.wrap(function _callee4$(_context4) {
         while (1) {
-          switch (_context3.prev = _context3.next) {
+          switch (_context4.prev = _context4.next) {
             case 0:
               throwIfStatus(conference_STATUS.kDisconnecting);
               throwIfStatus(conference_STATUS.kDisconnected);
-              _context3.t0 = status;
-              _context3.next = _context3.t0 === conference_STATUS.kNull ? 5 : _context3.t0 === conference_STATUS.kConnecting ? 6 : _context3.t0 === conference_STATUS.kConnected ? 6 : _context3.t0 === conference_STATUS.kDisconnecting ? 15 : _context3.t0 === conference_STATUS.kDisconnected ? 15 : 15;
+              _context4.t0 = status;
+              _context4.next = _context4.t0 === conference_STATUS.kNull ? 5 : _context4.t0 === conference_STATUS.kConnecting ? 6 : _context4.t0 === conference_STATUS.kConnected ? 6 : _context4.t0 === conference_STATUS.kDisconnecting ? 15 : _context4.t0 === conference_STATUS.kDisconnected ? 15 : 15;
               break;
 
             case 5:
-              return _context3.abrupt("break", 16);
+              return _context4.abrupt("break", 16);
 
             case 6:
               if (!(status === conference_STATUS.kConnected)) {
-                _context3.next = 13;
+                _context4.next = 13;
                 break;
               }
 
               onDisconnecting();
-              _context3.next = 10;
+              _context4.next = 10;
               return api.request('leave').send().catch(function (error) {
                 conference_log('leave error: ', error);
               });
 
             case 10:
               onDisconnected();
-              _context3.next = 14;
+              _context4.next = 14;
               break;
 
             case 13:
@@ -18863,20 +18990,20 @@ function createConference(config) {
               }
 
             case 14:
-              return _context3.abrupt("break", 16);
+              return _context4.abrupt("break", 16);
 
             case 15:
-              return _context3.abrupt("break", 16);
+              return _context4.abrupt("break", 16);
 
             case 16:
-              return _context3.abrupt("return", conference);
+              return _context4.abrupt("return", conference);
 
             case 17:
             case "end":
-              return _context3.stop();
+              return _context4.stop();
           }
         }
-      }, _callee3);
+      }, _callee4);
     }));
     return _leave.apply(this, arguments);
   }
@@ -18888,30 +19015,26 @@ function createConference(config) {
   function _end() {
     _end = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee4() {
-      return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    regeneratorRuntime.mark(function _callee5() {
+      return regeneratorRuntime.wrap(function _callee5$(_context5) {
         while (1) {
-          switch (_context4.prev = _context4.next) {
+          switch (_context5.prev = _context5.next) {
             case 0:
               throwIfNotStatus(conference_STATUS.kConnected);
-              _context4.next = 3;
-              return leave();
+              _context5.next = 3;
+              return Promise.all([leave(), api.request('end').data({
+                'conference-url': url
+              }).send()]);
 
             case 3:
-              _context4.next = 5;
-              return api.request('end').data({
-                'conference-url': url
-              }).send();
+              return _context5.abrupt("return", conference);
 
-            case 5:
-              return _context4.abrupt("return", conference);
-
-            case 6:
+            case 4:
             case "end":
-              return _context4.stop();
+              return _context5.stop();
           }
         }
-      }, _callee4);
+      }, _callee5);
     }));
     return _end.apply(this, arguments);
   }
@@ -18923,10 +19046,10 @@ function createConference(config) {
         users = _information.users;
     state.on('sharingUserEntityChanged', function (val) {
       // in some cases, eg. whitebord sharing
-      // sharing use entity is an new unique id, which can not be find in user list
+      // sharing use entity is an new unique id, which can not be finded in user list
       // use the second param the help making sharing detection strategy
       // 1. no user & no entity => no sharing
-      // 2. no user & has entity => sharing
+      // 2. no user & has entity => sharing(whitebord)
       // 3. has user => sharing
       events.emit('sharinguser', users.getUser(val), val);
     });
@@ -18974,7 +19097,8 @@ function createConference(config) {
       },
       onRenegotiate: function onRenegotiate(data) {
         conference_log('receive renegotiate: %o', data);
-        mediaChannel.renegotiate();
+        retryChannel(mediaChannel);
+        retryChannel(shareChannel);
       },
       onQuit: function onQuit(data) {
         conference_log('receive quit: %o', data);
@@ -19068,40 +19192,40 @@ function createConference(config) {
     request = undefined;
   }
 
-  function share(_x) {
+  function share(_x2) {
     return _share.apply(this, arguments);
   }
 
   function _share() {
     _share = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee5(options) {
-      return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    regeneratorRuntime.mark(function _callee6(options) {
+      return regeneratorRuntime.wrap(function _callee6$(_context6) {
         while (1) {
-          switch (_context5.prev = _context5.next) {
+          switch (_context6.prev = _context6.next) {
             case 0:
               throwIfNotStatus(conference_STATUS.kConnected);
 
               if (!(!shareChannel.isInProgress() && !shareChannel.isEstablished())) {
-                _context5.next = 4;
+                _context6.next = 4;
                 break;
               }
 
-              _context5.next = 4;
+              _context6.next = 4;
               return shareChannel.connect(options);
 
             case 4:
-              _context5.next = 6;
+              _context6.next = 6;
               return api.request('switchShare').data({
                 share: true
               }).send();
 
             case 6:
             case "end":
-              return _context5.stop();
+              return _context6.stop();
           }
         }
-      }, _callee5);
+      }, _callee6);
     }));
     return _share.apply(this, arguments);
   }
@@ -19113,61 +19237,61 @@ function createConference(config) {
   function _setSharing() {
     _setSharing = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee6() {
+    regeneratorRuntime.mark(function _callee7() {
       var enable,
-          _args6 = arguments;
-      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+          _args7 = arguments;
+      return regeneratorRuntime.wrap(function _callee7$(_context7) {
         while (1) {
-          switch (_context6.prev = _context6.next) {
+          switch (_context7.prev = _context7.next) {
             case 0:
-              enable = _args6.length > 0 && _args6[0] !== undefined ? _args6[0] : true;
+              enable = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : true;
               throwIfNotStatus(conference_STATUS.kConnected);
-              _context6.next = 4;
+              _context7.next = 4;
               return api.request('switchShare').data({
                 share: enable
               }).send();
 
             case 4:
             case "end":
-              return _context6.stop();
+              return _context7.stop();
           }
         }
-      }, _callee6);
+      }, _callee7);
     }));
     return _setSharing.apply(this, arguments);
   }
 
-  function sendMessage(_x2, _x3) {
+  function sendMessage(_x3, _x4) {
     return _sendMessage.apply(this, arguments);
   }
 
   function _sendMessage() {
     _sendMessage = Object(asyncToGenerator["a" /* default */])(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee7(msg, target) {
-      return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    regeneratorRuntime.mark(function _callee8(msg, target) {
+      return regeneratorRuntime.wrap(function _callee8$(_context8) {
         while (1) {
-          switch (_context7.prev = _context7.next) {
+          switch (_context8.prev = _context8.next) {
             case 0:
               throwIfNotStatus(conference_STATUS.kConnected);
 
               if (!(!chatChannel || !chatChannel.ready)) {
-                _context7.next = 3;
+                _context8.next = 3;
                 break;
               }
 
               throw new Error('Not Ready');
 
             case 3:
-              _context7.next = 5;
+              _context8.next = 5;
               return chatChannel.sendMessage(msg, target);
 
             case 5:
             case "end":
-              return _context7.stop();
+              return _context8.stop();
           }
         }
-      }, _callee7);
+      }, _callee8);
     }));
     return _sendMessage.apply(this, arguments);
   }
@@ -19188,7 +19312,7 @@ function createConference(config) {
     // in conference info
     // user entity is string type
     // while we may receive number type
-    // change to string type
+    // cast to string type
     get userId() {
       return "".concat(userId);
     },
@@ -19506,7 +19630,7 @@ function createUA() {
 if (false) {}
 
 var src_log = browser_default()('MN');
-var src_version = "1.0.0"; // global setup
+var src_version = "1.0.1"; // global setup
 
 function src_setup(config) {
   Object(src_config["a" /* setupConfig */])(config);

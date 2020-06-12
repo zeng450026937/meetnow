@@ -290,6 +290,7 @@ declare interface Channel extends Events {
     readonly connection?: RTCPeerConnection;
     readonly startTime?: Date;
     readonly endTime?: Date;
+    getConnectOptions: () => ParsedConnectOptions;
     isInProgress: () => boolean;
     isEstablished: () => boolean;
     isEnded: () => boolean;
@@ -915,7 +916,7 @@ declare interface Message {
     readonly sender?: MessageSender;
     readonly receiver?: string[];
     readonly private?: boolean;
-    send: (message: string, target?: string[]) => Promise<void>;
+    send: (target?: string[]) => Promise<void>;
     retry: () => Promise<void>;
     cancel: () => void;
     incoming: (data: MessageData) => Message;
@@ -949,6 +950,13 @@ declare enum MessageStatus {
 declare interface Organizer {
     'display-text': string;
     'subject-id': string;
+}
+
+declare interface ParsedConnectOptions {
+    rtcConstraints: RTCConfiguration;
+    rtcOfferConstraints: RTCOfferOptions;
+    localMediaStream?: MediaStream;
+    localMediaStreamLocallyGenerated: boolean;
 }
 
 declare interface ParsedStats {
@@ -1187,6 +1195,7 @@ declare interface Users extends Events, LobbyCtrl {
     kick: (entity: string) => Promise<void>;
     mute: () => Promise<void>;
     unmute: () => Promise<void>;
+    reject: () => Promise<void>;
 }
 
 export declare const version: string;
