@@ -1,3 +1,12 @@
+## [1.0.2](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.1...v1.0.2) (2020-06-12)
+
+
+### Bug Fixes
+
+* **deps:** move wip dependencies into devDependencies ([1f6d979](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/1f6d979279124e5e6f0d5aecaacacd1f6a524412))
+
+
+
 ## [1.0.1](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.0...v1.0.1) (2020-06-12)
 
 
