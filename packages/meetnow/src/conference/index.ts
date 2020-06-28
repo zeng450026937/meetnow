@@ -178,7 +178,15 @@ export function createConference(config: ConferenceConfigs) {
     const { localMediaStream, rtcConstraints, rtcOfferConstraints } = channel.getConnectOptions();
 
     await channel!.terminate('Retry');
-    await channel!.connect({ rtcConstraints, rtcOfferConstraints, mediaStream: localMediaStream });
+    await channel!.connect({
+      rtcConstraints,
+      rtcOfferConstraints,
+      mediaStream      : localMediaStream,
+      mediaConstraints : {
+        audio : false,
+        video : false,
+      },
+    });
   }
 
   async function join(options: Partial<JoinOptions> = {}) {
