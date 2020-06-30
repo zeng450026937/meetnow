@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/browser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Browser detect for meetnow",
   "main": "index.js",
   "module": "dist/browser.esm-bundler.js",

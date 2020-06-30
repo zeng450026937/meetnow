@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/eslint-config",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "eslint config of meetnow.",
   "main": "index.js",
   "private": true,

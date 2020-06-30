@@ -12654,7 +12654,15 @@ function createConference(config) {
         }
         const { localMediaStream, rtcConstraints, rtcOfferConstraints } = channel.getConnectOptions();
         await channel.terminate('Retry');
-        await channel.connect({ rtcConstraints, rtcOfferConstraints, mediaStream: localMediaStream });
+        await channel.connect({
+            rtcConstraints,
+            rtcOfferConstraints,
+            mediaStream: localMediaStream,
+            mediaConstraints: {
+                audio: false,
+                video: false,
+            },
+        });
     }
     async function join(options = {}) {
         log$s('join()');
@@ -12676,8 +12684,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.2"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.2"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.3"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.3"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -13090,7 +13098,7 @@ function createUA(config = {}) {
     polyfill();
 }
 const log$u = browser('MN');
-const version = "1.0.2";
+const version = "1.0.3";
 // global setup
 function setup$2(config) {
     setupConfig(config);

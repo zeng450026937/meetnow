@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/axios-miniprogram-adapter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Axios adapter for miniprogram",
   "main": "index.js",
   "module": "dist/axios-miniprogram-adapter.esm-bundler.js",
