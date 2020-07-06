@@ -17,6 +17,7 @@ export interface PollingConfigs {
   api: Api;
   onInformation?: (...args: any[]) => void;
   onMessage?: (...args: any[]) => void;
+  onCallRecord?: (...args: any[]) => void;
   onRenegotiate?: (...args: any[]) => void;
   onQuit?: (...args: any[]) => void;
   onError?: (...args: any[]) => void;
@@ -77,6 +78,10 @@ export function createPolling(config: PollingConfigs): Polling {
 
       case 'port-change':
         config.onRenegotiate && config.onRenegotiate(body);
+        break;
+
+      case 'call-record-list':
+        config.onCallRecord && config.onCallRecord(body);
         break;
 
       case 'quit-conference':

@@ -412,6 +412,12 @@ export function createConference(config: ConferenceConfigs) {
         chatChannel!.incoming(data);
       },
 
+      onCallRecord : (data) => {
+        log('receive callRecord: %o', data);
+
+        events.emit('callrecord', data);
+      },
+
       onRenegotiate : (data: any) => {
         log('receive renegotiate: %o', data);
 
