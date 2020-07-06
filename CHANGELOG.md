@@ -1,3 +1,12 @@
+## [1.0.4](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.3...v1.0.4) (2020-07-06)
+
+
+### Features
+
+* **polling:** call-record-list ([b2f6b76](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/b2f6b766b1119621b9e7497c77a46f66b3bee38d))
+
+
+
 ## [1.0.3](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.2...v1.0.3) (2020-06-30)
 
 

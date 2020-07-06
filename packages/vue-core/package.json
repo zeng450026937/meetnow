@@ -1,6 +1,6 @@
 {
   "name": "@meetnow/vue-core",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "vue core/reactive api.",
   "main": "index.js",
   "private": true,

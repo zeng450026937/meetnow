@@ -12220,6 +12220,10 @@ function createPolling(config) {
         config.onRenegotiate && config.onRenegotiate(body);
         break;
 
+      case 'call-record-list':
+        config.onCallRecord && config.onCallRecord(body);
+        break;
+
       case 'quit-conference':
         config.onQuit && config.onQuit(body);
         break;
@@ -18841,8 +18845,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.3"));
-              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.3")); // join focus
+              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.4"));
+              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.4")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -19098,6 +19102,10 @@ function createConference(config) {
       onMessage: function onMessage(data) {
         conference_log('receive message: %o', data);
         chatChannel.incoming(data);
+      },
+      onCallRecord: function onCallRecord(data) {
+        conference_log('receive callRecord: %o', data);
+        events.emit('callrecord', data);
       },
       onRenegotiate: function onRenegotiate(data) {
         conference_log('receive renegotiate: %o', data);
@@ -19634,7 +19642,7 @@ function createUA() {
 if (false) {}
 
 var src_log = browser_default()('MN');
-var src_version = "1.0.3"; // global setup
+var src_version = "1.0.4"; // global setup
 
 function src_setup(config) {
   Object(src_config["a" /* setupConfig */])(config);
