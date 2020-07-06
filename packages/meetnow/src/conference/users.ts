@@ -11,7 +11,7 @@ export * from './user';
 const log = debug('MN:Information:Users');
 
 export interface InviteOptions {
-  uid: string[];
+  teamsURL: string;
   sipURL: string;
   h323URL: string;
 }
@@ -193,9 +193,9 @@ export function createUsers(data: ConferenceUsers, context: Context): Users {
     await api
       .request('inviteUser')
       .data({
-        uid        : option.uid,
-        'sip-url'  : option.sipURL,
-        'h323-url' : option.h323URL,
+        'teams-url' : option.teamsURL,
+        'sip-url'   : option.sipURL,
+        'h323-url'  : option.h323URL,
       })
       .send();
   }
