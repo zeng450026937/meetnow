@@ -846,7 +846,7 @@ declare interface Information extends Events {
 }
 
 declare interface InviteOptions {
-    uid: string[];
+    teamsURL: string;
     sipURL: string;
     h323URL: string;
 }

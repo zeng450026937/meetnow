@@ -4479,7 +4479,7 @@ var MeetNow = (function (exports) {
 	        await api
 	            .request('inviteUser')
 	            .data({
-	            uid: option.uid,
+	            'teams-url': option.teamsURL,
 	            'sip-url': option.sipURL,
 	            'h323-url': option.h323URL,
 	        })
@@ -7377,8 +7377,8 @@ var MeetNow = (function (exports) {
 	            // extract url
 	            ({ url: options.url } = data.data);
 	        }
-	        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.4"}`);
-	        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.4"}`);
+	        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.5"}`);
+	        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.5"}`);
 	        // join focus
 	        const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
 	        request = api
@@ -7795,7 +7795,7 @@ var MeetNow = (function (exports) {
 	    polyfill();
 	}
 	const log$t = browser('MN');
-	const version = "1.0.4";
+	const version = "1.0.5";
 	// global setup
 	function setup$2(config) {
 	    setupConfig(config);

@@ -14146,7 +14146,7 @@ function createUsers(data, context) {
               users_log('invite');
               _context.next = 3;
               return api.request('inviteUser').data({
-                uid: option.uid,
+                'teams-url': option.teamsURL,
                 'sip-url': option.sipURL,
                 'h323-url': option.h323URL
               }).send();
@@ -18845,8 +18845,8 @@ function createConference(config) {
               options.url = data.data.url;
 
             case 16:
-              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.4"));
-              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.4")); // join focus
+              useragent = config_config["a" /* CONFIG */].get('useragent', "Yealink ".concat(miniprogram ? 'WECHAT' : 'WEB-APP', " ").concat("1.0.5"));
+              clientinfo = config_config["a" /* CONFIG */].get('clientinfo', "".concat(miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC', " ").concat("1.0.5")); // join focus
 
               apiName = miniprogram ? 'joinWechat' : 'joinFocus';
               request = api.request(apiName).data({
@@ -19642,7 +19642,7 @@ function createUA() {
 if (false) {}
 
 var src_log = browser_default()('MN');
-var src_version = "1.0.4"; // global setup
+var src_version = "1.0.5"; // global setup
 
 function src_setup(config) {
   Object(src_config["a" /* setupConfig */])(config);

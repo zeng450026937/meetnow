@@ -2576,7 +2576,7 @@ function createUsers(data, context) {
         await api
             .request('inviteUser')
             .data({
-            uid: option.uid,
+            'teams-url': option.teamsURL,
             'sip-url': option.sipURL,
             'h323-url': option.h323URL,
         })
@@ -5474,8 +5474,8 @@ function createConference(config) {
             // extract url
             ({ url: options.url } = data.data);
         }
-        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.4"}`);
-        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.4"}`);
+        const useragent = CONFIG.get('useragent', `Yealink ${miniprogram ? 'WECHAT' : 'WEB-APP'} ${"1.0.5"}`);
+        const clientinfo = CONFIG.get('clientinfo', `${miniprogram ? 'Apollo_WeChat' : 'Apollo_WebRTC'} ${"1.0.5"}`);
         // join focus
         const apiName = miniprogram ? 'joinWechat' : 'joinFocus';
         request = api
@@ -5892,7 +5892,7 @@ function createUA(config = {}) {
     polyfill();
 }
 const log$t = debug('MN');
-const version = "1.0.4";
+const version = "1.0.5";
 // global setup
 function setup$1(config) {
     setupConfig(config);

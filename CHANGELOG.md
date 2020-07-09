@@ -1,3 +1,12 @@
+## [1.0.5](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.4...v1.0.5) (2020-07-09)
+
+
+### Bug Fixes
+
+* **invite:** teams-url ([b8c7c82](http://gitcode.yealink.com/server/client/web_app/meetnow/commits/b8c7c82e2e3da7ac9866b8f17bcd820369589dac))
+
+
+
 ## [1.0.4](http://gitcode.yealink.com/server/client/web_app/meetnow/compare/v1.0.3...v1.0.4) (2020-07-06)
 
 
